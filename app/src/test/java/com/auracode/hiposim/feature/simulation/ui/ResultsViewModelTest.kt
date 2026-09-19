@@ -1,11 +1,17 @@
 package com.auracode.hiposim.feature.simulation.ui
 
+import com.auracode.hiposim.core.navigation.MainDestination
+import com.auracode.hiposim.feature.auth.data.FakeAuthRepository
+import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
+import com.auracode.hiposim.feature.auth.domain.RegistrationForm
+import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
 import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
 import com.auracode.hiposim.testing.MainDispatcherRule
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -15,11 +21,30 @@ class ResultsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private lateinit var authRepository: FakeAuthRepository
     private lateinit var viewModel: ResultsViewModel
 
     @Before
     fun setUp() {
-        viewModel = ResultsViewModel(GetLoanSimulationUseCase(FakeSimulationRepository()))
+        authRepository = FakeAuthRepository()
+        viewModel =
+            ResultsViewModel(
+                getLoanSimulation = GetLoanSimulationUseCase(FakeSimulationRepository()),
+                observeSession = ObserveSessionUseCase(authRepository),
+                signOut = SignOutUseCase(authRepository),
+            )
+    }
+
+    private suspend fun signIn() {
+        authRepository.register(
+            RegistrationForm(
+                fullName = "Carlos Mendoza",
+                email = "carlos@ejemplo.com",
+                phone = "987654321",
+                password = "secret123",
+                consentAccepted = true,
+            ),
+        )
     }
 
     @Test
@@ -28,6 +53,7 @@ class ResultsViewModelTest {
 
         assertFalse(state.isLoading)
         assertFalse(state.isUnlockSheetVisible)
+        assertFalse(state.isAuthenticated)
         val summary = requireNotNull(state.summary)
         assertEquals("S/ 280,000", summary.propertyPrice)
         assertEquals("S/ 42,000", summary.downPayment)
@@ -68,18 +94,30 @@ class ResultsViewModelTest {
     }
 
     @Test
-    fun sendQuoteClick_opensUnlockSheet() {
+    fun guest_sendQuote_opensUnlockSheet() {
         viewModel.onSendQuoteClick()
 
         assertTrue(viewModel.uiState.value.isUnlockSheetVisible)
-        assertNotNull(viewModel.uiState.value.summary)
+        assertFalse(viewModel.uiState.value.showComingSoon)
     }
 
     @Test
-    fun lockedDestinationClick_opensUnlockSheet() {
-        viewModel.onLockedDestinationClick()
+    fun guest_lockedDestinations_openUnlockSheet() {
+        listOf(MainDestination.Realtors, MainDestination.History, MainDestination.Profile).forEach { destination ->
+            viewModel.onUnlockSheetDismiss()
 
-        assertTrue(viewModel.uiState.value.isUnlockSheetVisible)
+            viewModel.onDestinationClick(destination)
+
+            assertTrue(destination.name, viewModel.uiState.value.isUnlockSheetVisible)
+        }
+    }
+
+    @Test
+    fun simulateDestination_doesNothing() {
+        viewModel.onDestinationClick(MainDestination.Simulate)
+
+        assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
+        assertFalse(viewModel.uiState.value.showComingSoon)
     }
 
     @Test
@@ -89,4 +127,58 @@ class ResultsViewModelTest {
 
         assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
     }
+
+    @Test
+    fun downloadPdf_showsComingSoonUntilConsumed() {
+        viewModel.onDownloadPdfClick()
+        assertTrue(viewModel.uiState.value.showComingSoon)
+
+        viewModel.onComingSoonShown()
+        assertFalse(viewModel.uiState.value.showComingSoon)
+    }
+
+    @Test
+    fun signingIn_exposesTheAccountAndClosesTheUnlockSheet() =
+        runTest {
+            viewModel.onSendQuoteClick()
+
+            signIn()
+
+            val state = viewModel.uiState.value
+            assertTrue(state.isAuthenticated)
+            assertEquals("Carlos Mendoza", state.account?.name)
+            assertEquals("carlos@ejemplo.com", state.account?.email)
+            assertFalse(state.isUnlockSheetVisible)
+        }
+
+    @Test
+    fun signedIn_sendQuoteAndAgenciesShowComingSoonInsteadOfTheSheet() =
+        runTest {
+            signIn()
+
+            viewModel.onSendQuoteClick()
+            assertTrue(viewModel.uiState.value.showComingSoon)
+            assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
+
+            viewModel.onComingSoonShown()
+            viewModel.onDestinationClick(MainDestination.Realtors)
+            assertTrue(viewModel.uiState.value.showComingSoon)
+            assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
+        }
+
+    @Test
+    fun signedIn_profileOpensAccountSheet_andSignOutReturnsToGuest() =
+        runTest {
+            signIn()
+
+            viewModel.onDestinationClick(MainDestination.Profile)
+            assertTrue(viewModel.uiState.value.isAccountSheetVisible)
+
+            viewModel.onSignOutClick()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isAccountSheetVisible)
+            assertFalse(state.isAuthenticated)
+            assertNull(state.account)
+        }
 }

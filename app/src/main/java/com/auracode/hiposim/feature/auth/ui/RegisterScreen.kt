@@ -30,15 +30,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -61,22 +58,17 @@ import com.auracode.hiposim.feature.auth.domain.RegistrationField
 @Composable
 fun RegisterScreen(
     onBack: () -> Unit,
+    onRegistered: () -> Unit,
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val comingSoon = stringResource(R.string.register_coming_soon)
 
-    LaunchedEffect(state.showComingSoon) {
-        if (state.showComingSoon) {
-            viewModel.onComingSoonShown()
-            snackbarHostState.showSnackbar(comingSoon)
-        }
+    LaunchedEffect(state.isRegistered) {
+        if (state.isRegistered) onRegistered()
     }
 
     RegisterContent(
         state = state,
-        snackbarHostState = snackbarHostState,
         onBack = onBack,
         onFullNameChange = viewModel::onFullNameChange,
         onEmailChange = viewModel::onEmailChange,
@@ -92,7 +84,6 @@ fun RegisterScreen(
 @Composable
 private fun RegisterContent(
     state: RegisterUiState,
-    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onFullNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
@@ -134,7 +125,6 @@ private fun RegisterContent(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Column(
@@ -334,6 +324,7 @@ private fun RegistrationForm(
             text = stringResource(R.string.register_submit),
             trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
             onClick = onSubmit,
+            enabled = !state.isSubmitting,
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -383,5 +374,6 @@ private fun errorMessage(error: RegistrationError): String =
             RegistrationError.PhoneInvalid -> R.string.error_phone_invalid
             RegistrationError.PasswordTooShort -> R.string.error_password_short
             RegistrationError.ConsentRequired -> R.string.error_consent_required
+            RegistrationError.EmailAlreadyRegistered -> R.string.error_email_taken
         },
     )

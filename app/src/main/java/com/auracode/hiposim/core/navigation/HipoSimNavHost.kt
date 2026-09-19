@@ -26,6 +26,7 @@ fun HipoSimNavHost(
         composable<Route.Register> {
             RegisterScreen(
                 onBack = { navController.popBackStack() },
+                onRegistered = { navController.popBackStack() },
             )
         }
     }

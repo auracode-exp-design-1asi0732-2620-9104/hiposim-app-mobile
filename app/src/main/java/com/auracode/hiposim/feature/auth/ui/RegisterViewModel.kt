@@ -3,6 +3,10 @@ package com.auracode.hiposim.feature.auth.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.auracode.hiposim.core.util.PeruFormat
+import com.auracode.hiposim.feature.auth.domain.RegisterResult
+import com.auracode.hiposim.feature.auth.domain.RegisterUserUseCase
+import com.auracode.hiposim.feature.auth.domain.RegistrationError
+import com.auracode.hiposim.feature.auth.domain.RegistrationField
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.ValidateRegistrationFormUseCase
 import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
@@ -20,6 +24,7 @@ class RegisterViewModel
     constructor(
         private val getLoanSimulation: GetLoanSimulationUseCase,
         private val validateForm: ValidateRegistrationFormUseCase,
+        private val registerUser: RegisterUserUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(RegisterUiState())
         val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
@@ -54,28 +59,56 @@ class RegisterViewModel
             _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
         }
 
-        /** There is no account backend yet, so a valid form only asks the UI to show "coming soon". */
+        /** Validates the form and, if it is valid, creates the account. */
         fun onSubmit() {
-            _uiState.update { state ->
-                val validation = validateForm(state.form)
-                state.copy(errors = validation.errors, showComingSoon = validation.isValid)
-            }
-        }
+            val state = _uiState.value
+            if (state.isSubmitting) return
 
-        fun onComingSoonShown() {
-            _uiState.update { it.copy(showComingSoon = false) }
+            val validation = validateForm(state.form)
+            _uiState.update { it.copy(errors = validation.errors) }
+            if (!validation.isValid) return
+
+            _uiState.update { it.copy(isSubmitting = true) }
+            viewModelScope.launch {
+                when (registerUser(state.form)) {
+                    is RegisterResult.Success ->
+                        _uiState.update { it.copy(isSubmitting = false, isRegistered = true) }
+
+                    RegisterResult.EmailAlreadyRegistered ->
+                        _uiState.update {
+                            it.copy(
+                                isSubmitting = false,
+                                errors = it.errors + EMAIL_TAKEN_ERROR,
+                            )
+                        }
+                }
+            }
         }
 
         private fun updateForm(transform: (RegistrationForm) -> RegistrationForm) {
             _uiState.update { state ->
                 val form = transform(state.form)
-                val errors = if (state.errors.isEmpty()) state.errors else validateForm(form).errors
+                val errors = if (state.errors.isEmpty()) state.errors else revalidate(state, form)
                 state.copy(form = form, errors = errors)
             }
+        }
+
+        /** Follows the edits, but keeps "email already registered" until the email itself changes. */
+        private fun revalidate(
+            state: RegisterUiState,
+            form: RegistrationForm,
+        ): Map<RegistrationField, RegistrationError> {
+            val errors = validateForm(form).errors
+            val emailTaken = state.errors[RegistrationField.Email] == RegistrationError.EmailAlreadyRegistered
+            val keepEmailTaken =
+                emailTaken && form.email == state.form.email && !errors.containsKey(RegistrationField.Email)
+            return if (keepEmailTaken) errors + EMAIL_TAKEN_ERROR else errors
         }
 
         private companion object {
             /** Nine digits plus the two separating spaces of `987 654 321`. */
             const val MAX_PHONE_INPUT_LENGTH = 11
+
+            val EMAIL_TAKEN_ERROR = RegistrationField.Email to RegistrationError.EmailAlreadyRegistered
         }
     }

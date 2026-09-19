@@ -1,14 +1,22 @@
 package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.compose.runtime.Immutable
+import com.auracode.hiposim.feature.auth.ui.AccountUi
 
 /** Everything the Results screen draws. Money and rates are already formatted (es-PE). */
 @Immutable
 data class ResultsUiState(
     val isLoading: Boolean = true,
     val summary: ResultsSummaryUi? = null,
+    /** The signed in user, or null for a guest. */
+    val account: AccountUi? = null,
     val isUnlockSheetVisible: Boolean = false,
-)
+    val isAccountSheetVisible: Boolean = false,
+    /** One-off message request, cleared by [ResultsViewModel.onComingSoonShown]. */
+    val showComingSoon: Boolean = false,
+) {
+    val isAuthenticated: Boolean get() = account != null
+}
 
 @Immutable
 data class ResultsSummaryUi(

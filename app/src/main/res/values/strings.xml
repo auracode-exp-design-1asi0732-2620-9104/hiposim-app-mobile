@@ -51,6 +51,10 @@
   <string name="unlock_sheet_body">Create your account to send your financial profile to real estate agencies.</string>
   <string name="unlock_sheet_email">Continue with email</string>
 
+  <!-- Account sheet -->
+  <string name="account_sheet_title">Your account</string>
+  <string name="account_sign_out">Sign out</string>
+
   <!-- Contextual registration -->
   <string name="register_back_to_results">Back to results</string>
   <string name="register_quote_ready">Your quote is ready</string>
@@ -72,11 +76,11 @@
   <string name="password_hide">Hide password</string>
   <string name="consent_text">I authorize sharing my simulation with real estate agencies and the processing of my personal data in accordance with Law No. 29733 on Personal Data Protection.</string>
   <string name="register_submit">Create account and connect</string>
-  <string name="register_coming_soon">Account creation is coming soon</string>
   <string name="register_footer">HipoSim is an independent simulator: it does not recommend financial institutions.</string>
   <string name="error_name_required">Enter your full name</string>
   <string name="error_email_invalid">Enter a valid email</string>
   <string name="error_phone_invalid">Enter a 9-digit mobile number starting with 9</string>
   <string name="error_password_short">Use at least 8 characters</string>
+  <string name="error_email_taken">This email is already registered</string>
   <string name="error_consent_required">You must accept to continue</string>
 </resources>

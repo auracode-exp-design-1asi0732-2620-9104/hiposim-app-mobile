@@ -51,6 +51,10 @@
   <string name="unlock_sheet_body">Crea tu cuenta para enviar tu perfil financiero a las inmobiliarias.</string>
   <string name="unlock_sheet_email">Continuar con correo</string>
 
+  <!-- Account sheet -->
+  <string name="account_sheet_title">Tu cuenta</string>
+  <string name="account_sign_out">Cerrar sesión</string>
+
   <!-- Contextual registration -->
   <string name="register_back_to_results">Volver a resultados</string>
   <string name="register_quote_ready">Tu cotización está lista</string>
@@ -72,11 +76,11 @@
   <string name="password_hide">Ocultar contraseña</string>
   <string name="consent_text">Autorizo compartir mi simulación con inmobiliarias y el tratamiento de mis datos personales conforme a la Ley N° 29733 de Protección de Datos Personales.</string>
   <string name="register_submit">Crear cuenta y conectar con inmobiliarias</string>
-  <string name="register_coming_soon">El registro estará disponible próximamente</string>
   <string name="register_footer">HipoSim es un simulador independiente: no recomienda entidades financieras.</string>
   <string name="error_name_required">Ingresa tu nombre completo</string>
   <string name="error_email_invalid">Ingresa un correo válido</string>
   <string name="error_phone_invalid">Ingresa un celular de 9 dígitos que empiece con 9</string>
   <string name="error_password_short">Usa al menos 8 caracteres</string>
+  <string name="error_email_taken">Este correo ya está registrado</string>
   <string name="error_consent_required">Debes aceptar para continuar</string>
 </resources>
