@@ -18,6 +18,9 @@ enum class RegistrationError {
     PhoneInvalid,
     PasswordTooShort,
     ConsentRequired,
+
+    /** Reported by the repository after submitting, not by local validation. */
+    EmailAlreadyRegistered,
 }
 
 data class RegistrationValidation(

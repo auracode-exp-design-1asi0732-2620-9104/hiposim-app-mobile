@@ -12,8 +12,9 @@ data class RegisterUiState(
     /** Errors are hidden until the user tries to submit, then they follow the edits. */
     val errors: Map<RegistrationField, RegistrationError> = emptyMap(),
     val quote: QuoteSummaryUi? = null,
-    /** One-off message request, cleared by [RegisterViewModel.onComingSoonShown]. */
-    val showComingSoon: Boolean = false,
+    val isSubmitting: Boolean = false,
+    /** The account was created and the user is signed in, so the screen should close. */
+    val isRegistered: Boolean = false,
 )
 
 /** The quote the user is about to send, shown at the top of the form. */

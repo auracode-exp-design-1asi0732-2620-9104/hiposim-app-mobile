@@ -13,7 +13,20 @@ Primer avance ejecutable con dos pantallas basadas en los mockups de `docs/desig
 2. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
 
 Los datos salen de `FakeSimulationRepository`. El VAN y la TIR son valores de ejemplo hasta que exista el motor
-financiero. No hay API, autenticación real ni PDF todavía.
+financiero.
+
+### Cuentas y sesión (provisional)
+
+El registro crea una cuenta en memoria con `FakeAuthRepository` detrás de la interfaz `AuthRepository`. Al registrarte
+quedas con la sesión iniciada: los candados de la barra inferior desaparecen y "Perfil" abre una hoja con tu cuenta y
+"Cerrar sesión". Es solo para la demo:
+
+- Las cuentas y la sesión no se guardan: se pierden al cerrar la app.
+- No hay inicio de sesión todavía (no está en los mockups) ni se guarda la contraseña.
+- "Enviar cotización" e "Inmobiliarias" muestran "Disponible próximamente" con sesión iniciada, hasta que exista `feature/leads`.
+
+Cuando exista el backend, se reemplaza `FakeAuthRepository` por una implementación con la API en `di/RepositoryModule.kt`.
+No hay API real ni PDF todavía.
 
 ## Requisitos
 
@@ -75,7 +88,7 @@ app/src/main/java/com/auracode/hiposim/
   core/navigation/     rutas tipadas y NavHost
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
   feature/simulation/  ui (Resultados), domain (modelos, casos de uso), data (FakeSimulationRepository)
-  feature/auth/        ui (Registro, LoginRequiredSheet), domain (validación), data (pendiente)
+  feature/auth/        ui (Registro, LoginRequiredSheet, AccountSheet), domain (validación, sesión), data (FakeAuthRepository)
   feature/leads/       reservado (US21)
   feature/history/     reservado
   feature/comparison/  reservado

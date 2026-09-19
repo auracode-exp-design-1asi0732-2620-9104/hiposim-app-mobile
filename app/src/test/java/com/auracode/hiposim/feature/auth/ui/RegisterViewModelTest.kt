@@ -1,11 +1,16 @@
 package com.auracode.hiposim.feature.auth.ui
 
+import com.auracode.hiposim.feature.auth.data.FakeAuthRepository
+import com.auracode.hiposim.feature.auth.domain.RegisterUserUseCase
 import com.auracode.hiposim.feature.auth.domain.RegistrationError
 import com.auracode.hiposim.feature.auth.domain.RegistrationField
+import com.auracode.hiposim.feature.auth.domain.RegistrationForm
+import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.auth.domain.ValidateRegistrationFormUseCase
 import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
 import com.auracode.hiposim.testing.MainDispatcherRule
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -17,14 +22,17 @@ class RegisterViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private lateinit var authRepository: FakeAuthRepository
     private lateinit var viewModel: RegisterViewModel
 
     @Before
     fun setUp() {
+        authRepository = FakeAuthRepository()
         viewModel =
             RegisterViewModel(
                 getLoanSimulation = GetLoanSimulationUseCase(FakeSimulationRepository()),
                 validateForm = ValidateRegistrationFormUseCase(),
+                registerUser = RegisterUserUseCase(authRepository),
             )
     }
 
@@ -57,25 +65,66 @@ class RegisterViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(RegistrationError.ConsentRequired, state.errors[RegistrationField.Consent])
-        assertFalse(state.showComingSoon)
+        assertFalse(state.isRegistered)
+        assertEquals(SessionState.Guest, authRepository.session.value)
     }
 
     @Test
-    fun submitWithConsent_continues() {
+    fun submitWithConsent_createsTheAccountAndSignsIn() {
         fillValidForm()
         viewModel.onConsentChange(true)
 
         viewModel.onSubmit()
 
-        assertTrue(
-            viewModel.uiState.value.errors
-                .isEmpty(),
-        )
-        assertTrue(viewModel.uiState.value.showComingSoon)
-
-        viewModel.onComingSoonShown()
-        assertFalse(viewModel.uiState.value.showComingSoon)
+        val state = viewModel.uiState.value
+        assertTrue(state.errors.isEmpty())
+        assertTrue(state.isRegistered)
+        assertFalse(state.isSubmitting)
+        assertTrue(authRepository.session.value is SessionState.Authenticated)
     }
+
+    @Test
+    fun submitWithTakenEmail_showsEmailErrorAndDoesNotRegister() =
+        runTest {
+            authRepository.register(
+                RegistrationForm(fullName = "Ana", email = "carlos@ejemplo.com", phone = "987654321", password = "x"),
+            )
+            authRepository.signOut()
+            fillValidForm()
+            viewModel.onConsentChange(true)
+
+            viewModel.onSubmit()
+
+            val state = viewModel.uiState.value
+            assertEquals(RegistrationError.EmailAlreadyRegistered, state.errors[RegistrationField.Email])
+            assertFalse(state.isRegistered)
+            assertFalse(state.isSubmitting)
+            assertEquals(SessionState.Guest, authRepository.session.value)
+        }
+
+    @Test
+    fun takenEmailError_staysWhenEditingOtherFieldsAndClearsWhenEmailChanges() =
+        runTest {
+            authRepository.register(
+                RegistrationForm(fullName = "Ana", email = "carlos@ejemplo.com", phone = "987654321", password = "x"),
+            )
+            authRepository.signOut()
+            fillValidForm()
+            viewModel.onConsentChange(true)
+            viewModel.onSubmit()
+
+            viewModel.onFullNameChange("Carlos M.")
+            assertEquals(
+                RegistrationError.EmailAlreadyRegistered,
+                viewModel.uiState.value.errors[RegistrationField.Email],
+            )
+
+            viewModel.onEmailChange("otro@ejemplo.com")
+            assertFalse(
+                viewModel.uiState.value.errors
+                    .containsKey(RegistrationField.Email),
+            )
+        }
 
     @Test
     fun errors_areHiddenUntilSubmitAndThenFollowEdits() {

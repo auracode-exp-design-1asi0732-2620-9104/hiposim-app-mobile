@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,6 +66,7 @@ import com.auracode.hiposim.core.designsystem.theme.HipoSimTheme
 import com.auracode.hiposim.core.designsystem.theme.MetricDisplayStyle
 import com.auracode.hiposim.core.designsystem.theme.Spacing
 import com.auracode.hiposim.core.navigation.MainDestination
+import com.auracode.hiposim.feature.auth.ui.AccountSheet
 import com.auracode.hiposim.feature.auth.ui.LoginRequiredSheet
 import kotlinx.coroutines.launch
 
@@ -79,15 +81,21 @@ fun ResultsScreen(
     val comingSoon = stringResource(R.string.coming_soon)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
+    LaunchedEffect(state.showComingSoon) {
+        if (state.showComingSoon) {
+            viewModel.onComingSoonShown()
+            // Own scope: clearing the flag restarts this effect, which would cancel the snackbar.
+            scope.launch { snackbarHostState.showSnackbar(comingSoon) }
+        }
+    }
+
     ResultsContent(
         state = state,
         snackbarHostState = snackbarHostState,
         onBack = { backDispatcher?.onBackPressed() },
         onSendQuote = viewModel::onSendQuoteClick,
-        onDestinationClick = { destination ->
-            if (destination.requiresAccount) viewModel.onLockedDestinationClick()
-        },
-        onDownloadPdf = { scope.launch { snackbarHostState.showSnackbar(comingSoon) } },
+        onDestinationClick = viewModel::onDestinationClick,
+        onDownloadPdf = viewModel::onDownloadPdfClick,
     )
 
     if (state.isUnlockSheetVisible) {
@@ -98,6 +106,16 @@ fun ResultsScreen(
             },
             onDismiss = viewModel::onUnlockSheetDismiss,
         )
+    }
+
+    state.account?.let { account ->
+        if (state.isAccountSheetVisible) {
+            AccountSheet(
+                account = account,
+                onSignOut = viewModel::onSignOutClick,
+                onDismiss = viewModel::onAccountSheetDismiss,
+            )
+        }
     }
 }
 
@@ -135,6 +153,7 @@ private fun ResultsContent(
         },
         bottomBar = {
             ResultsBottomBar(
+                isAuthenticated = state.isAuthenticated,
                 onSendQuote = onSendQuote,
                 onDownloadPdf = onDownloadPdf,
                 onDestinationClick = onDestinationClick,
@@ -465,6 +484,7 @@ private fun InstallmentLine(
 
 @Composable
 private fun ResultsBottomBar(
+    isAuthenticated: Boolean,
     onSendQuote: () -> Unit,
     onDownloadPdf: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
@@ -475,7 +495,7 @@ private fun ResultsBottomBar(
                 id = destination.name,
                 label = stringResource(destination.labelRes),
                 icon = destination.icon,
-                locked = destination.requiresAccount,
+                locked = destination.requiresAccount && !isAuthenticated,
             )
         }
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest, shadowElevation = 8.dp) {
