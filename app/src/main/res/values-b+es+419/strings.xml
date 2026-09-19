@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">HipoSim</string>
+  <string name="action_close">Cerrar</string>
+  <string name="action_back">Volver</string>
+  <string name="coming_soon">Disponible próximamente</string>
+  <string name="loading">Cargando</string>
+
+  <!-- Results -->
+  <string name="results_title">Resultados del Crédito</string>
+  <string name="subsidy_banner_title">Subsidio estatal aplicado</string>
+  <string name="subsidy_banner_body">Bono del Buen Pagador: %1$s descontados</string>
+  <string name="monthly_payment_label">Cuota mensual estimada</string>
+  <string name="per_month">/ mes</string>
+  <string name="payment_includes_insurance">Incluye seguros de desgravamen e inmueble</string>
+  <string name="tcea_label">TCEA</string>
+  <string name="tcea_description">TCEA %1$s, tasa de costo efectivo anual</string>
+  <string name="property_price_label">Vivienda</string>
+  <string name="down_payment_label">Inicial (%1$s)</string>
+  <string name="net_loan_label">Préstamo neto</string>
+  <string name="term_label">Plazo</string>
+  <string name="term_value">%1$d años (%2$d meses)</string>
+  <string name="npv_label">VAN</string>
+  <string name="irr_label">TIR</string>
+  <string name="example_value">Valor de ejemplo</string>
+  <string name="monthly_insurance_label">Seguro mensual</string>
+  <string name="monthly_insurance_detail">Desgravamen + inmueble</string>
+  <string name="composition_title">Composición de la primera cuota</string>
+  <string name="composition_summary">Interés %1$d%% • Capital %2$d%% • Seguros %3$d%%</string>
+  <string name="schedule_title">Cronograma inicial</string>
+  <string name="schedule_subtitle">Primeras cuotas proyectadas (método francés)</string>
+  <string name="schedule_range">Meses %1$d-%2$d</string>
+  <string name="installment_number">Cuota #%1$d</string>
+  <string name="installment_principal">Amortización</string>
+  <string name="installment_interest">Interés</string>
+  <string name="installment_insurance">Seguro</string>
+  <string name="installment_balance">Saldo restante</string>
+  <string name="send_quote">Enviar cotización a inmobiliarias</string>
+  <string name="send_quote_hint">(Desbloquea proyectos en tu rango)</string>
+  <string name="download_pdf">Descargar resumen PDF</string>
+
+  <!-- Navigation -->
+  <string name="nav_simulate">Simular</string>
+  <string name="nav_realtors">Inmobiliarias</string>
+  <string name="nav_history">Historial</string>
+  <string name="nav_profile">Perfil</string>
+  <string name="nav_locked_description">%1$s, bloqueado. Requiere una cuenta</string>
+
+  <!-- Login required sheet -->
+  <string name="unlock_sheet_title">Desbloquea Inmobiliarias</string>
+  <string name="unlock_sheet_body">Crea tu cuenta para enviar tu perfil financiero a las inmobiliarias.</string>
+  <string name="unlock_sheet_email">Continuar con correo</string>
+
+  <!-- Contextual registration -->
+  <string name="register_back_to_results">Volver a resultados</string>
+  <string name="register_quote_ready">Tu cotización está lista</string>
+  <string name="register_quote_payment">Cuota %1$s</string>
+  <string name="register_quote_property">Vivienda objetivo:</string>
+  <string name="register_headline">Conecta con inmobiliarias en tu rango presupuestal</string>
+  <string name="register_subtitle">Solo compartiremos tu simulación con las inmobiliarias que tú autorices.</string>
+  <string name="field_name">Nombre completo</string>
+  <string name="field_name_placeholder">Ej. Carlos Mendoza</string>
+  <string name="field_email">Correo electrónico</string>
+  <string name="field_email_placeholder">carlos@ejemplo.com</string>
+  <string name="field_phone">Celular</string>
+  <string name="field_phone_hint">Para contacto inmobiliario</string>
+  <string name="field_phone_prefix">+51</string>
+  <string name="field_phone_placeholder">987 654 321</string>
+  <string name="field_password">Contraseña</string>
+  <string name="field_password_placeholder">Mínimo 8 caracteres</string>
+  <string name="password_show">Mostrar contraseña</string>
+  <string name="password_hide">Ocultar contraseña</string>
+  <string name="consent_text">Autorizo compartir mi simulación con inmobiliarias y el tratamiento de mis datos personales conforme a la Ley N° 29733 de Protección de Datos Personales.</string>
+  <string name="register_submit">Crear cuenta y conectar con inmobiliarias</string>
+  <string name="register_coming_soon">El registro estará disponible próximamente</string>
+  <string name="register_footer">HipoSim es un simulador independiente: no recomienda entidades financieras.</string>
+  <string name="error_name_required">Ingresa tu nombre completo</string>
+  <string name="error_email_invalid">Ingresa un correo válido</string>
+  <string name="error_phone_invalid">Ingresa un celular de 9 dígitos que empiece con 9</string>
+  <string name="error_password_short">Usa al menos 8 caracteres</string>
+  <string name="error_consent_required">Debes aceptar para continuar</string>
+</resources>

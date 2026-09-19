@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">HipoSim</string>
+  <string name="action_close">Close</string>
+  <string name="action_back">Back</string>
+  <string name="coming_soon">Coming soon</string>
+  <string name="loading">Loading</string>
+
+  <!-- Results -->
+  <string name="results_title">Loan results</string>
+  <string name="subsidy_banner_title">State subsidy applied</string>
+  <string name="subsidy_banner_body">Good Payer Bonus (Bono del Buen Pagador): %1$s discounted</string>
+  <string name="monthly_payment_label">Estimated monthly payment</string>
+  <string name="per_month">/ month</string>
+  <string name="payment_includes_insurance">Includes life and property insurance</string>
+  <string name="tcea_label">TCEA</string>
+  <string name="tcea_description">TCEA %1$s, annual effective total cost rate</string>
+  <string name="property_price_label">Home price</string>
+  <string name="down_payment_label">Down payment (%1$s)</string>
+  <string name="net_loan_label">Net loan</string>
+  <string name="term_label">Term</string>
+  <string name="term_value">%1$d years (%2$d months)</string>
+  <string name="npv_label">NPV</string>
+  <string name="irr_label">IRR</string>
+  <string name="example_value">Example value</string>
+  <string name="monthly_insurance_label">Monthly insurance</string>
+  <string name="monthly_insurance_detail">Life + property</string>
+  <string name="composition_title">First installment breakdown</string>
+  <string name="composition_summary">Interest %1$d%% • Principal %2$d%% • Insurance %3$d%%</string>
+  <string name="schedule_title">Initial schedule</string>
+  <string name="schedule_subtitle">First installments (French method)</string>
+  <string name="schedule_range">Months %1$d-%2$d</string>
+  <string name="installment_number">Installment #%1$d</string>
+  <string name="installment_principal">Principal</string>
+  <string name="installment_interest">Interest</string>
+  <string name="installment_insurance">Insurance</string>
+  <string name="installment_balance">Remaining balance</string>
+  <string name="send_quote">Send quote to real estate agencies</string>
+  <string name="send_quote_hint">(Unlocks projects in your range)</string>
+  <string name="download_pdf">Download PDF summary</string>
+
+  <!-- Navigation -->
+  <string name="nav_simulate">Simulate</string>
+  <string name="nav_realtors">Real estate</string>
+  <string name="nav_history">History</string>
+  <string name="nav_profile">Profile</string>
+  <string name="nav_locked_description">%1$s, locked. Requires an account</string>
+
+  <!-- Login required sheet -->
+  <string name="unlock_sheet_title">Unlock real estate agencies</string>
+  <string name="unlock_sheet_body">Create your account to send your financial profile to real estate agencies.</string>
+  <string name="unlock_sheet_email">Continue with email</string>
+
+  <!-- Contextual registration -->
+  <string name="register_back_to_results">Back to results</string>
+  <string name="register_quote_ready">Your quote is ready</string>
+  <string name="register_quote_payment">Payment %1$s</string>
+  <string name="register_quote_property">Target home:</string>
+  <string name="register_headline">Connect with real estate agencies in your budget range</string>
+  <string name="register_subtitle">We only share your simulation with the agencies you authorize.</string>
+  <string name="field_name">Full name</string>
+  <string name="field_name_placeholder">E.g. Carlos Mendoza</string>
+  <string name="field_email">Email</string>
+  <string name="field_email_placeholder">carlos@example.com</string>
+  <string name="field_phone">Mobile phone</string>
+  <string name="field_phone_hint">For real estate contact</string>
+  <string name="field_phone_prefix">+51</string>
+  <string name="field_phone_placeholder">987 654 321</string>
+  <string name="field_password">Password</string>
+  <string name="field_password_placeholder">At least 8 characters</string>
+  <string name="password_show">Show password</string>
+  <string name="password_hide">Hide password</string>
+  <string name="consent_text">I authorize sharing my simulation with real estate agencies and the processing of my personal data in accordance with Law No. 29733 on Personal Data Protection.</string>
+  <string name="register_submit">Create account and connect</string>
+  <string name="register_coming_soon">Account creation is coming soon</string>
+  <string name="register_footer">HipoSim is an independent simulator: it does not recommend financial institutions.</string>
+  <string name="error_name_required">Enter your full name</string>
+  <string name="error_email_invalid">Enter a valid email</string>
+  <string name="error_phone_invalid">Enter a 9-digit mobile number starting with 9</string>
+  <string name="error_password_short">Use at least 8 characters</string>
+  <string name="error_consent_required">You must accept to continue</string>
+</resources>

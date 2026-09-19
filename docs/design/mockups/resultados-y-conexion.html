@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HipoSim - Resultados de la simulación</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;family=Roboto+Flex:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f7f9ff",
+            "on-secondary-container": "#006f6a",
+            "surface": "#f7f9ff",
+            "inverse-surface": "#27313c",
+            "outline-variant": "#bfc8c9",
+            "on-tertiary-fixed-variant": "#643f00",
+            "tertiary-fixed-dim": "#ffb957",
+            "background": "#f7f9ff",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#aceef6",
+            "on-primary-fixed": "#002023",
+            "secondary-fixed-dim": "#69d8d1",
+            "surface-container-low": "#edf4ff",
+            "on-primary-fixed-variant": "#004f55",
+            "on-tertiary-container": "#ffba59",
+            "on-error-container": "#93000a",
+            "surface-container": "#e4effd",
+            "secondary-fixed": "#87f4ee",
+            "on-surface-variant": "#3f484a",
+            "on-secondary-fixed": "#00201e",
+            "surface-container-high": "#dfe9f7",
+            "surface-tint": "#20676f",
+            "primary-container": "#0e5c63",
+            "surface-container-highest": "#d9e3f1",
+            "tertiary": "#553500",
+            "surface-variant": "#d9e3f1",
+            "secondary": "#006a66",
+            "secondary-container": "#84f2eb",
+            "error-container": "#ffdad6",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#121d26",
+            "on-secondary-fixed-variant": "#00504d",
+            "on-tertiary": "#ffffff",
+            "primary": "#004349",
+            "error": "#ba1a1a",
+            "on-tertiary-fixed": "#2a1800",
+            "primary-fixed-dim": "#90d1d9",
+            "on-primary": "#ffffff",
+            "outline": "#6f797a",
+            "tertiary-container": "#744a00",
+            "tertiary-fixed": "#ffddb5",
+            "on-primary-container": "#90d2da",
+            "inverse-on-surface": "#e8f2ff",
+            "surface-dim": "#d1dbe8",
+            "inverse-primary": "#90d1d9",
+            "on-surface": "#121d26",
+            "on-error": "#ffffff",
+            "brand-teal": "#0e5c63",
+            "brand-teal-light": "#3aafa9",
+            "brand-amber": "#f5a524",
+            "brand-amber-dark": "#e0921b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2rem",
+            "gutter-mobile": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "label-md": ["Roboto Flex"],
+            "display-lg": ["Outfit"],
+            "headline-lg": ["Outfit"],
+            "headline-md": ["Outfit"],
+            "metric-display": ["Outfit"],
+            "headline-sm": ["Outfit"],
+            "label-sm": ["Roboto Flex"],
+            "label-lg": ["Roboto Flex"],
+            "body-lg": ["Roboto Flex"],
+            "headline-lg-mobile": ["Outfit"],
+            "display-lg-mobile": ["Outfit"],
+            "body-md": ["Roboto Flex"],
+            "body-sm": ["Roboto Flex"],
+            "metric-display-mobile": ["Outfit"]
+          },
+          "fontSize": {
+            "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+            "display-lg": ["44px", {"lineHeight": "52px", "fontWeight": "700"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "metric-display": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+            "label-lg": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "600"}],
+            "display-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "metric-display-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+          },
+          "boxShadow": {
+            "ambient-sm": "0 1px 3px 0 rgba(14, 92, 99, 0.06), 0 1px 2px -1px rgba(14, 92, 99, 0.04)",
+            "ambient-md": "0 4px 12px -2px rgba(14, 92, 99, 0.08), 0 2px 6px -2px rgba(14, 92, 99, 0.04)",
+            "ambient-lg": "0 12px 24px -4px rgba(14, 92, 99, 0.12), 0 4px 10px -2px rgba(14, 92, 99, 0.06)",
+            "warm-glow": "0 4px 14px 0 rgba(245, 165, 36, 0.35)"
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen pb-44 selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar M3 (Docked full-width top-0, Shadow-sm, No horizontal borders) -->
+<header class="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-space-md h-16 bg-surface shadow-sm transition-colors duration-150">
+<div class="flex items-center gap-2">
+<button aria-label="Volver" class="w-10 h-10 flex items-center justify-center rounded-full text-primary hover:bg-surface-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h1 class="text-headline-sm font-headline-sm text-primary tracking-tight">Resultados del Crédito</h1>
+</div>
+</div>
+<div class="flex items-center">
+<span class="inline-flex items-center gap-1 bg-surface-container-low text-primary text-label-sm font-label-sm px-2.5 py-1 rounded-full border border-secondary/20">
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="check_circle">check_circle</span>
+        Sin compromiso
+      </span>
+</div>
+</header>
+<!-- Main Canvas Mobile Layout -->
+<main class="pt-20 px-4 max-w-md mx-auto space-y-4">
+<!-- Subsidio Banner Mivivienda / Verde -->
+<section class="bg-secondary-container/40 border border-secondary/25 rounded-xl p-3.5 flex items-center gap-3 shadow-ambient-sm">
+<div class="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="eco">eco</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-1.5">
+<span class="text-label-sm font-label-sm text-on-secondary-container font-semibold">Subsidio Estatal Aplicado</span>
+<span class="w-2 h-2 rounded-full bg-secondary inline-block"></span>
+</div>
+<p class="text-label-md font-label-md text-on-surface font-medium leading-snug">
+          Bono Buen Pagador Sostenible: <span class="text-secondary font-bold">S/ 27,200 descontados</span>
+</p>
+</div>
+</section>
+<!-- Resumen Clave: Tarjeta Elevada Level 2 -->
+<section class="bg-surface-container-lowest rounded-2xl p-5 shadow-ambient-md border border-outline-variant/30 space-y-5">
+<!-- Header de la tarjeta -->
+<div class="flex items-start justify-between border-b border-surface-container pb-4">
+<div>
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Cuota Mensual Estimada</span>
+<div class="flex items-baseline gap-1.5 mt-0.5">
+<span class="font-metric-display-mobile text-metric-display-mobile text-brand-amber font-bold tracking-tight">S/ 1,890</span>
+<span class="text-label-md font-label-md text-on-surface-variant">/ mes</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant/80 mt-0.5">Incluye seguros desgravamen e inmueble</p>
+</div>
+<!-- Tooltip TCEA Badge -->
+<div class="relative group">
+<div class="bg-surface-container-low border border-primary/20 rounded-xl px-3 py-1.5 text-right cursor-help transition-all group-hover:bg-surface-container">
+<div class="flex items-center gap-1 justify-end">
+<span class="text-label-sm font-label-sm text-on-surface-variant">TCEA</span>
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="info">info</span>
+</div>
+<p class="font-headline-sm font-headline-sm text-primary font-bold">9.25%</p>
+</div>
+<!-- Tooltip flotante interactivo -->
+<div class="absolute right-0 top-full mt-1.5 hidden group-hover:block group-focus:block z-20 w-52 p-2.5 bg-inverse-surface text-inverse-on-surface text-label-sm font-label-sm rounded-lg shadow-ambient-lg text-center">
+            Tasa de Costo Efectivo Anual con seguros y comisiones regulatorias.
+          </div>
+</div>
+</div>
+<!-- Métricas Financieras Secundarias (VAN, TIR, Monto, Plazo) -->
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-surface-container-low/60 rounded-xl p-3 border border-outline-variant/15">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">Monto financiado</span>
+<p class="text-label-lg font-label-lg text-on-surface font-semibold mt-0.5">S/ 238,000</p>
+<span class="text-label-sm font-label-sm text-secondary font-medium">20 años (240 m)</span>
+</div>
+<div class="bg-surface-container-low/60 rounded-xl p-3 border border-outline-variant/15">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">VAN Financiero</span>
+<p class="text-label-lg font-label-lg text-on-surface font-semibold mt-0.5 text-secondary">S/ +14,200</p>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Rendimiento favorable</span>
+</div>
+<div class="bg-surface-container-low/60 rounded-xl p-3 border border-outline-variant/15">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">TIR Anual</span>
+<p class="text-label-lg font-label-lg text-on-surface font-semibold mt-0.5">8.10%</p>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Tasa interna de retorno</span>
+</div>
+<div class="bg-surface-container-low/60 rounded-xl p-3 border border-outline-variant/15">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">Seguro mensual</span>
+<p class="text-label-lg font-label-lg text-on-surface font-semibold mt-0.5">S/ 128.50</p>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Desgravamen + Sismo</span>
+</div>
+</div>
+<!-- Barra de distribución visual de cuota -->
+<div class="space-y-1.5 pt-1">
+<div class="flex justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>Composición de cuota inicial</span>
+<span class="font-medium text-primary">Interés 62% • Capital 31% • Seguros 7%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="h-full bg-primary-container" style="width: 62%"></div>
+<div class="h-full bg-brand-teal-light" style="width: 31%"></div>
+<div class="h-full bg-tertiary-fixed-dim" style="width: 7%"></div>
+</div>
+</div>
+</section>
+<!-- Amortización: Lista Desplazable Táctil (No tabla densa) -->
+<section class="space-y-3 pt-2">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-background">Cronograma Inicial</h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Primeras cuotas proyectadas (Método Francés)</p>
+</div>
+<span class="text-label-sm font-label-sm text-secondary font-semibold bg-secondary-container/40 px-2 py-0.5 rounded">
+          Meses 1-4
+        </span>
+</div>
+<!-- Contenedor scroll horizontal táctil con tarjetas fluidas -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 snap-x snap-mandatory">
+<!-- Tarjeta Cuota 1 -->
+<div class="snap-start shrink-0 w-[260px] bg-surface-container-lowest rounded-xl p-4 shadow-ambient-sm border border-outline-variant/30 space-y-3">
+<div class="flex justify-between items-center pb-2 border-b border-surface-container">
+<span class="font-headline-sm font-headline-sm text-primary">Cuota #1</span>
+<span class="text-label-sm font-label-sm font-semibold text-brand-amber">S/ 1,890.00</span>
+</div>
+<div class="space-y-2 text-label-sm font-label-sm">
+<div class="flex justify-between text-on-surface-variant">
+<span>Amortización:</span>
+<span class="font-medium text-on-surface">S/ 584.20</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Interés:</span>
+<span class="font-medium text-on-surface">S/ 1,177.30</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Seguro Desgravamen:</span>
+<span class="font-medium text-on-surface">S/ 128.50</span>
+</div>
+<div class="pt-2 border-t border-surface-container flex justify-between">
+<span class="text-on-surface-variant">Saldo Restante:</span>
+<span class="font-semibold text-primary">S/ 237,415.80</span>
+</div>
+</div>
+</div>
+<!-- Tarjeta Cuota 2 -->
+<div class="snap-start shrink-0 w-[260px] bg-surface-container-lowest rounded-xl p-4 shadow-ambient-sm border border-outline-variant/30 space-y-3">
+<div class="flex justify-between items-center pb-2 border-b border-surface-container">
+<span class="font-headline-sm font-headline-sm text-primary">Cuota #2</span>
+<span class="text-label-sm font-label-sm font-semibold text-brand-amber">S/ 1,890.00</span>
+</div>
+<div class="space-y-2 text-label-sm font-label-sm">
+<div class="flex justify-between text-on-surface-variant">
+<span>Amortización:</span>
+<span class="font-medium text-on-surface">S/ 587.10</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Interés:</span>
+<span class="font-medium text-on-surface">S/ 1,174.40</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Seguro Desgravamen:</span>
+<span class="font-medium text-on-surface">S/ 128.50</span>
+</div>
+<div class="pt-2 border-t border-surface-container flex justify-between">
+<span class="text-on-surface-variant">Saldo Restante:</span>
+<span class="font-semibold text-primary">S/ 236,828.70</span>
+</div>
+</div>
+</div>
+<!-- Tarjeta Cuota 3 -->
+<div class="snap-start shrink-0 w-[260px] bg-surface-container-lowest rounded-xl p-4 shadow-ambient-sm border border-outline-variant/30 space-y-3">
+<div class="flex justify-between items-center pb-2 border-b border-surface-container">
+<span class="font-headline-sm font-headline-sm text-primary">Cuota #3</span>
+<span class="text-label-sm font-label-sm font-semibold text-brand-amber">S/ 1,890.00</span>
+</div>
+<div class="space-y-2 text-label-sm font-label-sm">
+<div class="flex justify-between text-on-surface-variant">
+<span>Amortización:</span>
+<span class="font-medium text-on-surface">S/ 590.05</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Interés:</span>
+<span class="font-medium text-on-surface">S/ 1,171.45</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Seguro Desgravamen:</span>
+<span class="font-medium text-on-surface">S/ 128.50</span>
+</div>
+<div class="pt-2 border-t border-surface-container flex justify-between">
+<span class="text-on-surface-variant">Saldo Restante:</span>
+<span class="font-semibold text-primary">S/ 236,238.65</span>
+</div>
+</div>
+</div>
+<!-- Tarjeta Cuota 4 -->
+<div class="snap-start shrink-0 w-[260px] bg-surface-container-lowest rounded-xl p-4 shadow-ambient-sm border border-outline-variant/30 space-y-3">
+<div class="flex justify-between items-center pb-2 border-b border-surface-container">
+<span class="font-headline-sm font-headline-sm text-primary">Cuota #4</span>
+<span class="text-label-sm font-label-sm font-semibold text-brand-amber">S/ 1,890.00</span>
+</div>
+<div class="space-y-2 text-label-sm font-label-sm">
+<div class="flex justify-between text-on-surface-variant">
+<span>Amortización:</span>
+<span class="font-medium text-on-surface">S/ 593.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Interés:</span>
+<span class="font-medium text-on-surface">S/ 1,168.50</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Seguro Desgravamen:</span>
+<span class="font-medium text-on-surface">S/ 128.50</span>
+</div>
+<div class="pt-2 border-t border-surface-container flex justify-between">
+<span class="text-on-surface-variant">Saldo Restante:</span>
+<span class="font-semibold text-primary">S/ 235,645.65</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Botón Ver cronograma completo -->
+<button class="w-full py-3 px-4 rounded-xl border border-primary/30 text-primary font-label-md font-label-md flex items-center justify-center gap-2 hover:bg-surface-container active:scale-98 transition-all bg-surface-container-lowest" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="calendar_month">calendar_month</span>
+        Ver cronograma completo (240 cuotas)
+      </button>
+</section>
+<!-- Tarjeta informativa de Entidades Financieras Recomendadas -->
+<section class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20 space-y-2.5">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm font-semibold text-primary uppercase tracking-wide">Mejor Opción Calculada</span>
+<span class="bg-secondary text-on-secondary text-label-sm font-label-sm px-2 py-0.5 rounded-full font-medium">Menor Costo Financiero</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-center font-bold text-primary text-label-md">
+            BCP
+          </div>
+<div>
+<p class="text-label-md font-label-md font-semibold text-on-surface">Crédito Hipotecario Tradicional</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">TCEA 9.25% • Cuota: S/ 1,890</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="verified">verified</span>
+</div>
+</section>
+</main>
+<!-- Modal Diálogo de Login Rápido (Disparado por el botón CTA) -->
+<div class="fixed inset-0 z-50 hidden bg-inverse-surface/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity" id="login-modal">
+<div class="w-full max-w-sm bg-surface-container-lowest rounded-t-3xl sm:rounded-2xl p-6 shadow-ambient-lg space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-200">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded-full bg-brand-amber/15 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="lock_open">lock_open</span>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:bg-surface-container" id="close-login-btn" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Desbloquea Inmobiliarias</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Crea tu cuenta o inicia sesión gratis para enviar tu perfil financiero a las 24 inmobiliarias con convenios activos.</p>
+</div>
+<div class="space-y-2.5 pt-2">
+<button class="w-full py-3 px-4 rounded-xl bg-brand-amber text-inverse-surface font-label-lg font-label-lg font-semibold hover:bg-brand-amber-dark transition-colors shadow-warm-glow flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="mail">mail</span>
+          Continuar con Correo
+        </button>
+<button class="w-full py-2.5 px-4 rounded-xl border border-outline-variant/50 text-on-surface font-label-md font-label-md hover:bg-surface-container flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="badge">badge</span>
+          Acceder con DNI digital
+        </button>
+</div>
+</div>
+</div>
+<!-- Barra Fija de Acciones Inferior (Sobre la BottomNavBar) -->
+<div class="fixed bottom-16 left-0 w-full z-30 bg-surface-container-lowest/95 backdrop-blur-md px-4 py-2.5 shadow-[0_-4px_16px_rgba(14,92,99,0.06)] border-t border-outline-variant/10">
+<div class="max-w-md mx-auto space-y-2">
+<!-- Botón principal prominente en ámbar #F5A524 -->
+<button class="w-full bg-brand-amber hover:bg-brand-amber-dark active:scale-98 text-inverse-surface py-3 px-4 rounded-xl font-label-lg font-label-lg font-semibold shadow-warm-glow transition-all flex flex-col items-center justify-center text-center" id="trigger-login-btn" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="send">send</span>
+<span>Enviar cotización a inmobiliarias</span>
+</div>
+<span class="text-label-sm font-label-sm opacity-85 font-normal -mt-0.5">(Desbloquea proyectos en tu rango)</span>
+</button>
+<!-- Botón secundario outline -->
+<button class="w-full py-2 px-3 rounded-lg border border-brand-teal text-brand-teal font-label-md font-label-md flex items-center justify-center gap-1.5 hover:bg-brand-teal/5 active:scale-98 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="picture_as_pdf">picture_as_pdf</span>
+        Descargar resumen PDF
+      </button>
+</div>
+</div>
+<!-- BottomNavBar M3 (Semantic Shell JSON Anchor) -->
+<!-- Destinos: 'Simular' (activo), 'Inmobiliarias' (lock), 'Historial' (lock), 'Perfil' (lock) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-xs py-2 bg-surface-container-lowest shadow-lg">
+<!-- Destino 1: Simular (Activo por mapeo semántico de la pantalla de resultados) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 transition-transform duration-100 active:scale-95" href="#simular">
+<span class="material-symbols-outlined text-[20px]" data-icon="calculate">calculate</span>
+<span class="text-label-sm font-label-sm">Simular</span>
+</a>
+<!-- Destino 2: Inmobiliarias (Con icono candado lock pequeño indicando Requiere login) -->
+<button class="login-trigger-subtle flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:bg-surface-container transition-colors duration-150 active:scale-95" type="button">
+<div class="relative inline-flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="apartment">apartment</span>
+<span class="material-symbols-outlined absolute -top-1 -right-2 text-[12px] text-brand-amber font-bold" data-icon="lock">lock</span>
+</div>
+<span class="text-label-sm font-label-sm">Inmobiliarias</span>
+</button>
+<!-- Destino 3: Historial (Con icono lock) -->
+<button class="login-trigger-subtle flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:bg-surface-container transition-colors duration-150 active:scale-95" type="button">
+<div class="relative inline-flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="history">history</span>
+<span class="material-symbols-outlined absolute -top-1 -right-2 text-[12px] text-brand-amber font-bold" data-icon="lock">lock</span>
+</div>
+<span class="text-label-sm font-label-sm">Historial</span>
+</button>
+<!-- Destino 4: Perfil (Con icono lock) -->
+<button class="login-trigger-subtle flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:bg-surface-container transition-colors duration-150 active:scale-95" type="button">
+<div class="relative inline-flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+<span class="material-symbols-outlined absolute -top-1 -right-2 text-[12px] text-brand-amber font-bold" data-icon="lock">lock</span>
+</div>
+<span class="text-label-sm font-label-sm">Perfil</span>
+</button>
+</nav>
+<!-- Script ligero de micro-interacción para el modal de login de visitante -->
+<script>
+    const modal = document.getElementById('login-modal');
+    const triggerBtn = document.getElementById('trigger-login-btn');
+    const closeBtn = document.getElementById('close-login-btn');
+    const subtleTriggers = document.querySelectorAll('.login-trigger-subtle');
+
+    function openModal() {
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      if (modal) modal.classList.add('hidden');
+    }
+
+    if (triggerBtn) triggerBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    
+    subtleTriggers.forEach(btn => {
+      btn.addEventListener('click', openModal);
+    });
+
+    // Cerrar al pulsar fuera del cuadro de diálogo
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+  </script>
+</body></html>
