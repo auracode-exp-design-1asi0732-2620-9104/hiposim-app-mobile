@@ -34,6 +34,7 @@ data class ResultsSummaryUi(
     val irr: String,
     val composition: PaymentCompositionUi,
     val schedule: List<InstallmentUi>,
+    val detailedSchedule: List<ScheduleInstallmentUi>,
 )
 
 /** Share of the first installment going to interest, principal and insurance. The three add up to 100. */
@@ -51,5 +52,14 @@ data class InstallmentUi(
     val principal: String,
     val interest: String,
     val insurance: String,
+    val remainingBalance: String,
+)
+
+@Immutable
+data class ScheduleInstallmentUi(
+    val number: Int,
+    val initialBalance: String,
+    val principal: String,
+    val interest: String,
     val remainingBalance: String,
 )

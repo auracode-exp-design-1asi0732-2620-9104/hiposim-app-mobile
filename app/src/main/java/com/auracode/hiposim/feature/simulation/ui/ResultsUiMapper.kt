@@ -26,6 +26,7 @@ fun LoanSimulation.toResultsSummaryUi(): ResultsSummaryUi =
         irr = PeruFormat.percent(irr),
         composition = initialSchedule.first().toComposition(),
         schedule = initialSchedule.map { it.toUi() },
+        detailedSchedule = initialSchedule.toDetailedScheduleUi(netLoan),
     )
 
 private fun Installment.toUi() =
@@ -53,3 +54,20 @@ private fun BigDecimal.percentOf(total: BigDecimal): Int =
         .divide(total, MathContext.DECIMAL64)
         .setScale(0, RoundingMode.HALF_UP)
         .toInt()
+private fun List<Installment>.toDetailedScheduleUi(
+    initialBalance: BigDecimal,
+): List<ScheduleInstallmentUi> {
+    var currentBalance = initialBalance
+
+    return map { installment ->
+        ScheduleInstallmentUi(
+            number = installment.number,
+            initialBalance = PeruFormat.soles(currentBalance, CENTS),
+            principal = PeruFormat.soles(installment.principal, CENTS),
+            interest = PeruFormat.soles(installment.interest, CENTS),
+            remainingBalance = PeruFormat.soles(installment.remainingBalance, CENTS),
+        ).also {
+            currentBalance = installment.remainingBalance
+        }
+    }
+}
