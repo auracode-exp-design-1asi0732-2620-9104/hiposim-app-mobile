@@ -9,5 +9,8 @@ sealed interface Route {
     data object Results : Route
 
     @Serializable
+    data object Schedule : Route
+
+    @Serializable
     data object Register : Route
 }

@@ -73,6 +73,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ResultsScreen(
     onNavigateToRegister: () -> Unit,
+    onNavigateToSchedule: () -> Unit,
     viewModel: ResultsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +92,7 @@ fun ResultsScreen(
 
     ResultsContent(
         state = state,
+        onNavigateToSchedule = onNavigateToSchedule,
         snackbarHostState = snackbarHostState,
         onBack = { backDispatcher?.onBackPressed() },
         onSendQuote = viewModel::onSendQuoteClick,
@@ -125,6 +127,7 @@ private fun ResultsContent(
     state: ResultsUiState,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
+    onNavigateToSchedule: () -> Unit,
     onSendQuote: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
     onDownloadPdf: () -> Unit,
@@ -180,7 +183,10 @@ private fun ResultsContent(
             ) {
                 SubsidyBanner(summary)
                 SummaryCard(summary)
-                ScheduleSection(summary)
+                ScheduleSection(
+                    summary = summary,
+                    onViewFullSchedule = onNavigateToSchedule,
+                )
             }
         }
     }
@@ -382,7 +388,10 @@ private fun CompositionSection(composition: PaymentCompositionUi) {
 }
 
 @Composable
-private fun ScheduleSection(summary: ResultsSummaryUi) {
+private fun ScheduleSection(
+    summary: ResultsSummaryUi,
+    onViewFullSchedule: () -> Unit,
+) {
     val listState = rememberLazyListState()
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Row(
@@ -419,6 +428,11 @@ private fun ScheduleSection(summary: ResultsSummaryUi) {
                 InstallmentCard(installment, modifier = Modifier.width(260.dp))
             }
         }
+        OutlinedActionButton(
+            text = stringResource(R.string.schedule_view_full),
+            onClick = onViewFullSchedule,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

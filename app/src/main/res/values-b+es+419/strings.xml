@@ -38,6 +38,12 @@
   <string name="send_quote">Enviar cotización a inmobiliarias</string>
   <string name="send_quote_hint">(Desbloquea proyectos en tu rango)</string>
   <string name="download_pdf">Descargar resumen PDF</string>
+  <string name="schedule_detail_title">Cronograma de pagos</string>
+  <string name="schedule_detail_subtitle">Detalle de tus pagos mensuales</string>
+  <string name="schedule_detail_count">%1$d cuotas</string>
+  <string name="schedule_initial_balance">Saldo inicial</string>
+  <string name="schedule_final_balance">Saldo final</string>
+  <string name="schedule_view_full">Ver cronograma completo</string>
 
   <!-- Navigation -->
   <string name="nav_simulate">Simular</string>

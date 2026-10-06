@@ -38,6 +38,12 @@
   <string name="send_quote">Send quote to real estate agencies</string>
   <string name="send_quote_hint">(Unlocks projects in your range)</string>
   <string name="download_pdf">Download PDF summary</string>
+  <string name="schedule_detail_title">Payment schedule</string>
+  <string name="schedule_detail_subtitle">Detailed breakdown of your monthly payments</string>
+  <string name="schedule_detail_count">%1$d installments</string>
+  <string name="schedule_initial_balance">Initial balance</string>
+  <string name="schedule_final_balance">Final balance</string>
+  <string name="schedule_view_full">View full schedule</string>
 
   <!-- Navigation -->
   <string name="nav_simulate">Simulate</string>
