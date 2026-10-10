@@ -242,10 +242,10 @@ class RegisterViewModelTest {
     }
 
     @Test
-    fun phoneInput_keepsOnlyDigitsAndSpaces() {
+    fun phoneInput_keepsOnlyTheFirstNineDigits() {
         viewModel.onPhoneChange("9a8-7 6543219999")
 
-        assertEquals("987 6543219", state.form.phone)
+        assertEquals("987654321", state.form.phone)
     }
 
     @Test

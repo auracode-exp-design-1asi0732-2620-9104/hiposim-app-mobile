@@ -131,7 +131,10 @@
   <string name="field_phone">Celular</string>
   <string name="field_phone_hint">Para contacto inmobiliario</string>
   <string name="field_phone_prefix">+51</string>
-  <string name="field_phone_placeholder">987 654 321</string>
+  <string name="field_phone_placeholder">987654321</string>
+  <string name="field_phone_rule">9 dígitos, empieza con 9</string>
+  <string name="field_password_rule">Mínimo 8 caracteres, con una letra y un número</string>
+  <string name="error_password_weak">Incluye al menos una letra y un número</string>
   <string name="field_password">Contraseña</string>
   <string name="field_password_placeholder">Mínimo 8 caracteres</string>
   <string name="password_show">Mostrar contraseña</string>

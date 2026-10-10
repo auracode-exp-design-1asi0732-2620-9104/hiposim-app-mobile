@@ -87,7 +87,32 @@ class ValidateRegistrationFormUseCaseTest {
             RegistrationError.PasswordTooShort,
             errorOf(validForm.copy(password = "1234567"), RegistrationField.Password),
         )
-        assertTrue(validate(validForm.copy(password = "12345678")).isValid)
+        assertTrue(validate(validForm.copy(password = "abcde123")).isValid)
+    }
+
+    @Test
+    fun password_needsALetterAndANumber() {
+        assertEquals(
+            RegistrationError.PasswordTooWeak,
+            errorOf(validForm.copy(password = "12345678"), RegistrationField.Password),
+        )
+        assertEquals(
+            RegistrationError.PasswordTooWeak,
+            errorOf(validForm.copy(password = "abcdefgh"), RegistrationField.Password),
+        )
+        assertEquals(
+            RegistrationError.PasswordTooWeak,
+            errorOf(validForm.copy(password = "sdsda@!?"), RegistrationField.Password),
+        )
+        assertTrue(validate(validForm.copy(password = "Clave-2026")).isValid)
+    }
+
+    @Test
+    fun phone_cannotHaveMoreThanNineDigits() {
+        assertEquals(
+            RegistrationError.PhoneInvalid,
+            errorOf(validForm.copy(phone = "99999999999"), RegistrationField.Phone),
+        )
     }
 
     @Test
