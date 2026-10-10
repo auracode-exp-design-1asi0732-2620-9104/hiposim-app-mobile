@@ -1,0 +1,96 @@
+name: Distribute
+
+# Builds the signed release APK that talks to the deployed API and uploads it to Firebase App Distribution
+# every time develop changes. It needs the repository secrets listed in docs/firebase-app-distribution.md;
+# without them the job ends with a notice instead of failing.
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+concurrency:
+  group: distribute-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  API_BASE_URL: ${{ vars.HIPOSIM_API_BASE_URL || 'https://hiposim-api.onrender.com/' }}
+  FIREBASE_APP_ID: ${{ vars.FIREBASE_APP_ID || '1:494450254218:android:e3e54b438ce6dc18f7e873' }}
+  FIREBASE_GROUPS: ${{ vars.FIREBASE_GROUPS || 'equipo-hiposim' }}
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the distribution secrets
+        id: secrets
+        env:
+          KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$KEYSTORE" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && [ -n "$SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Distribution skipped: the signing or Firebase secrets are not configured. See docs/firebase-app-distribution.md."
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.secrets.outputs.ready == 'true'
+
+      - uses: actions/setup-java@v5
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+        if: steps.secrets.outputs.ready == 'true'
+
+      - name: Restore the signing keystore
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/signing"
+          echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/signing/release.jks"
+          {
+            echo "storeFile=release.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > "$RUNNER_TEMP/signing/keystore.properties"
+          echo "HIPOSIM_SIGNING_PROPERTIES=$RUNNER_TEMP/signing/keystore.properties" >> "$GITHUB_ENV"
+
+      - name: Build the signed release APK
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          ./gradlew assembleRelease \
+            "-Phiposim.useFakeApi=false" \
+            "-Phiposim.apiBaseUrl.release=$API_BASE_URL" \
+            "-Phiposim.versionCode=$((100 + GITHUB_RUN_NUMBER))"
+
+      - name: Upload to Firebase App Distribution
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-service-account.json"
+          APK=$(ls app/build/outputs/apk/release/*-api-release.apk)
+          npx --yes firebase-tools@15 appdistribution:distribute "$APK" \
+            --app "$FIREBASE_APP_ID" \
+            --groups "$FIREBASE_GROUPS" \
+            --release-notes "develop ${GITHUB_SHA::7}: $(git log -1 --pretty=%s)"
+
+      - name: Remove the secrets from the runner
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/signing" "$RUNNER_TEMP/firebase-service-account.json"

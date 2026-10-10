@@ -46,6 +46,9 @@ val signingProperties =
 
 val appVersionName = "0.1.0"
 
+// Every upload to Firebase App Distribution needs a higher versionCode. CI passes the workflow run number.
+val appVersionCode = providers.gradleProperty("hiposim.versionCode").getOrElse("1").toInt()
+
 // "demo" answers from memory and works without a server; "api" calls the API at API_BASE_URL.
 base {
     archivesName.set("hiposim-$appVersionName-${if (useFakeApi) "demo" else "api"}")
@@ -61,7 +64,7 @@ android {
         applicationId = "com.auracode.hiposim"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        versionCode = appVersionCode
         versionName = appVersionName
 
         testInstrumentationRunner = "com.auracode.hiposim.HiltTestRunner"
