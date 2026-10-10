@@ -47,10 +47,10 @@ La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFF
   ese Comprador. Como en la app se simula primero y la cuenta se crea después, al enviar se vuelve a calcular la
   misma simulación con la sesión iniciada (`SimulationRepository.recalculateCurrent`) y se envía ese
   `simulationId` nuevo. Las cifras no cambian.
-- **Inmobiliarias.** `GET /api/agencies` todavía no existe en el backend. La forma `[{id, name}]` es una propuesta
-  (`AgenciesService`), y mientras tanto la lista es la inmobiliaria demo del seed del backend. Esto lo controla
-  `USE_FAKE_AGENCIES` (propiedad `hiposim.useFakeAgencies`, por defecto `true`), aparte de `USE_FAKE_API`, para poder
-  enviar leads reales antes de que exista ese endpoint.
+- **Inmobiliarias.** `GET /api/agencies` responde `[{id, name}]` (`AgenciesService`). El endpoint está implementado
+  en la rama `feature/us21-agencies-endpoint` del backend y todavía no está en su `develop`, así que
+  `USE_FAKE_AGENCIES` (propiedad `hiposim.useFakeAgencies`, por defecto `true`) mantiene en memoria la inmobiliaria
+  demo del seed, aparte de `USE_FAKE_API`. Con `-Phiposim.useFakeAgencies=false` la lista viene de la API.
 - **Errores.** 404 (inmobiliaria o simulación inexistente), sin conexión y 5xx se muestran en la hoja y permiten
   reintentar. Un 401 o 403 cierra la sesión y pide iniciarla de nuevo.
 - **Con `USE_FAKE_API`** el envío solo simula el 201: no se guarda nada ni lo recibe ninguna inmobiliaria.
@@ -110,6 +110,27 @@ Capturas para el informe:
 
 El workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) corre ktlint, lint, pruebas unitarias y
 `assembleDebug` en cada push a `main` y `develop` y en cada pull request.
+
+### Prueba de punta a punta con la API real
+
+El 10 de octubre de 2026 se recorrió el flujo completo en el emulador (Pixel 10 Pro) contra la API local de
+`hiposim-backEnd` con PostgreSQL, sin servicios en memoria:
+
+```powershell
+.\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.useFakeAgencies=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5080/"
+```
+
+| Paso | Endpoint | Resultado | Captura |
+|---|---|---|---|
+| Simulación (S/ 280,000, inicial S/ 42,000, 20 años, con bono) | `POST /api/simulations` | Cuota S/ 1,909, TCEA 8.85%, bono S/ 18,200 | [formulario](docs/screenshots/e2e-01-formulario.png), [resultados](docs/screenshots/e2e-02-resultados.png) |
+| Cronograma completo | Ninguno (usa la simulación ya calculada) | 240 cuotas, de la primera a la última | [cronograma](docs/screenshots/e2e-03-cronograma.png) |
+| Registro del Comprador | `POST /api/auth/register` | 201, sesión iniciada | [hoja de cuenta](docs/screenshots/e2e-04-requiere-cuenta.png), [registro](docs/screenshots/e2e-05-registro.png), [sesión](docs/screenshots/e2e-06-registro-exitoso.png), [perfil](docs/screenshots/e2e-07-perfil.png) |
+| Inicio de sesión | `POST /api/auth/login` | 401 con mensaje genérico y luego 200 | [credenciales inválidas](docs/screenshots/e2e-08-login-credenciales-invalidas.png), [login](docs/screenshots/e2e-09-login.png) |
+| Envío a la inmobiliaria demo | `GET /api/agencies`, `POST /api/simulations` (recálculo con sesión), `POST /api/leads` | 201, lead en estado `New` | [hoja de envío](docs/screenshots/e2e-10-enviar-a-inmobiliaria.png), [confirmación](docs/screenshots/e2e-11-envio-exitoso.png) |
+
+El lead se comprobó del lado del Asesor: `GET /api/leads` con la cuenta de asesor del seed lo devuelve con la cuota
+de S/ 1,908.88 y la TCEA de 0.0885, y aparece en la bandeja de la aplicación web (`develop` de `hiposim-webApp`).
+Los datos del Comprador son de prueba.
 
 ## Conexión con la API
 
@@ -245,9 +266,9 @@ feat(auth): add contextual registration form (US13)
 | Historia | Alcance | Feature | Estado |
 |---|---|---|---|
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
-| US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho con la API en memoria, listo para la API real |
-| US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho con la API en memoria, listo para la API real |
-| US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho; la lista de inmobiliarias es provisional hasta que exista `GET /api/agencies` |
+| US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho y probado con la API real |
+| US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho y probado con la API real |
+| US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho y probado con la API real; `GET /api/agencies` está pendiente de merge en el backend |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
 | US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
 | US02 | Ver cronograma de pagos completo desde Resultados | `feature/simulation` | Hecho; usa el cronograma de la simulación ya calculada |
