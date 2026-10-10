@@ -6,6 +6,27 @@
   <string name="coming_soon">Disponible próximamente</string>
   <string name="loading">Cargando</string>
 
+  <!-- Simulation form -->
+  <string name="simulation_title">Simula tu crédito</string>
+  <string name="simulation_headline">Calcula tu cuota hipotecaria</string>
+  <string name="simulation_subtitle">No necesitas una cuenta. Ingresa el precio de la vivienda, tu cuota inicial y el plazo.</string>
+  <string name="currency_prefix">S/</string>
+  <string name="field_property_price">Precio de la vivienda</string>
+  <string name="field_property_price_placeholder">Ej. 280,000</string>
+  <string name="field_down_payment">Cuota inicial</string>
+  <string name="down_payment_hint">%1$s del precio de la vivienda (mínimo %2$d%%)</string>
+  <string name="years_short">%1$d años</string>
+  <string name="simulation_submit">Simular</string>
+  <string name="simulation_submitting">Simulando</string>
+  <string name="error_property_price_required">Ingresa el precio de la vivienda</string>
+  <string name="error_down_payment_required">Ingresa tu cuota inicial</string>
+  <string name="error_down_payment_too_low">La cuota inicial debe ser al menos %1$d%% del precio</string>
+  <string name="error_down_payment_too_high">La cuota inicial debe ser menor que el precio de la vivienda</string>
+  <string name="error_term_out_of_range">Elige un plazo entre 5 y 30 años</string>
+  <string name="error_rejected_by_server">El servidor no aceptó este valor</string>
+  <string name="error_no_connection">No pudimos conectar con HipoSim. Revisa tu conexión e inténtalo de nuevo.</string>
+  <string name="error_server">Algo salió mal de nuestro lado. Inténtalo de nuevo en un momento.</string>
+
   <!-- Results -->
   <string name="results_title">Resultados del Crédito</string>
   <string name="subsidy_banner_title">Subsidio estatal aplicado</string>
@@ -22,7 +43,6 @@
   <string name="term_value">%1$d años (%2$d meses)</string>
   <string name="npv_label">VAN</string>
   <string name="irr_label">TIR</string>
-  <string name="example_value">Valor de ejemplo</string>
   <string name="monthly_insurance_label">Seguro mensual</string>
   <string name="monthly_insurance_detail">Desgravamen + inmueble</string>
   <string name="composition_title">Composición de la primera cuota</string>
