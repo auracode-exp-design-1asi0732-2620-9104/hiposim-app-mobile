@@ -7,8 +7,10 @@ import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
 import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
+import com.auracode.hiposim.feature.simulation.domain.SimulationParams
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.contractExampleParams
 import com.auracode.hiposim.testing.fakeBackedSimulationRepository
 import com.auracode.hiposim.testing.simulationRepositoryWithContractExample
 import kotlinx.coroutines.runBlocking
@@ -20,6 +22,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.math.BigDecimal
 
 class ResultsViewModelTest {
     @get:Rule
@@ -74,12 +77,74 @@ class ResultsViewModelTest {
     }
 
     @Test
-    fun withoutASimulation_keepsLoading() {
+    fun init_showsTheRealIndicatorsOfTheContractExample() {
+        val state = viewModel.uiState.value
+        val summary = requireNotNull(state.summary)
+
+        assertFalse(state.isSimulationMissing)
+        assertEquals("8.50%", summary.tcea)
+        assertEquals("8.50%", summary.irr)
+        assertEquals("-S/ 20,792", summary.npv)
+        assertEquals("10.00%", summary.npvDiscountRate)
+        assertEquals("S/ 447,358", summary.totalPaid)
+        assertEquals("S/ 227,558", summary.totalInterest)
+        assertEquals("S/ 0.00", summary.monthlyInsurance)
+    }
+
+    @Test
+    fun outOfRangeExample_showsItsIndicatorsAndTheBonusAsNotEligible() =
+        runTest {
+            val repository = fakeBackedSimulationRepository()
+            repository.simulate(
+                SimulationParams(
+                    propertyPrice = BigDecimal("450000"),
+                    downPayment = BigDecimal("90000"),
+                    termYears = 20,
+                    applyGoodPayerBonus = true,
+                ),
+            )
+
+            val summary = requireNotNull(viewModelWith(repository).uiState.value.summary)
+
+            assertEquals(BonusStatus.NotEligible, summary.bonusStatus)
+            assertEquals("S/ 360,000", summary.netLoan)
+            assertEquals("S/ 3,053", summary.monthlyPayment)
+            assertEquals("8.50%", summary.tcea)
+            assertEquals("8.50%", summary.irr)
+            assertEquals("-S/ 34,054", summary.npv)
+        }
+
+    @Test
+    fun withoutASimulation_showsTheMissingStateInsteadOfLoadingForever() {
         val state = viewModelWith(fakeBackedSimulationRepository()).uiState.value
 
-        assertTrue(state.isLoading)
+        assertFalse(state.isLoading)
+        assertTrue(state.isSimulationMissing)
         assertNull(state.summary)
     }
+
+    @Test
+    fun aNewSimulation_replacesTheOneOnScreen() =
+        runTest {
+            val repository = fakeBackedSimulationRepository()
+            val results = viewModelWith(repository)
+            assertTrue(results.uiState.value.isSimulationMissing)
+
+            repository.simulate(contractExampleParams)
+            assertEquals(
+                "S/ 1,864",
+                results.uiState.value.summary
+                    ?.monthlyPayment,
+            )
+            assertFalse(results.uiState.value.isSimulationMissing)
+
+            repository.simulate(contractExampleParams.copy(termYears = 10))
+            assertEquals(
+                120,
+                results.uiState.value.summary
+                    ?.termMonths,
+            )
+        }
 
     @Test
     fun init_formatsScheduleRows() {

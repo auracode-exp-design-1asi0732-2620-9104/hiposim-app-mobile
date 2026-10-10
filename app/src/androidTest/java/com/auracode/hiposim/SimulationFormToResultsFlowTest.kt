@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.test.espresso.Espresso
 import com.auracode.hiposim.core.util.PeruFormat
 import com.auracode.hiposim.feature.simulation.domain.SimulationConfig
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -36,6 +37,9 @@ class SimulationFormToResultsFlowTest {
     private fun text(id: Int) = composeRule.activity.getString(id)
 
     private fun submit() {
+        // Typing leaves the keyboard open; it covers the button and scrolls the form.
+        Espresso.closeSoftKeyboard()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText(text(R.string.simulation_submit)).performScrollTo().performClick()
     }
 
@@ -73,8 +77,9 @@ class SimulationFormToResultsFlowTest {
         val minimum = PeruFormat.percent(SimulationConfig.MIN_DOWN_PAYMENT_RATE, fractionDigits = 0)
         composeRule
             .onNodeWithText(composeRule.activity.getString(R.string.error_down_payment_minimum, minimum))
+            .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText(text(R.string.simulation_form_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.simulation_form_title)).performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -84,6 +89,22 @@ class SimulationFormToResultsFlowTest {
         waitForResults()
 
         composeRule.onNodeWithText(text(R.string.subsidy_banner_title)).assertIsDisplayed()
+    }
+
+    /** US04: the indicators of the contract example (S/ 280,000, 15%, 20 years, bonus applied). */
+    @Test
+    fun results_showTheRealIndicators_andExplainTheNegativeNpv() {
+        composeRule.onNodeWithText(text(R.string.bonus_checkbox_title)).performScrollTo().performClick()
+        submit()
+        waitForResults()
+
+        composeRule.onNodeWithText("S/ 1,864").assertIsDisplayed()
+        composeRule
+            .onNodeWithContentDescription(composeRule.activity.getString(R.string.tcea_description, "8.50%"))
+            .assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.npv_label)).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("-S/ 20,792").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.npv_explanation)).performScrollTo().assertIsDisplayed()
     }
 
     @Test

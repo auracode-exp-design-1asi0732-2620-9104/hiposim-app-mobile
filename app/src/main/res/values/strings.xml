@@ -43,7 +43,7 @@
   <string name="bonus_not_eligible_body">This home price is outside the bonus range, so the simulation was calculated without it.</string>
   <string name="monthly_payment_label">Estimated monthly payment</string>
   <string name="per_month">/ month</string>
-  <string name="payment_includes_insurance">Includes life and property insurance</string>
+  <string name="payment_excludes_insurance">Principal and interest, without insurance</string>
   <string name="tcea_label">TCEA</string>
   <string name="tcea_description">TCEA %1$s, annual effective total cost rate</string>
   <string name="property_price_label">Home price</string>
@@ -51,9 +51,16 @@
   <string name="net_loan_label">Net loan</string>
   <string name="term_label">Term</string>
   <string name="term_value">%1$d years (%2$d months)</string>
-  <string name="npv_label">NPV</string>
+  <string name="npv_label">NPV (lender\'s side)</string>
+  <string name="npv_detail">Discounted at %1$s per year</string>
+  <string name="npv_explanation">The NPV is calculated from the side of the institution that lends the money. A negative value is not a loss for you: it means the loan rate is lower than the discount rate used.</string>
   <string name="irr_label">IRR</string>
-  <string name="example_value">Example value</string>
+  <string name="irr_detail">Annual</string>
+  <string name="total_interest_label">Total interest</string>
+  <string name="total_paid_label">Total to pay</string>
+  <string name="results_missing_title">We could not find your simulation</string>
+  <string name="results_missing_body">It may have been lost when the app was closed. Run it again to see your results.</string>
+  <string name="results_new_simulation">Simulate again</string>
   <string name="monthly_insurance_label">Monthly insurance</string>
   <string name="monthly_insurance_detail">Life + property</string>
   <string name="composition_title">First installment breakdown</string>

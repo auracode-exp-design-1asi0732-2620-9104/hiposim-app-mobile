@@ -6,7 +6,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-/** Formatting for Peruvian soles and percentages (es-PE): `S/ 1,909`, `S/ 1,803.20`, `8.85%`. */
+/** Formatting for Peruvian soles and percentages (es-PE): `S/ 1,909`, `S/ 1,803.20`, `-S/ 20,792`, `8.85%`. */
 object PeruFormat {
     private const val PERCENT_FACTOR = 100
 
@@ -20,7 +20,12 @@ object PeruFormat {
     fun soles(
         amount: BigDecimal,
         fractionDigits: Int = 0,
-    ): String = "S/ ${decimal(amount, fractionDigits)}"
+    ): String {
+        val formatted = decimal(amount.abs(), fractionDigits)
+        // The sign goes before the currency symbol, and a value that rounds to zero has none.
+        val isNegative = amount.signum() < 0 && formatted.any { it in '1'..'9' }
+        return if (isNegative) "-S/ $formatted" else "S/ $formatted"
+    }
 
     /** [fraction] is a rate expressed as a fraction, so `0.0885` becomes `8.85%`. */
     fun percent(

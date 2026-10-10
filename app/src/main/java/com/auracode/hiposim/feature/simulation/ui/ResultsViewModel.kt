@@ -30,8 +30,13 @@ class ResultsViewModel
         init {
             viewModelScope.launch {
                 observeCurrentSimulation().collect { simulation ->
-                    val summary = simulation?.toResultsSummaryUi()
-                    _uiState.update { it.copy(isLoading = summary == null, summary = summary) }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            summary = simulation?.toResultsSummaryUi(),
+                            isSimulationMissing = simulation == null,
+                        )
+                    }
                 }
             }
             viewModelScope.launch {
