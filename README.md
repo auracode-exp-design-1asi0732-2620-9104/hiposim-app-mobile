@@ -47,10 +47,9 @@ La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFF
   ese Comprador. Como en la app se simula primero y la cuenta se crea después, al enviar se vuelve a calcular la
   misma simulación con la sesión iniciada (`SimulationRepository.recalculateCurrent`) y se envía ese
   `simulationId` nuevo. Las cifras no cambian.
-- **Inmobiliarias.** `GET /api/agencies` responde `[{id, name}]` (`AgenciesService`). El endpoint está implementado
-  en la rama `feature/us21-agencies-endpoint` del backend y todavía no está en su `develop`, así que
-  `USE_FAKE_AGENCIES` (propiedad `hiposim.useFakeAgencies`, por defecto `true`) mantiene en memoria la inmobiliaria
-  demo del seed, aparte de `USE_FAKE_API`. Con `-Phiposim.useFakeAgencies=false` la lista viene de la API.
+- **Inmobiliarias.** `GET /api/agencies` responde `[{id, name}]` (`AgenciesService`) y ya está en `develop` del
+  backend. Contra un backend anterior a ese endpoint, `-Phiposim.useFakeAgencies=true` (`USE_FAKE_AGENCIES`, por
+  defecto `false`) mantiene en memoria la inmobiliaria demo del seed aunque el resto de la app use la API.
 - **Errores.** 404 (inmobiliaria o simulación inexistente), sin conexión y 5xx se muestran en la hoja y permiten
   reintentar. Un 401 o 403 cierra la sesión y pide iniciarla de nuevo.
 - **Con `USE_FAKE_API`** el envío solo simula el 201: no se guarda nada ni lo recibe ninguna inmobiliaria.
@@ -131,7 +130,7 @@ El 10 de octubre de 2026 se recorrió el flujo completo en el emulador (Pixel 10
 `hiposim-backEnd` con PostgreSQL, sin servicios en memoria:
 
 ```powershell
-.\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.useFakeAgencies=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5080/"
+.\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5080/"
 ```
 
 | Paso | Endpoint | Resultado | Captura |
@@ -156,7 +155,7 @@ El contrato es `docs/api-contract/openapi.v0.yaml` del repo `hiposim-backEnd` (v
 | URL base en debug | `API_BASE_URL` | `http://10.0.2.2:5000/` | `hiposim.apiBaseUrl.debug` |
 | URL base en release | `API_BASE_URL` | `https://api.hiposim.invalid/` (marcador) | `hiposim.apiBaseUrl.release` |
 | Implementación falsa o real | `USE_FAKE_API` | `true` | `hiposim.useFakeApi` |
-| Lista de inmobiliarias en memoria | `USE_FAKE_AGENCIES` | `true` | `hiposim.useFakeAgencies` |
+| Lista de inmobiliarias en memoria | `USE_FAKE_AGENCIES` | `false` | `hiposim.useFakeAgencies` |
 
 Las propiedades se definen en `~/.gradle/gradle.properties` o en la línea de comandos, sin tocar el código. La URL
 debe terminar en `/`. Para probar contra la API real en el emulador:
@@ -282,7 +281,7 @@ feat(auth): add contextual registration form (US13)
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
 | US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho y probado con la API real |
 | US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho y probado con la API real |
-| US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho y probado con la API real; `GET /api/agencies` está pendiente de merge en el backend |
+| US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho y probado con la API real |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
 | US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
 | US02 | Ver cronograma de pagos completo desde Resultados | `feature/simulation` | Hecho; usa el cronograma de la simulación ya calculada |

@@ -10,7 +10,7 @@ El nombre del archivo indica de dónde salen los datos:
 | APK | Cuándo usarlo | Propiedades de Gradle |
 |---|---|---|
 | `hiposim-<versión>-demo-release.apk` | Mientras no exista una URL del backend desplegado. Responde desde memoria, funciona sin servidor y sin red. | Ninguna (`hiposim.useFakeApi` es `true` por defecto) |
-| `hiposim-<versión>-api-release.apk` | Cuando el backend esté desplegado con HTTPS. | `-Phiposim.useFakeApi=false`, `-Phiposim.useFakeAgencies=false` y `-Phiposim.apiBaseUrl.release=https://<host>/` |
+| `hiposim-<versión>-api-release.apk` | Cuando el backend esté desplegado con HTTPS. | `-Phiposim.useFakeApi=false` y `-Phiposim.apiBaseUrl.release=https://<host>/` |
 
 Los dos quedan en `app/build/outputs/apk/release/`. Tienen el mismo `applicationId` y la misma versión, así que en un
 teléfono se instala uno u otro, no los dos a la vez.
@@ -81,7 +81,7 @@ APK de demostración, sin servidor:
 APK conectado a la API desplegada:
 
 ```powershell
-.\gradlew assembleRelease "-Phiposim.useFakeApi=false" "-Phiposim.useFakeAgencies=false" "-Phiposim.apiBaseUrl.release=https://<host>/"
+.\gradlew assembleRelease "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.release=https://<host>/"
 ```
 
 Comprobar la firma:

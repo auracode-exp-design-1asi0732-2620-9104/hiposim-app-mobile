@@ -19,9 +19,9 @@ val releaseApiBaseUrl = providers.gradleProperty("hiposim.apiBaseUrl.release").g
 // Stays true by default until the API host (hiposim-platform) exists.
 val useFakeApi = providers.gradleProperty("hiposim.useFakeApi").getOrElse("true").toBoolean()
 
-// GET /api/agencies does not exist in the API yet. While this is true the list of agencies is the demo agency
-// of the backend seed, even when the rest of the app talks to the real API. Set it to false when the endpoint ships.
-val useFakeAgencies = providers.gradleProperty("hiposim.useFakeAgencies").getOrElse("true").toBoolean()
+// true: the list of agencies is the demo agency of the backend seed, kept in memory, even when the rest of the app
+// talks to the real API. Only needed against a backend older than GET /api/agencies.
+val useFakeAgencies = providers.gradleProperty("hiposim.useFakeAgencies").getOrElse("false").toBoolean()
 
 // Release signing. The keystore and its passwords live OUTSIDE the repository: a properties file with storeFile,
 // storePassword, keyAlias and keyPassword, located by -Phiposim.signing.propertiesFile=<path> (for example in
