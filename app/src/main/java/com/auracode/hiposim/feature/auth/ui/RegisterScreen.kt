@@ -50,8 +50,10 @@ import com.auracode.hiposim.core.designsystem.component.ConsentCheckbox
 import com.auracode.hiposim.core.designsystem.component.ErrorBanner
 import com.auracode.hiposim.core.designsystem.component.HipoSimCard
 import com.auracode.hiposim.core.designsystem.component.HipoSimTextField
+import com.auracode.hiposim.core.designsystem.component.LegalLink
 import com.auracode.hiposim.core.designsystem.component.PrimaryButton
 import com.auracode.hiposim.core.designsystem.theme.Spacing
+import com.auracode.hiposim.core.legal.LegalLinks
 import com.auracode.hiposim.feature.auth.domain.RegistrationError
 import com.auracode.hiposim.feature.auth.domain.RegistrationField
 
@@ -330,11 +332,22 @@ private fun RegistrationForm(
             onCheckedChange = onTermsChange,
             error = fieldError(state, RegistrationField.Terms),
         )
+        // The checkbox row toggles the acceptance, so the documents are separate links right below it.
+        LegalLink(
+            text = stringResource(R.string.legal_terms_read),
+            description = stringResource(R.string.legal_terms_description),
+            url = LegalLinks.termsUrl(),
+        )
         ConsentCheckbox(
             text = stringResource(R.string.consent_text),
             checked = form.consentAccepted,
             onCheckedChange = onConsentChange,
             error = fieldError(state, RegistrationField.Consent),
+        )
+        LegalLink(
+            text = stringResource(R.string.legal_privacy_read),
+            description = stringResource(R.string.legal_privacy_description),
+            url = LegalLinks.privacyUrl(),
         )
 
         state.failure?.let { ErrorBanner(stringResource(it.messageRes())) }

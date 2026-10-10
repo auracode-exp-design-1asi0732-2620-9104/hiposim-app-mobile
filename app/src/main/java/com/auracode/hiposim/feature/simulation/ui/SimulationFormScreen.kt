@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.auracode.hiposim.R
 import com.auracode.hiposim.core.designsystem.component.ErrorBanner
 import com.auracode.hiposim.core.designsystem.component.HipoSimTextField
+import com.auracode.hiposim.core.designsystem.component.LegalFooter
 import com.auracode.hiposim.core.designsystem.component.PrimaryButton
 import com.auracode.hiposim.core.designsystem.component.ThousandsSeparatorTransformation
 import com.auracode.hiposim.core.designsystem.theme.Spacing
@@ -168,6 +169,8 @@ private fun SimulationFormContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            LegalFooter()
         }
     }
 }

@@ -140,6 +140,7 @@ El 10 de octubre de 2026 se recorrió el flujo completo en el emulador (Pixel 10
 | Registro del Comprador | `POST /api/auth/register` | 201, sesión iniciada | [hoja de cuenta](docs/screenshots/e2e-04-requiere-cuenta.png), [registro](docs/screenshots/e2e-05-registro.png), [sesión](docs/screenshots/e2e-06-registro-exitoso.png), [perfil](docs/screenshots/e2e-07-perfil.png) |
 | Inicio de sesión | `POST /api/auth/login` | 401 con mensaje genérico y luego 200 | [credenciales inválidas](docs/screenshots/e2e-08-login-credenciales-invalidas.png), [login](docs/screenshots/e2e-09-login.png) |
 | Envío a la inmobiliaria demo | `GET /api/agencies`, `POST /api/simulations` (recálculo con sesión), `POST /api/leads` | 201, lead en estado `New` | [hoja de envío](docs/screenshots/e2e-10-enviar-a-inmobiliaria.png), [confirmación](docs/screenshots/e2e-11-envio-exitoso.png) |
+| Términos y Privacidad desde el pie (US17) | Ninguno (abre el Landing en el navegador) | Pie con ambos enlaces en el formulario, en Resultados y en la hoja de cuenta; enlaces también bajo las casillas del registro | [pie](docs/screenshots/e2e-12-terminos-pie.png) |
 
 El lead se comprobó del lado del Asesor: `GET /api/leads` con la cuenta de asesor del seed lo devuelve con la cuota
 de S/ 1,908.88 y la TCEA de 0.0885, y aparece en la bandeja de la aplicación web (`develop` de `hiposim-webApp`).
@@ -156,6 +157,7 @@ El contrato es `docs/api-contract/openapi.v0.yaml` del repo `hiposim-backEnd` (v
 | URL base en release | `API_BASE_URL` | `https://api.hiposim.invalid/` (marcador) | `hiposim.apiBaseUrl.release` |
 | Implementación falsa o real | `USE_FAKE_API` | `true` | `hiposim.useFakeApi` |
 | Lista de inmobiliarias en memoria | `USE_FAKE_AGENCIES` | `false` | `hiposim.useFakeAgencies` |
+| URL del Landing (Términos y Privacidad) | `LANDING_BASE_URL` | Landing publicado en GitHub Pages | `hiposim.landingBaseUrl` |
 
 Las propiedades se definen en `~/.gradle/gradle.properties` o en la línea de comandos, sin tocar el código. La URL
 debe terminar en `/`. Para probar contra la API real en el emulador:
@@ -282,6 +284,7 @@ feat(auth): add contextual registration form (US13)
 | US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho y probado con la API real |
 | US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho y probado con la API real |
 | US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho y probado con la API real |
+| US17 | Términos y Condiciones y Política de Privacidad accesibles desde el pie de la aplicación | `core/legal`, `core/designsystem` | Hecho; abren las secciones del Landing (`hiposim.landingBaseUrl`) |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
 | US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
 | US02 | Ver cronograma de pagos completo desde Resultados | `feature/simulation` | Hecho; usa el cronograma de la simulación ya calculada |

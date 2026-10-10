@@ -15,6 +15,12 @@ val debugApiBaseUrl = providers.gradleProperty("hiposim.apiBaseUrl.debug").getOr
 val releaseApiBaseUrlPlaceholder = "https://api.hiposim.invalid/"
 val releaseApiBaseUrl = providers.gradleProperty("hiposim.apiBaseUrl.release").getOrElse(releaseApiBaseUrlPlaceholder)
 
+// Published Landing Page: the Terms and Conditions and the Privacy Policy live there (US17).
+val landingBaseUrl =
+    providers
+        .gradleProperty("hiposim.landingBaseUrl")
+        .getOrElse("https://auracode-exp-design-1asi0732-2620-9104.github.io/hiposim-LandingPage/")
+
 // true: repositories answer with in-memory fakes shaped like the contract. false: they call the API.
 // Stays true by default until the API host (hiposim-platform) exists.
 val useFakeApi = providers.gradleProperty("hiposim.useFakeApi").getOrElse("true").toBoolean()
@@ -62,6 +68,7 @@ android {
 
         buildConfigField("boolean", "USE_FAKE_API", useFakeApi.toString())
         buildConfigField("boolean", "USE_FAKE_AGENCIES", useFakeAgencies.toString())
+        buildConfigField("String", "LANDING_BASE_URL", "\"$landingBaseUrl\"")
     }
 
     signingConfigs {

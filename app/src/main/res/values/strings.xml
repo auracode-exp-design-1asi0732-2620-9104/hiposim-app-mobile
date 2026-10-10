@@ -158,4 +158,10 @@
   <string name="error_password_required">Enter your password</string>
   <string name="error_invalid_credentials">The email or the password is incorrect.</string>
   <string name="error_not_a_buyer">This account belongs to a real estate advisor. Use the web app for advisors.</string>
+  <string name="legal_terms">Terms and Conditions</string>
+  <string name="legal_privacy">Privacy Policy</string>
+  <string name="legal_terms_read">Read the Terms and Conditions</string>
+  <string name="legal_privacy_read">Read the Privacy Policy</string>
+  <string name="legal_terms_description">Terms and Conditions, opens in the browser</string>
+  <string name="legal_privacy_description">Privacy Policy, opens in the browser</string>
 </resources>
