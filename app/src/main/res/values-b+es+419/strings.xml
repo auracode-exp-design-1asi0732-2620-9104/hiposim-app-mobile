@@ -6,10 +6,41 @@
   <string name="coming_soon">Disponible próximamente</string>
   <string name="loading">Cargando</string>
 
+  <!-- Simulation form -->
+  <string name="simulation_form_title">Simula tu crédito hipotecario</string>
+  <string name="simulation_form_subtitle">Ingresa los datos de la vivienda que quieres. No necesitas una cuenta.</string>
+  <string name="currency_prefix">S/\u0020</string>
+  <string name="field_property_price">Valor de la vivienda</string>
+  <string name="field_property_price_hint">Entre %1$s y %2$s</string>
+  <string name="field_down_payment">Cuota inicial</string>
+  <string name="field_down_payment_hint">%1$s del valor de la vivienda (mínimo %2$s)</string>
+  <string name="field_down_payment_hint_minimum">Mínimo %1$s del valor de la vivienda</string>
+  <string name="field_term_years">Plazo</string>
+  <string name="field_term_suffix">años</string>
+  <string name="field_term_hint">De %1$d a %2$d años</string>
+  <string name="bonus_checkbox_title">Aplicar el Bono del Buen Pagador</string>
+  <string name="bonus_checkbox_body">Subsidio estatal para viviendas dentro de un rango de precios. Si tu vivienda no califica, la simulación se calcula sin el bono.</string>
+  <string name="simulation_rate_note">Tasa de referencia: TEA de %1$s. Cada entidad financiera define la suya.</string>
+  <string name="simulation_submit">Simular</string>
+  <string name="simulation_submitting">Calculando</string>
+  <string name="error_property_price_required">Ingresa el valor de la vivienda</string>
+  <string name="error_property_price_range">Ingresa un valor entre %1$s y %2$s</string>
+  <string name="error_down_payment_required">Ingresa la cuota inicial</string>
+  <string name="error_down_payment_minimum">La cuota inicial debe ser al menos el %1$s del valor de la vivienda</string>
+  <string name="error_down_payment_too_high">La cuota inicial debe ser menor que el valor de la vivienda</string>
+  <string name="error_term_required">Ingresa el plazo en años</string>
+  <string name="error_term_range">Ingresa un plazo entre %1$d y %2$d años</string>
+  <string name="error_no_connection">No pudimos conectarnos. Revisa tu conexión a internet e inténtalo de nuevo.</string>
+  <string name="error_service_unavailable">El servicio no está disponible en este momento. Inténtalo de nuevo en unos minutos.</string>
+  <string name="error_request_rejected">No pudimos calcular la simulación con estos valores. Revísalos e inténtalo de nuevo.</string>
+  <string name="error_unexpected">Ocurrió un problema. Inténtalo de nuevo.</string>
+
   <!-- Results -->
   <string name="results_title">Resultados del Crédito</string>
   <string name="subsidy_banner_title">Subsidio estatal aplicado</string>
   <string name="subsidy_banner_body">Bono del Buen Pagador: %1$s descontados</string>
+  <string name="bonus_not_eligible_title">Bono del Buen Pagador no aplicado</string>
+  <string name="bonus_not_eligible_body">El valor de esta vivienda está fuera del rango del bono, por eso la simulación se calculó sin él.</string>
   <string name="monthly_payment_label">Cuota mensual estimada</string>
   <string name="per_month">/ mes</string>
   <string name="payment_includes_insurance">Incluye seguros de desgravamen e inmueble</string>

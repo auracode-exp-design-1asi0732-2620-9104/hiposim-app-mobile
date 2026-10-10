@@ -2,6 +2,7 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.compose.runtime.Immutable
 import com.auracode.hiposim.feature.auth.ui.AccountUi
+import com.auracode.hiposim.feature.simulation.domain.BonusStatus
 
 /** Everything the Results screen draws. Money and rates are already formatted (es-PE). */
 @Immutable
@@ -23,6 +24,7 @@ data class ResultsSummaryUi(
     val propertyPrice: String,
     val downPayment: String,
     val downPaymentPercent: String,
+    val bonusStatus: BonusStatus,
     val goodPayerBonus: String,
     val netLoan: String,
     val termYears: Int,

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.auracode.hiposim.feature.auth.ui.RegisterScreen
 import com.auracode.hiposim.feature.simulation.ui.ResultsScreen
+import com.auracode.hiposim.feature.simulation.ui.SimulationFormScreen
 
 @Composable
 fun HipoSimNavHost(
@@ -15,9 +16,14 @@ fun HipoSimNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Route.Results,
+        startDestination = Route.SimulationForm,
         modifier = modifier,
     ) {
+        composable<Route.SimulationForm> {
+            SimulationFormScreen(
+                onSimulated = { navController.navigate(Route.Results) },
+            )
+        }
         composable<Route.Results> {
             ResultsScreen(
                 onNavigateToRegister = { navController.navigate(Route.Register) },

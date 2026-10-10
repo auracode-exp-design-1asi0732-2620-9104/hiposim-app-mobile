@@ -10,11 +10,15 @@ import java.math.RoundingMode
 private const val CENTS = 2
 private const val PERCENT = 100
 
+/** Rows shown in the "initial schedule" strip. The full schedule belongs to its own screen (US02). */
+private const val INITIAL_SCHEDULE_ROWS = 4
+
 fun LoanSimulation.toResultsSummaryUi(): ResultsSummaryUi =
     ResultsSummaryUi(
         propertyPrice = PeruFormat.soles(propertyPrice),
         downPayment = PeruFormat.soles(downPayment),
         downPaymentPercent = PeruFormat.percent(downPaymentRate, fractionDigits = 0),
+        bonusStatus = bonusStatus,
         goodPayerBonus = PeruFormat.soles(goodPayerBonus),
         netLoan = PeruFormat.soles(netLoan),
         termYears = termYears,
@@ -24,8 +28,8 @@ fun LoanSimulation.toResultsSummaryUi(): ResultsSummaryUi =
         tcea = PeruFormat.percent(tcea),
         npv = PeruFormat.soles(npv),
         irr = PeruFormat.percent(irr),
-        composition = initialSchedule.first().toComposition(),
-        schedule = initialSchedule.map { it.toUi() },
+        composition = schedule.firstOrNull().toComposition(),
+        schedule = schedule.take(INITIAL_SCHEDULE_ROWS).map { it.toUi() },
     )
 
 private fun Installment.toUi() =
@@ -38,7 +42,9 @@ private fun Installment.toUi() =
         remainingBalance = PeruFormat.soles(remainingBalance, CENTS),
     )
 
-private fun Installment.toComposition(): PaymentCompositionUi {
+/** Shares of the total payment of the month. All zero when there is nothing to split. */
+private fun Installment?.toComposition(): PaymentCompositionUi {
+    if (this == null || payment.signum() <= 0) return PaymentCompositionUi(0, 0, 0)
     val interestPercent = interest.percentOf(payment)
     val insurancePercent = insurance.percentOf(payment)
     return PaymentCompositionUi(

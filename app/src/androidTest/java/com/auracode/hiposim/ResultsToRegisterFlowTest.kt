@@ -28,6 +28,9 @@ class ResultsToRegisterFlowTest {
     @Before
     fun setUp() {
         hiltRule.inject()
+        // The app starts on the simulation form: Results needs a simulation first.
+        composeRule.onNodeWithText(text(R.string.simulation_submit)).performScrollTo().performClick()
+        composeRule.waitUntilAtLeastOneExists(hasText(text(R.string.results_title)), RESULTS_TIMEOUT_MILLIS)
     }
 
     private fun text(id: Int) = composeRule.activity.getString(id)
@@ -52,7 +55,7 @@ class ResultsToRegisterFlowTest {
 
     @Test
     fun sendQuote_opensSheet_continueWithEmail_showsRegister_backReturnsToResults() {
-        composeRule.onNodeWithText("S/ 1,909").assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.results_title)).assertIsDisplayed()
 
         composeRule.onNodeWithText(text(R.string.send_quote)).performClick()
         composeRule.onNodeWithText(text(R.string.unlock_sheet_title)).assertIsDisplayed()
@@ -78,7 +81,8 @@ class ResultsToRegisterFlowTest {
         fillRegistrationForm(acceptConsent = false)
 
         composeRule.onNodeWithText(text(R.string.error_consent_required)).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText(text(R.string.register_headline)).assertIsDisplayed()
+        // The keyboard may have pushed the headline out of view.
+        composeRule.onNodeWithText(text(R.string.register_headline)).performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -101,5 +105,9 @@ class ResultsToRegisterFlowTest {
         composeRule.onNodeWithText(text(R.string.account_sign_out)).performClick()
 
         composeRule.onNodeWithContentDescription(lockedDescription).assertIsDisplayed()
+    }
+
+    private companion object {
+        const val RESULTS_TIMEOUT_MILLIS = 5_000L
     }
 }
