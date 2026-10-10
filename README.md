@@ -100,6 +100,20 @@ Capturas para el informe:
 & "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" exec-out screencap -p > captura.png
 ```
 
+## Release y distribución
+
+```powershell
+.\gradlew assembleRelease
+```
+
+Genera `app/build/outputs/apk/release/hiposim-<versión>-demo-release.apk`, que responde desde memoria y funciona sin
+servidor. Con `-Phiposim.useFakeApi=false` y `-Phiposim.apiBaseUrl.release=https://<host>/` genera
+`hiposim-<versión>-api-release.apk`, conectado a la API desplegada. La firma usa un keystore local que no está en el
+repositorio; sin él, el APK sale sin firmar.
+
+La firma, los dos APK y los comandos de Firebase App Distribution están en
+[docs/firebase-app-distribution.md](docs/firebase-app-distribution.md).
+
 ## Pruebas y calidad
 
 ```powershell
