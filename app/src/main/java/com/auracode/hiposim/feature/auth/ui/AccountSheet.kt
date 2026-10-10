@@ -16,6 +16,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.auracode.hiposim.R
+import com.auracode.hiposim.core.designsystem.component.LegalFooter
 import com.auracode.hiposim.core.designsystem.component.OutlinedActionButton
 import com.auracode.hiposim.core.designsystem.theme.Spacing
 
@@ -71,6 +72,7 @@ fun AccountSheet(
                 onClick = onSignOut,
                 modifier = Modifier.fillMaxWidth(),
             )
+            LegalFooter()
         }
     }
 }
