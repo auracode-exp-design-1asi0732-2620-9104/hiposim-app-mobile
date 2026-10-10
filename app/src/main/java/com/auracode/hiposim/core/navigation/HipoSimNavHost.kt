@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.auracode.hiposim.feature.auth.ui.LoginScreen
 import com.auracode.hiposim.feature.auth.ui.RegisterScreen
 import com.auracode.hiposim.feature.simulation.ui.ResultsScreen
+import com.auracode.hiposim.feature.simulation.ui.ScheduleScreen
 import com.auracode.hiposim.feature.simulation.ui.SimulationFormScreen
 
 @Composable
@@ -29,7 +30,11 @@ fun HipoSimNavHost(
             ResultsScreen(
                 onNavigateToRegister = { navController.navigate(Route.Register) },
                 onNavigateToLogin = { navController.navigate(Route.Login) },
+                onNavigateToSchedule = { navController.navigate(Route.Schedule) },
             )
+        }
+        composable<Route.Schedule> {
+            ScheduleScreen(onBack = { navController.popBackStack() })
         }
         composable<Route.Register> {
             RegisterScreen(

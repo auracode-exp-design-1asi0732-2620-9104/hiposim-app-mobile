@@ -73,6 +73,12 @@
   <string name="installment_interest">Interés</string>
   <string name="installment_insurance">Seguro</string>
   <string name="installment_balance">Saldo restante</string>
+  <string name="installment_opening_balance">Saldo inicial</string>
+  <string name="installment_closing_balance">Saldo final</string>
+  <string name="schedule_full_action">Ver cronograma completo</string>
+  <string name="schedule_full_title">Cronograma de pagos</string>
+  <string name="schedule_full_subtitle">%1$d cuotas mensuales (método francés). Cada una muestra cómo se reparte entre interés y capital.</string>
+  <string name="schedule_row_grace">%1$s, periodo de gracia</string>
   <string name="send_quote">Enviar cotización a inmobiliarias</string>
   <string name="send_quote_hint">(Desbloquea proyectos en tu rango)</string>
   <string name="download_pdf">Descargar resumen PDF</string>

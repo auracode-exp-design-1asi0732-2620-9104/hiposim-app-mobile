@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Info
@@ -81,6 +82,7 @@ import kotlinx.coroutines.launch
 fun ResultsScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToSchedule: () -> Unit,
     viewModel: ResultsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -104,6 +106,7 @@ fun ResultsScreen(
         onSendQuote = viewModel::onSendQuoteClick,
         onDestinationClick = viewModel::onDestinationClick,
         onDownloadPdf = viewModel::onDownloadPdfClick,
+        onViewSchedule = onNavigateToSchedule,
     )
 
     if (state.isUnlockSheetVisible) {
@@ -140,6 +143,7 @@ private fun ResultsContent(
     onSendQuote: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
     onDownloadPdf: () -> Unit,
+    onViewSchedule: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -199,7 +203,7 @@ private fun ResultsContent(
                     BonusStatus.NotRequested -> Unit
                 }
                 SummaryCard(summary)
-                ScheduleSection(summary)
+                ScheduleSection(summary, onViewSchedule)
             }
         }
     }
@@ -231,7 +235,7 @@ private fun SubsidyBanner(summary: ResultsSummaryUi) {
 
 /** Nothing to show: the buyer goes back to the form, which is the previous screen. */
 @Composable
-private fun MissingSimulation(
+internal fun MissingSimulation(
     onNewSimulation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -463,7 +467,10 @@ private fun CompositionSection(composition: PaymentCompositionUi) {
 }
 
 @Composable
-private fun ScheduleSection(summary: ResultsSummaryUi) {
+private fun ScheduleSection(
+    summary: ResultsSummaryUi,
+    onViewSchedule: () -> Unit,
+) {
     val listState = rememberLazyListState()
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Row(
@@ -500,6 +507,13 @@ private fun ScheduleSection(summary: ResultsSummaryUi) {
                 InstallmentCard(installment, modifier = Modifier.width(260.dp))
             }
         }
+        // The strip above is only a preview: every installment is on its own screen (US02).
+        OutlinedActionButton(
+            text = stringResource(R.string.schedule_full_action),
+            icon = Icons.AutoMirrored.Filled.ListAlt,
+            onClick = onViewSchedule,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

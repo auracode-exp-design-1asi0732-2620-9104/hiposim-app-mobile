@@ -13,6 +13,10 @@ sealed interface Route {
     @Serializable
     data object Results : Route
 
+    /** Every installment of the current simulation (US02). */
+    @Serializable
+    data object Schedule : Route
+
     /** Creates a buyer account. Reached from Results, where the buyer already has a simulation. */
     @Serializable
     data object Register : Route
