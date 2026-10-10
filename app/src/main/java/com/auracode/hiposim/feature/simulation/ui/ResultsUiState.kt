@@ -17,6 +17,8 @@ data class ResultsUiState(
     val account: AccountUi? = null,
     val isUnlockSheetVisible: Boolean = false,
     val isAccountSheetVisible: Boolean = false,
+    /** The sheet to choose an agency and authorize sending the simulation (signed in buyers only). */
+    val isSendSheetVisible: Boolean = false,
     /** One-off message request, cleared by [ResultsViewModel.onComingSoonShown]. */
     val showComingSoon: Boolean = false,
 ) {

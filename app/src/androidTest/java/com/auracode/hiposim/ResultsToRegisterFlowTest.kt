@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.compose.ui.test.waitUntilDoesNotExist
 import androidx.test.espresso.Espresso
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -98,13 +99,15 @@ class ResultsToRegisterFlowTest {
         fillRegistrationForm(acceptConsent = true)
 
         // Creating the account takes a moment; then the app is back on Results, signed in:
-        // the padlock is gone and the sheet does not open.
+        // the padlock is gone and sending opens the agency sheet.
         composeRule.waitUntilAtLeastOneExists(hasText(text(R.string.send_quote)), RESULTS_TIMEOUT_MILLIS)
         composeRule.onNodeWithText(text(R.string.send_quote)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(lockedDescription).assertDoesNotExist()
         composeRule.onNodeWithText(text(R.string.send_quote)).performClick()
-        composeRule.waitUntilAtLeastOneExists(hasText(text(R.string.coming_soon)))
-        composeRule.onNodeWithText(text(R.string.coming_soon)).assertIsDisplayed()
+        composeRule.waitUntilAtLeastOneExists(hasText(text(R.string.send_sheet_title)), RESULTS_TIMEOUT_MILLIS)
+        composeRule.onNodeWithText(text(R.string.unlock_sheet_title)).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription(text(R.string.action_close)).performClick()
+        composeRule.waitUntilDoesNotExist(hasText(text(R.string.send_sheet_title)), RESULTS_TIMEOUT_MILLIS)
 
         // Profile shows the account and lets the user sign out.
         composeRule.onNodeWithText(text(R.string.nav_profile)).performClick()

@@ -4,6 +4,7 @@
   <string name="action_close">Cerrar</string>
   <string name="action_back">Volver</string>
   <string name="coming_soon">Disponible próximamente</string>
+  <string name="action_retry">Reintentar</string>
   <string name="loading">Cargando</string>
 
   <!-- Simulation form -->
@@ -95,6 +96,22 @@
   <string name="unlock_sheet_body">Crea tu cuenta o inicia sesión para enviar tu simulación a las inmobiliarias.</string>
   <string name="unlock_sheet_email">Crear cuenta con correo</string>
   <string name="unlock_sheet_sign_in">Ya tengo una cuenta</string>
+
+  <!-- Send to a real estate agency -->
+  <string name="send_sheet_title">Envía tu simulación a una inmobiliaria</string>
+  <string name="send_sheet_body">Elige quién la recibe. No compartimos nada hasta que lo autorices.</string>
+  <string name="send_sheet_loading">Cargando inmobiliarias</string>
+  <string name="send_sheet_empty">Todavía no hay inmobiliarias disponibles.</string>
+  <string name="send_consent_text">Autorizo de forma expresa compartir esta simulación y mis datos de contacto (nombre, correo y celular) con la inmobiliaria seleccionada, conforme a la Ley N° 29733 de Protección de Datos Personales.</string>
+  <string name="send_submit">Enviar simulación</string>
+  <string name="send_submitting">Enviando</string>
+  <string name="send_success">Enviamos tu simulación a %1$s. La inmobiliaria ya puede contactarte.</string>
+  <string name="send_done">Listo</string>
+  <string name="error_agency_required">Elige una inmobiliaria</string>
+  <string name="error_send_consent_required">Debes autorizar el envío para compartir tu simulación</string>
+  <string name="error_send_not_found">No encontramos la inmobiliaria o tu simulación. Vuelve a simular e inténtalo de nuevo.</string>
+  <string name="error_send_rejected">No pudimos enviar tu simulación. Revisa tu elección e inténtalo de nuevo.</string>
+  <string name="error_session_expired">Tu sesión venció. Inicia sesión de nuevo para enviar tu simulación.</string>
 
   <!-- Account sheet -->
   <string name="account_sheet_title">Tu cuenta</string>

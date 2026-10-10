@@ -236,18 +236,44 @@ class ResultsViewModelTest {
         }
 
     @Test
-    fun signedIn_sendQuoteAndAgenciesShowComingSoonInsteadOfTheSheet() =
+    fun signedIn_sendQuoteAndAgenciesOpenTheSendSheet_andHistoryIsStillComingSoon() =
         runTest {
             signIn()
 
             viewModel.onSendQuoteClick()
-            assertTrue(viewModel.uiState.value.showComingSoon)
+            assertTrue(viewModel.uiState.value.isSendSheetVisible)
             assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
+            assertFalse(viewModel.uiState.value.showComingSoon)
 
-            viewModel.onComingSoonShown()
+            viewModel.onSendSheetDismiss()
+            assertFalse(viewModel.uiState.value.isSendSheetVisible)
+
             viewModel.onDestinationClick(MainDestination.Realtors)
+            assertTrue(viewModel.uiState.value.isSendSheetVisible)
+
+            viewModel.onSendSheetDismiss()
+            viewModel.onDestinationClick(MainDestination.History)
             assertTrue(viewModel.uiState.value.showComingSoon)
-            assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
+            assertFalse(viewModel.uiState.value.isSendSheetVisible)
+        }
+
+    @Test
+    fun guest_sendQuote_neverOpensTheSendSheet() {
+        viewModel.onSendQuoteClick()
+
+        assertFalse(viewModel.uiState.value.isSendSheetVisible)
+        assertTrue(viewModel.uiState.value.isUnlockSheetVisible)
+    }
+
+    @Test
+    fun signedInWithoutASimulation_cannotOpenTheSendSheet() =
+        runTest {
+            val withoutSimulation = viewModelWith(fakeBackedSimulationRepository())
+            signIn()
+
+            withoutSimulation.onSendQuoteClick()
+
+            assertFalse(withoutSimulation.uiState.value.isSendSheetVisible)
         }
 
     @Test

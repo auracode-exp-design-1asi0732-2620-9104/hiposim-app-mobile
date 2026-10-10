@@ -20,7 +20,10 @@ La app arranca en el formulario de simulación y llega a los resultados con la r
    una lista perezosa, con fecha, cuota, saldo inicial, interés, amortización y saldo final de cada mes.
 4. **Registro** (US13): nombre, correo, celular y contraseña, con dos aceptaciones obligatorias y desmarcadas por
    defecto: Términos y Condiciones, y tratamiento de datos personales (Ley N° 29733).
-5. **Inicio de sesión** (US26): correo y contraseña. Si las credenciales no son válidas, el mensaje no indica cuál
+5. **Envío a inmobiliarias** (US21): con sesión iniciada, "Enviar cotización a inmobiliarias" abre un selector de
+   inmobiliaria con una casilla de consentimiento expreso (Ley N° 29733), desmarcada por defecto. Sin esa
+   autorización no se comparte nada. Sin sesión, pide crear una cuenta o iniciar sesión.
+6. **Inicio de sesión** (US26): correo y contraseña. Si las credenciales no son válidas, el mensaje no indica cuál
    de los dos datos es incorrecto.
 
 La simulación sigue el contrato `POST /api/simulations` (v0.1.0). Mientras no exista el host de la API, responde
@@ -34,6 +37,23 @@ del equipo (pregunta abierta 6 del contrato): cómo presentarlo, o si mostrarlo.
 La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFFECTIVE_RATE` (TEA 0.0885, es decir
 8.85%), la tasa de referencia acordada por el equipo y la misma que muestra el Landing. Con el ejemplo del Landing
 (S/ 280,000, 15% de inicial, 20 años, con bono) la cuota es S/ 1,909.
+
+### Envío a inmobiliarias
+
+`POST /api/leads` sigue el contrato del backend (`src/HipoSim.Api/Leads/LeadContracts.cs`): `agencyId`,
+`simulationId` y `acceptedContact`, solo con sesión de Comprador.
+
+- **La simulación debe ser del Comprador.** La API solo acepta un lead si la simulación se calculó con el token de
+  ese Comprador. Como en la app se simula primero y la cuenta se crea después, al enviar se vuelve a calcular la
+  misma simulación con la sesión iniciada (`SimulationRepository.recalculateCurrent`) y se envía ese
+  `simulationId` nuevo. Las cifras no cambian.
+- **Inmobiliarias.** `GET /api/agencies` todavía no existe en el backend. La forma `[{id, name}]` es una propuesta
+  (`AgenciesService`), y mientras tanto la lista es la inmobiliaria demo del seed del backend. Esto lo controla
+  `USE_FAKE_AGENCIES` (propiedad `hiposim.useFakeAgencies`, por defecto `true`), aparte de `USE_FAKE_API`, para poder
+  enviar leads reales antes de que exista ese endpoint.
+- **Errores.** 404 (inmobiliaria o simulación inexistente), sin conexión y 5xx se muestran en la hoja y permiten
+  reintentar. Un 401 o 403 cierra la sesión y pide iniciarla de nuevo.
+- **Con `USE_FAKE_API`** el envío solo simula el 201: no se guarda nada ni lo recibe ninguna inmobiliaria.
 
 ### Cuentas y sesión
 
@@ -101,6 +121,7 @@ El contrato es `docs/api-contract/openapi.v0.yaml` del repo `hiposim-backEnd` (v
 | URL base en debug | `API_BASE_URL` | `http://10.0.2.2:5000/` | `hiposim.apiBaseUrl.debug` |
 | URL base en release | `API_BASE_URL` | `https://api.hiposim.invalid/` (marcador) | `hiposim.apiBaseUrl.release` |
 | Implementación falsa o real | `USE_FAKE_API` | `true` | `hiposim.useFakeApi` |
+| Lista de inmobiliarias en memoria | `USE_FAKE_AGENCIES` | `true` | `hiposim.useFakeAgencies` |
 
 Las propiedades se definen en `~/.gradle/gradle.properties` o en la línea de comandos, sin tocar el código. La URL
 debe terminar en `/`. Para probar contra la API real en el emulador:
@@ -191,7 +212,8 @@ app/src/main/java/com/auracode/hiposim/
                        data (DTO del contrato, SimulationService, FakeSimulationService, repositorio)
   feature/auth/        ui (Registro, Inicio de sesión, LoginRequiredSheet, AccountSheet), domain (validación, sesión),
                        data (DTO del contrato, AuthService, FakeAuthService, repositorio)
-  feature/leads/       reservado (US21)
+  feature/leads/       ui (hoja de envío), domain (inmobiliarias, lead, casos de uso),
+                       data (DTO del contrato, LeadsService, AgenciesService, falsos, repositorio)
   feature/history/     reservado
   feature/comparison/  reservado
   di/                  módulos de Hilt (red, servicios falsos o reales, repositorios)
@@ -225,7 +247,7 @@ feat(auth): add contextual registration form (US13)
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
 | US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho con la API en memoria, listo para la API real |
 | US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho con la API en memoria, listo para la API real |
-| US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
+| US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho; la lista de inmobiliarias es provisional hasta que exista `GET /api/agencies` |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
 | US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
 | US02 | Ver cronograma de pagos completo desde Resultados | `feature/simulation` | Hecho; usa el cronograma de la simulación ya calculada |

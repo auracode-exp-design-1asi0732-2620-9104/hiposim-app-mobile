@@ -2,6 +2,7 @@ package com.auracode.hiposim.feature.simulation.data
 
 import com.auracode.hiposim.core.network.ApiError
 import com.auracode.hiposim.core.network.ApiResult
+import com.auracode.hiposim.core.network.TokenStore
 import com.auracode.hiposim.core.network.safeApiCall
 import com.auracode.hiposim.feature.simulation.domain.LoanSimulation
 import com.auracode.hiposim.feature.simulation.domain.SimulationFailure
@@ -27,11 +28,32 @@ class DefaultSimulationRepository
     @Inject
     constructor(
         private val service: SimulationService,
+        private val tokenStore: TokenStore = TokenStore(),
     ) : SimulationRepository {
         private val _currentSimulation = MutableStateFlow<LoanSimulation?>(null)
         override val currentSimulation: StateFlow<LoanSimulation?> = _currentSimulation.asStateFlow()
 
+        /** What the current simulation was calculated from, and the token its request carried (null for a guest). */
+        @Volatile
+        private var currentParams: SimulationParams? = null
+
+        @Volatile
+        private var currentToken: String? = null
+
+        override val currentBelongsToSession: Boolean
+            get() {
+                val activeToken = tokenStore.token
+                return _currentSimulation.value != null && activeToken != null && activeToken == currentToken
+            }
+
+        override suspend fun recalculateCurrent(): SimulationResult {
+            val params = currentParams ?: return SimulationResult.Failure(SimulationFailure.Unexpected)
+            return simulate(params)
+        }
+
         override suspend fun simulate(params: SimulationParams): SimulationResult {
+            // Read before the call: this is the token the auth interceptor attaches to it.
+            val tokenOfTheRequest = tokenStore.token
             // The mapping runs inside the call so a body that cannot be mapped (a bad date) is a failure, not a crash.
             val response = safeApiCall { service.createSimulation(params.toRequestDto()).toDomainOrNull(params) }
             return when (response) {
@@ -40,6 +62,8 @@ class DefaultSimulationRepository
                     if (simulation == null) {
                         SimulationResult.Failure(SimulationFailure.Unexpected)
                     } else {
+                        currentParams = params
+                        currentToken = tokenOfTheRequest
                         _currentSimulation.value = simulation
                         SimulationResult.Success(simulation)
                     }
