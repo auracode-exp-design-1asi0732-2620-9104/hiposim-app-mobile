@@ -6,14 +6,22 @@ Material 3. La elección de tecnología está documentada en [docs/adr/0001-mobi
 
 ## Estado
 
-Primer avance ejecutable con dos pantallas basadas en los mockups de `docs/design/mockups/`:
+La app arranca en el formulario de simulación y llega a los resultados con la respuesta de la API:
 
-1. **Resultados del Crédito**: subsidio (Bono del Buen Pagador), cuota, TCEA, VAN, TIR, plazo, seguro, cronograma
-   inicial, enviar cotización, PDF (aviso "Disponible próximamente") y barra inferior con destinos bloqueados.
-2. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
+1. **Simulación** (US01): valor de la vivienda, cuota inicial, plazo y casilla del Bono del Buen Pagador. Valida en
+   el cliente con los rangos del Landing (S/ 120,000 a 800,000, cuota inicial mínima 10%, plazo de 5 a 30 años) y
+   muestra junto a cada campo los errores que devuelva la API, que es la fuente de verdad.
+2. **Resultados del Crédito**: cuota, TCEA, VAN, TIR, plazo, seguro, cronograma inicial, enviar cotización, PDF
+   (aviso "Disponible próximamente") y barra inferior con destinos bloqueados. Si el bono se pidió y la vivienda está
+   fuera de rango, lo explica sin tratarlo como error.
+3. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
 
-Los datos salen de `FakeSimulationRepository`. El VAN y la TIR son valores de ejemplo hasta que exista el motor
-financiero.
+La simulación sigue el contrato `POST /api/simulations` (v0.1.0). Mientras no exista el host de la API, responde
+`FakeSimulationService`, que respeta la forma del contrato y reproduce los números de sus ejemplos; ver
+"Conexión con la API".
+
+La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFFECTIVE_RATE` (TEA 0.085, la del
+ejemplo del contrato). Pendiente de decisión del equipo: alinearla con el 8.85% que muestra el Landing.
 
 ### Cuentas y sesión (provisional)
 
@@ -88,9 +96,9 @@ debe terminar en `/`. Para probar contra la API real en el emulador:
 .\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5000/"
 ```
 
-- **Falsa o real**: mientras no exista el host de la API, `USE_FAKE_API` vale `true` y cada repositorio responde con
-  una implementación en memoria que respeta la forma del contrato. La elección se hace en `di/RepositoryModule.kt`;
-  la UI y el dominio no cambian.
+- **Falsa o real**: mientras no exista el host de la API, `USE_FAKE_API` vale `true` y cada servicio es una
+  implementación en memoria que respeta la forma del contrato (por ejemplo `FakeSimulationService`). La elección se
+  hace solo en `di/ServiceModule.kt`; el repositorio, el dominio y la UI son los mismos en ambos casos.
 - **HTTP sin cifrar**: permitido solo en debug y solo hacia `10.0.2.2` y `localhost`
   (`app/src/debug/res/xml/network_security_config.xml`). Release exige HTTPS.
 - **Token JWT**: `AuthInterceptor` agrega `Authorization: Bearer <accessToken>` cuando `TokenStore.token` tiene valor.
@@ -118,6 +126,8 @@ servidor responde con PascalCase (`DownPayment`), se normaliza.
 
 ### Agregar un servicio nuevo
 
+`feature/simulation/data` es el ejemplo completo. Los pasos:
+
 1. **DTO** en `feature/<nombre>/data`, con `@Serializable` y los mismos nombres del contrato. Las tasas son
    fracciones (`0.085` es 8.5%).
 2. **Interfaz Retrofit** en la misma carpeta, con rutas relativas sin `/` inicial:
@@ -129,18 +139,20 @@ servidor responde con PascalCase (`DownPayment`), se normaliza.
    }
    ```
 
-3. **Repositorio real** que implementa la interfaz del dominio, llama al servicio dentro de `safeApiCall` y convierte
-   el DTO al modelo del dominio con `map`:
+3. **Servicio falso** que implementa esa misma interfaz y responde con la forma del contrato. Para simular un error,
+   lanza la misma `HttpException` que lanzaría Retrofit (ver `FakeSimulationService.validationError`).
+4. **Hilt**: en `di/ServiceModule.kt`, provee el falso o `retrofit.get().create(AuthService::class.java)` según
+   `BuildConfig.USE_FAKE_API`.
+5. **Repositorio** (uno solo) que implementa la interfaz del dominio, llama al servicio dentro de `safeApiCall` y
+   convierte el DTO al modelo del dominio con `map`. Se enlaza en `di/RepositoryModule.kt`:
 
    ```kotlin
    override suspend fun login(email: String, password: String): ApiResult<AuthenticatedUser> =
        safeApiCall { service.login(LoginRequestDto(email, password)) }.map { it.toDomain() }
    ```
 
-4. **Repositorio falso** con la misma interfaz y datos con la forma del contrato.
-5. **Hilt**: provee el servicio con `retrofit.create(AuthService::class.java)` y elige la implementación en
-   `di/RepositoryModule.kt` según `BuildConfig.USE_FAKE_API`.
-6. **Pruebas**: el mapeo del DTO, y el repositorio real contra `MockWebServer` (ver `NetworkStackTest`).
+6. **Pruebas**: el mapeo del DTO, el servicio falso contra los ejemplos del contrato, y el repositorio contra
+   `MockWebServer` (ver `DefaultSimulationRepositoryTest`).
 
 ## Idioma
 
@@ -160,12 +172,13 @@ app/src/main/java/com/auracode/hiposim/
   core/navigation/     rutas tipadas y NavHost
   core/network/        ApiResult, ApiError, safeApiCall, AuthInterceptor, TokenStore
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
-  feature/simulation/  ui (Resultados), domain (modelos, casos de uso), data (FakeSimulationRepository)
+  feature/simulation/  ui (Formulario, Resultados), domain (modelos, validación, casos de uso),
+                       data (DTO del contrato, SimulationService, FakeSimulationService, repositorio)
   feature/auth/        ui (Registro, LoginRequiredSheet, AccountSheet), domain (validación, sesión), data (FakeAuthRepository)
   feature/leads/       reservado (US21)
   feature/history/     reservado
   feature/comparison/  reservado
-  di/                  módulos de Hilt
+  di/                  módulos de Hilt (red, servicios falsos o reales, repositorios)
   MainActivity.kt, HipoSimApp.kt
 ```
 
@@ -196,4 +209,5 @@ feat(auth): add contextual registration form (US13)
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
 | US13 | Mockup de registro contextual | `feature/auth` | Mockup implementado |
 | US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
-| US01, US02, US04, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |
+| US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
+| US02, US04, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |

@@ -7,7 +7,7 @@ import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
 import com.auracode.hiposim.feature.auth.ui.AccountUi
-import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
+import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +20,7 @@ import javax.inject.Inject
 class ResultsViewModel
     @Inject
     constructor(
-        private val getLoanSimulation: GetLoanSimulationUseCase,
+        private val observeCurrentSimulation: ObserveCurrentSimulationUseCase,
         private val observeSession: ObserveSessionUseCase,
         private val signOut: SignOutUseCase,
     ) : ViewModel() {
@@ -29,8 +29,10 @@ class ResultsViewModel
 
         init {
             viewModelScope.launch {
-                val summary = getLoanSimulation().toResultsSummaryUi()
-                _uiState.update { it.copy(isLoading = false, summary = summary) }
+                observeCurrentSimulation().collect { simulation ->
+                    val summary = simulation?.toResultsSummaryUi()
+                    _uiState.update { it.copy(isLoading = summary == null, summary = summary) }
+                }
             }
             viewModelScope.launch {
                 observeSession().collect { session ->

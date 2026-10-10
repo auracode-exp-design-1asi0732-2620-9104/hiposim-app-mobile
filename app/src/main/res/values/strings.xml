@@ -6,10 +6,41 @@
   <string name="coming_soon">Coming soon</string>
   <string name="loading">Loading</string>
 
+  <!-- Simulation form -->
+  <string name="simulation_form_title">Simulate your mortgage</string>
+  <string name="simulation_form_subtitle">Enter the details of the home you want. You do not need an account.</string>
+  <string name="currency_prefix">S/\u0020</string>
+  <string name="field_property_price">Home price</string>
+  <string name="field_property_price_hint">Between %1$s and %2$s</string>
+  <string name="field_down_payment">Down payment</string>
+  <string name="field_down_payment_hint">%1$s of the home price (minimum %2$s)</string>
+  <string name="field_down_payment_hint_minimum">Minimum %1$s of the home price</string>
+  <string name="field_term_years">Term</string>
+  <string name="field_term_suffix">years</string>
+  <string name="field_term_hint">From %1$d to %2$d years</string>
+  <string name="bonus_checkbox_title">Apply the Good Payer Bonus (Bono del Buen Pagador)</string>
+  <string name="bonus_checkbox_body">State subsidy for homes within a price range. If your home does not qualify, the simulation is calculated without it.</string>
+  <string name="simulation_rate_note">Reference rate: %1$s effective annual rate (TEA). Each financial institution sets its own.</string>
+  <string name="simulation_submit">Simulate</string>
+  <string name="simulation_submitting">Calculating</string>
+  <string name="error_property_price_required">Enter the home price</string>
+  <string name="error_property_price_range">Enter a value between %1$s and %2$s</string>
+  <string name="error_down_payment_required">Enter the down payment</string>
+  <string name="error_down_payment_minimum">The down payment must be at least %1$s of the home price</string>
+  <string name="error_down_payment_too_high">The down payment must be lower than the home price</string>
+  <string name="error_term_required">Enter the term in years</string>
+  <string name="error_term_range">Enter a term between %1$d and %2$d years</string>
+  <string name="error_no_connection">We could not connect. Check your internet connection and try again.</string>
+  <string name="error_service_unavailable">The service is not available right now. Try again in a few minutes.</string>
+  <string name="error_request_rejected">We could not calculate the simulation with these values. Review them and try again.</string>
+  <string name="error_unexpected">Something went wrong. Try again.</string>
+
   <!-- Results -->
   <string name="results_title">Loan results</string>
   <string name="subsidy_banner_title">State subsidy applied</string>
   <string name="subsidy_banner_body">Good Payer Bonus (Bono del Buen Pagador): %1$s discounted</string>
+  <string name="bonus_not_eligible_title">Good Payer Bonus not applied</string>
+  <string name="bonus_not_eligible_body">This home price is outside the bonus range, so the simulation was calculated without it.</string>
   <string name="monthly_payment_label">Estimated monthly payment</string>
   <string name="per_month">/ month</string>
   <string name="payment_includes_insurance">Includes life and property insurance</string>

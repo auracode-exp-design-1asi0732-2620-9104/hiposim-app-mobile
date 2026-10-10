@@ -9,7 +9,7 @@ import com.auracode.hiposim.feature.auth.domain.RegistrationError
 import com.auracode.hiposim.feature.auth.domain.RegistrationField
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.ValidateRegistrationFormUseCase
-import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
+import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,7 @@ import javax.inject.Inject
 class RegisterViewModel
     @Inject
     constructor(
-        private val getLoanSimulation: GetLoanSimulationUseCase,
+        private val observeCurrentSimulation: ObserveCurrentSimulationUseCase,
         private val validateForm: ValidateRegistrationFormUseCase,
         private val registerUser: RegisterUserUseCase,
     ) : ViewModel() {
@@ -31,14 +31,17 @@ class RegisterViewModel
 
         init {
             viewModelScope.launch {
-                val simulation = getLoanSimulation()
-                val quote =
-                    QuoteSummaryUi(
-                        monthlyPayment = PeruFormat.soles(simulation.monthlyPayment),
-                        tcea = PeruFormat.percent(simulation.tcea),
-                        propertyPrice = PeruFormat.soles(simulation.propertyPrice),
-                    )
-                _uiState.update { it.copy(quote = quote) }
+                observeCurrentSimulation().collect { simulation ->
+                    val quote =
+                        simulation?.let {
+                            QuoteSummaryUi(
+                                monthlyPayment = PeruFormat.soles(it.monthlyPayment),
+                                tcea = PeruFormat.percent(it.tcea),
+                                propertyPrice = PeruFormat.soles(it.propertyPrice),
+                            )
+                        }
+                    _uiState.update { it.copy(quote = quote) }
+                }
             }
         }
 

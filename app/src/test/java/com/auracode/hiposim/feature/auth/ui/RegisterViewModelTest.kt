@@ -7,9 +7,10 @@ import com.auracode.hiposim.feature.auth.domain.RegistrationField
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.auth.domain.ValidateRegistrationFormUseCase
-import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
-import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
+import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.simulationRepositoryWithContractExample
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -30,7 +31,8 @@ class RegisterViewModelTest {
         authRepository = FakeAuthRepository()
         viewModel =
             RegisterViewModel(
-                getLoanSimulation = GetLoanSimulationUseCase(FakeSimulationRepository()),
+                observeCurrentSimulation =
+                    ObserveCurrentSimulationUseCase(runBlocking { simulationRepositoryWithContractExample() }),
                 validateForm = ValidateRegistrationFormUseCase(),
                 registerUser = RegisterUserUseCase(authRepository),
             )
@@ -47,8 +49,8 @@ class RegisterViewModelTest {
     fun init_showsQuoteSummary() {
         val quote = requireNotNull(viewModel.uiState.value.quote)
 
-        assertEquals("S/ 1,909", quote.monthlyPayment)
-        assertEquals("8.85%", quote.tcea)
+        assertEquals("S/ 1,864", quote.monthlyPayment)
+        assertEquals("8.50%", quote.tcea)
         assertEquals("S/ 280,000", quote.propertyPrice)
     }
 

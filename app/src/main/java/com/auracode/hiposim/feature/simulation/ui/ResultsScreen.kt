@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +70,7 @@ import com.auracode.hiposim.core.designsystem.theme.Spacing
 import com.auracode.hiposim.core.navigation.MainDestination
 import com.auracode.hiposim.feature.auth.ui.AccountSheet
 import com.auracode.hiposim.feature.auth.ui.LoginRequiredSheet
+import com.auracode.hiposim.feature.simulation.domain.BonusStatus
 import kotlinx.coroutines.launch
 
 @Composable
@@ -178,7 +181,11 @@ private fun ResultsContent(
                         .padding(horizontal = Spacing.md, vertical = Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                SubsidyBanner(summary)
+                when (summary.bonusStatus) {
+                    BonusStatus.Applied -> SubsidyBanner(summary)
+                    BonusStatus.NotEligible -> BonusNotEligibleBanner()
+                    BonusStatus.NotRequested -> Unit
+                }
                 SummaryCard(summary)
                 ScheduleSection(summary)
             }
@@ -207,6 +214,16 @@ private fun SubsidyBanner(summary: ResultsSummaryUi) {
         icon = Icons.Filled.Eco,
         title = stringResource(R.string.subsidy_banner_title),
         body = body,
+    )
+}
+
+/** The bonus was requested but the home price is outside its range: a normal result, explained, not an error. */
+@Composable
+private fun BonusNotEligibleBanner() {
+    HighlightBanner(
+        icon = Icons.Filled.Info,
+        title = stringResource(R.string.bonus_not_eligible_title),
+        body = AnnotatedString(stringResource(R.string.bonus_not_eligible_body)),
     )
 }
 

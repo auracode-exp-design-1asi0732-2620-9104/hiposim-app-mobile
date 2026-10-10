@@ -5,9 +5,13 @@ import com.auracode.hiposim.feature.auth.data.FakeAuthRepository
 import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
-import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
-import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
+import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
+import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.fakeBackedSimulationRepository
+import com.auracode.hiposim.testing.simulationRepositoryWithContractExample
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -27,13 +31,15 @@ class ResultsViewModelTest {
     @Before
     fun setUp() {
         authRepository = FakeAuthRepository()
-        viewModel =
-            ResultsViewModel(
-                getLoanSimulation = GetLoanSimulationUseCase(FakeSimulationRepository()),
-                observeSession = ObserveSessionUseCase(authRepository),
-                signOut = SignOutUseCase(authRepository),
-            )
+        viewModel = viewModelWith(runBlocking { simulationRepositoryWithContractExample() })
     }
+
+    private fun viewModelWith(simulationRepository: SimulationRepository) =
+        ResultsViewModel(
+            observeCurrentSimulation = ObserveCurrentSimulationUseCase(simulationRepository),
+            observeSession = ObserveSessionUseCase(authRepository),
+            signOut = SignOutUseCase(authRepository),
+        )
 
     private suspend fun signIn() {
         authRepository.register(
@@ -48,7 +54,7 @@ class ResultsViewModelTest {
     }
 
     @Test
-    fun init_loadsSimulationWithLandingFigures() {
+    fun init_showsTheSimulationCalculatedFromTheForm() {
         val state = viewModel.uiState.value
 
         assertFalse(state.isLoading)
@@ -62,8 +68,17 @@ class ResultsViewModelTest {
         assertEquals("S/ 219,800", summary.netLoan)
         assertEquals(20, summary.termYears)
         assertEquals(240, summary.termMonths)
-        assertEquals("S/ 1,909", summary.monthlyPayment)
-        assertEquals("8.85%", summary.tcea)
+        assertEquals("S/ 1,864", summary.monthlyPayment)
+        assertEquals("8.50%", summary.tcea)
+        assertEquals(BonusStatus.Applied, summary.bonusStatus)
+    }
+
+    @Test
+    fun withoutASimulation_keepsLoading() {
+        val state = viewModelWith(fakeBackedSimulationRepository()).uiState.value
+
+        assertTrue(state.isLoading)
+        assertNull(state.summary)
     }
 
     @Test
@@ -73,11 +88,11 @@ class ResultsViewModelTest {
         assertEquals(4, schedule.size)
         val first = schedule.first()
         assertEquals(1, first.number)
-        assertEquals("S/ 1,909.00", first.payment)
-        assertEquals("S/ 385.49", first.principal)
-        assertEquals("S/ 1,417.71", first.interest)
-        assertEquals("S/ 105.80", first.insurance)
-        assertEquals("S/ 219,414.51", first.remainingBalance)
+        assertEquals("S/ 1,863.99", first.payment)
+        assertEquals("S/ 364.63", first.principal)
+        assertEquals("S/ 1,499.36", first.interest)
+        assertEquals("S/ 0.00", first.insurance)
+        assertEquals("S/ 219,435.37", first.remainingBalance)
     }
 
     @Test
@@ -88,9 +103,9 @@ class ResultsViewModelTest {
             100,
             composition.interestPercent + composition.principalPercent + composition.insurancePercent,
         )
-        assertEquals(74, composition.interestPercent)
+        assertEquals(80, composition.interestPercent)
         assertEquals(20, composition.principalPercent)
-        assertEquals(6, composition.insurancePercent)
+        assertEquals(0, composition.insurancePercent)
     }
 
     @Test
