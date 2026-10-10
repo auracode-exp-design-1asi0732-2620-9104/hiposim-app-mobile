@@ -70,6 +70,78 @@ Capturas para el informe:
 El workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) corre ktlint, lint, pruebas unitarias y
 `assembleDebug` en cada push a `main` y `develop` y en cada pull request.
 
+## Conexión con la API
+
+El contrato es `docs/api-contract/openapi.v0.yaml` del repo `hiposim-backEnd` (v0.1.0). La capa de red vive en
+`core/network` y se arma en `di/NetworkModule.kt` (Retrofit, OkHttp y kotlinx.serialization).
+
+| Ajuste | `BuildConfig` | Valor por defecto | Propiedad de Gradle |
+|---|---|---|---|
+| URL base en debug | `API_BASE_URL` | `http://10.0.2.2:5000/` | `hiposim.apiBaseUrl.debug` |
+| URL base en release | `API_BASE_URL` | `https://api.hiposim.invalid/` (marcador) | `hiposim.apiBaseUrl.release` |
+| Implementación falsa o real | `USE_FAKE_API` | `true` | `hiposim.useFakeApi` |
+
+Las propiedades se definen en `~/.gradle/gradle.properties` o en la línea de comandos, sin tocar el código. La URL
+debe terminar en `/`. Para probar contra la API real en el emulador:
+
+```powershell
+.\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5000/"
+```
+
+- **Falsa o real**: mientras no exista el host de la API, `USE_FAKE_API` vale `true` y cada repositorio responde con
+  una implementación en memoria que respeta la forma del contrato. La elección se hace en `di/RepositoryModule.kt`;
+  la UI y el dominio no cambian.
+- **HTTP sin cifrar**: permitido solo en debug y solo hacia `10.0.2.2` y `localhost`
+  (`app/src/debug/res/xml/network_security_config.xml`). Release exige HTTPS.
+- **Token JWT**: `AuthInterceptor` agrega `Authorization: Bearer <accessToken>` cuando `TokenStore.token` tiene valor.
+  El registro y el inicio de sesión deben guardar ahí el `accessToken` y limpiarlo al cerrar sesión. Sin sesión la
+  petición sale sin cabecera (la simulación es pública).
+- **Registro de peticiones**: solo en debug (Logcat, etiqueta `okhttp.OkHttpClient`), con el token oculto.
+
+### Errores
+
+Los repositorios envuelven cada llamada con `safeApiCall { ... }` y devuelven `ApiResult<T>`, nunca lanzan. Un fallo
+llega como `ApiResult.Failure(error)` con uno de estos `ApiError`:
+
+| `ApiError` | Cuándo | Qué hace la UI |
+|---|---|---|
+| `NoConnection` | Sin red, tiempo agotado o servidor inaccesible | Mensaje de conexión y reintento |
+| `Validation(fieldErrors, title)` | 400 con `application/problem+json` | Muestra cada mensaje junto a su campo |
+| `Unauthorized(title)` | 401 | Credenciales inválidas o sesión vencida |
+| `Conflict(title)` | 409 | Por ejemplo, correo ya registrado |
+| `Client(code, title)` | Otro 4xx | Mensaje genérico |
+| `Server(code)` | 5xx | Mensaje genérico y reintento |
+| `Unexpected(cause)` | Respuesta que no coincide con el DTO u otro fallo | Mensaje genérico |
+
+`fieldErrors` usa como clave la propiedad de la petición en camelCase (`downPayment`), igual que el DTO. Si el
+servidor responde con PascalCase (`DownPayment`), se normaliza.
+
+### Agregar un servicio nuevo
+
+1. **DTO** en `feature/<nombre>/data`, con `@Serializable` y los mismos nombres del contrato. Las tasas son
+   fracciones (`0.085` es 8.5%).
+2. **Interfaz Retrofit** en la misma carpeta, con rutas relativas sin `/` inicial:
+
+   ```kotlin
+   interface AuthService {
+       @POST("api/auth/login")
+       suspend fun login(@Body request: LoginRequestDto): LoginResponseDto
+   }
+   ```
+
+3. **Repositorio real** que implementa la interfaz del dominio, llama al servicio dentro de `safeApiCall` y convierte
+   el DTO al modelo del dominio con `map`:
+
+   ```kotlin
+   override suspend fun login(email: String, password: String): ApiResult<AuthenticatedUser> =
+       safeApiCall { service.login(LoginRequestDto(email, password)) }.map { it.toDomain() }
+   ```
+
+4. **Repositorio falso** con la misma interfaz y datos con la forma del contrato.
+5. **Hilt**: provee el servicio con `retrofit.create(AuthService::class.java)` y elige la implementación en
+   `di/RepositoryModule.kt` según `BuildConfig.USE_FAKE_API`.
+6. **Pruebas**: el mapeo del DTO, y el repositorio real contra `MockWebServer` (ver `NetworkStackTest`).
+
 ## Idioma
 
 `res/values` está en inglés (idioma por defecto del curso) y `res/values-b+es+419` en español. La demo arranca en
@@ -86,6 +158,7 @@ implementaciones en `di/`, de modo que la UI nunca conoce la capa `data`.
 app/src/main/java/com/auracode/hiposim/
   core/designsystem/   theme (Color, Type, Shape, Spacing) y componentes reutilizables
   core/navigation/     rutas tipadas y NavHost
+  core/network/        ApiResult, ApiError, safeApiCall, AuthInterceptor, TokenStore
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
   feature/simulation/  ui (Resultados), domain (modelos, casos de uso), data (FakeSimulationRepository)
   feature/auth/        ui (Registro, LoginRequiredSheet, AccountSheet), domain (validación, sesión), data (FakeAuthRepository)
