@@ -63,6 +63,7 @@ import com.auracode.hiposim.core.designsystem.component.BarSegment
 import com.auracode.hiposim.core.designsystem.component.HighlightBanner
 import com.auracode.hiposim.core.designsystem.component.HipoSimCard
 import com.auracode.hiposim.core.designsystem.component.HipoSimNavigationBar
+import com.auracode.hiposim.core.designsystem.component.LegalFooter
 import com.auracode.hiposim.core.designsystem.component.LoadingIndicator
 import com.auracode.hiposim.core.designsystem.component.MetricTile
 import com.auracode.hiposim.core.designsystem.component.NavBarItem
@@ -525,6 +526,7 @@ private fun ScheduleSection(
             onClick = onViewSchedule,
             modifier = Modifier.fillMaxWidth(),
         )
+        LegalFooter()
     }
 }
 

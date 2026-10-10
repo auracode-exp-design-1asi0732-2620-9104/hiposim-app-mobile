@@ -158,4 +158,10 @@
   <string name="error_password_required">Ingresa tu contraseña</string>
   <string name="error_invalid_credentials">El correo o la contraseña son incorrectos.</string>
   <string name="error_not_a_buyer">Esta cuenta es de un asesor inmobiliario. Usa la aplicación web para asesores.</string>
+  <string name="legal_terms">Términos y Condiciones</string>
+  <string name="legal_privacy">Política de Privacidad</string>
+  <string name="legal_terms_read">Leer los Términos y Condiciones</string>
+  <string name="legal_privacy_read">Leer la Política de Privacidad</string>
+  <string name="legal_terms_description">Términos y Condiciones, se abre en el navegador</string>
+  <string name="legal_privacy_description">Política de Privacidad, se abre en el navegador</string>
 </resources>
