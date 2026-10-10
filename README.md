@@ -157,7 +157,11 @@ servidor responde con PascalCase (`DownPayment`), se normaliza.
 
 6. **Pruebas**: el mapeo del DTO con los ejemplos del contrato guardados en `app/src/test/resources/contract`
    (ver `SimulationMapperTest`), el servicio falso contra esos mismos números, y el repositorio contra
-   `MockWebServer` (ver `DefaultSimulationRepositoryTest`).
+   `MockWebServer` (ver `DefaultSimulationRepositoryTest`). Además, `FakeSimulationParityTest` compara el servicio
+   falso con 11 casos calculados por el motor real de `hiposim-backEnd` con la TEA de 8.85%
+   (`app/src/test/resources/engine-parity`, con el bono aplicado, no solicitado y fuera de rango). Como la app usa el
+   falso por defecto, esa prueba asegura que la cuota que se ve es la del motor. Si el motor cambia a propósito, se
+   regenera el archivo con `make_engine_parity.py` (ver el README de esa carpeta).
 
 ## Idioma
 
