@@ -6,14 +6,19 @@ Material 3. La elección de tecnología está documentada en [docs/adr/0001-mobi
 
 ## Estado
 
-Primer avance ejecutable con dos pantallas basadas en los mockups de `docs/design/mockups/`:
+Tres pantallas. Las dos últimas se basan en los mockups de `docs/design/mockups/`:
 
-1. **Resultados del Crédito**: subsidio (Bono del Buen Pagador), cuota, TCEA, VAN, TIR, plazo, seguro, cronograma
-   inicial, enviar cotización, PDF (aviso "Disponible próximamente") y barra inferior con destinos bloqueados.
-2. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
+1. **Simulación (US01)**: pantalla de inicio. Precio de la vivienda, cuota inicial (mínimo 10%) y plazo de 5 a 30
+   años. Funciona sin cuenta y calcula con `POST /api/simulations`.
+2. **Resultados del Crédito**: subsidio (Bono del Buen Pagador, solo si se aplicó), cuota, TCEA, VAN, TIR, plazo,
+   seguro, cronograma inicial (primer año), enviar cotización, PDF (aviso "Disponible próximamente") y barra
+   inferior con destinos bloqueados. Muestra los valores que devuelve la API.
+3. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
 
-Los datos salen de `FakeSimulationRepository`. El VAN y la TIR son valores de ejemplo hasta que exista el motor
-financiero.
+Las simulaciones salen de la API de HipoSim (`RemoteSimulationRepository`). `FakeSimulationRepository` queda solo para
+las pruebas. La tasa se envía fija: TEA de referencia de 8.85%, la misma del Landing Page
+(`SimulationRequest.REFERENCE_ANNUAL_RATE`). La opción del bono (US05) llega después: la petición ya incluye
+`applyGoodPayerBonus`, hoy siempre en `false`.
 
 ### Cuentas y sesión (provisional)
 
@@ -25,8 +30,8 @@ quedas con la sesión iniciada: los candados de la barra inferior desaparecen y 
 - No hay inicio de sesión todavía (no está en los mockups) ni se guarda la contraseña.
 - "Enviar cotización" e "Inmobiliarias" muestran "Disponible próximamente" con sesión iniciada, hasta que exista `feature/leads`.
 
-Cuando exista el backend, se reemplaza `FakeAuthRepository` por una implementación con la API en `di/RepositoryModule.kt`.
-No hay API real ni PDF todavía.
+Cuando existan registro e inicio de sesión en la API, se reemplaza `FakeAuthRepository` por una implementación con la
+API en `di/RepositoryModule.kt`. No hay PDF todavía.
 
 ## Requisitos
 
@@ -52,6 +57,21 @@ Emulador `Pixel_10_Pro`:
 .\gradlew installDebug
 & "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" shell am start -n com.auracode.hiposim/.MainActivity
 ```
+
+### API
+
+La app llama a la API de HipoSim (repositorio `hiposim-backEnd`). La dirección sale de `BuildConfig.API_BASE_URL`:
+
+| Compilación | Dirección por defecto | Cambiarla con |
+|---|---|---|
+| debug | `http://10.0.2.2:5000/` (el equipo anfitrión visto desde el emulador) | `-Phiposim.apiBaseUrl.debug=http://<ip-lan>:5000/` |
+| release | `https://hiposim-api.invalid/` (reservada, aún no hay API desplegada) | `-Phiposim.apiBaseUrl.release=https://<host>/` |
+
+La dirección siempre termina en `/`. Las compilaciones debug permiten HTTP sin cifrar
+(`app/src/debug/res/xml/network_security_config.xml`); release no. Para probar en un teléfono físico usa la IP de tu
+red local y que la API escuche en ella. La API en desarrollo corre en `http://localhost:5000` y necesita PostgreSQL;
+las instrucciones están en el repositorio del backend. Sin la API, el formulario muestra "No pudimos conectar con
+HipoSim".
 
 Capturas para el informe:
 
@@ -86,8 +106,10 @@ implementaciones en `di/`, de modo que la UI nunca conoce la capa `data`.
 app/src/main/java/com/auracode/hiposim/
   core/designsystem/   theme (Color, Type, Shape, Spacing) y componentes reutilizables
   core/navigation/     rutas tipadas y NavHost
+  core/network/        JSON compartido y manejo de respuestas de la API (errores de red, problem+json)
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
-  feature/simulation/  ui (Resultados), domain (modelos, casos de uso), data (FakeSimulationRepository)
+  feature/simulation/  ui (Formulario, Resultados), domain (modelos, validación, casos de uso),
+                       data (API con Retrofit, RemoteSimulationRepository, FakeSimulationRepository para pruebas)
   feature/auth/        ui (Registro, LoginRequiredSheet, AccountSheet), domain (validación, sesión), data (FakeAuthRepository)
   feature/leads/       reservado (US21)
   feature/history/     reservado
@@ -96,7 +118,9 @@ app/src/main/java/com/auracode/hiposim/
   MainActivity.kt, HipoSimApp.kt
 ```
 
-Pruebas en `app/src/test` (JVM) y `app/src/androidTest` (instrumentadas).
+Pruebas en `app/src/test` (JVM) y `app/src/androidTest` (instrumentadas). Las pruebas JVM del cliente de red usan un
+servidor local (MockWebServer) con los ejemplos del contrato copiados en `app/src/test/resources/contract/`. Las
+instrumentadas reemplazan los repositorios por datos fijos (`TestRepositoryModule`), así que no necesitan la API.
 
 ## Convenciones
 
@@ -123,4 +147,5 @@ feat(auth): add contextual registration form (US13)
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
 | US13 | Mockup de registro contextual | `feature/auth` | Mockup implementado |
 | US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
-| US01, US02, US04, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |
+| US01 | Simular crédito con la API, sin cuenta | `feature/simulation`, `core/network` | Implementado, pendiente de revisión |
+| US02, US04, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |
