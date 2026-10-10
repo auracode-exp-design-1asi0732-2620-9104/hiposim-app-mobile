@@ -1,18 +1,31 @@
 package com.auracode.hiposim.di
 
-import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
+import com.auracode.hiposim.feature.auth.data.DefaultAuthRepository
+import com.auracode.hiposim.feature.auth.domain.AuthRepository
+import com.auracode.hiposim.feature.leads.data.DefaultLeadsRepository
+import com.auracode.hiposim.feature.leads.domain.LeadsRepository
+import com.auracode.hiposim.feature.simulation.data.DefaultSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
+/**
+ * Binds each domain repository to its implementation.
+ *
+ * Every repository has a single implementation, and the fake or real choice is made one level below, in
+ * [ServiceModule]. The implementations are singletons themselves: they hold the session and the current simulation.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-    /** Swap for the API-backed repository when the backend exists. */
     @Binds
-    @Singleton
-    abstract fun bindSimulationRepository(impl: FakeSimulationRepository): SimulationRepository
+    abstract fun bindSimulationRepository(impl: DefaultSimulationRepository): SimulationRepository
+
+    @Binds
+    abstract fun bindAuthRepository(impl: DefaultAuthRepository): AuthRepository
+
+    @Binds
+    abstract fun bindLeadsRepository(impl: DefaultLeadsRepository): LeadsRepository
 }

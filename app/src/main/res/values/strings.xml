@@ -4,15 +4,47 @@
   <string name="action_close">Close</string>
   <string name="action_back">Back</string>
   <string name="coming_soon">Coming soon</string>
+  <string name="action_retry">Try again</string>
   <string name="loading">Loading</string>
+
+  <!-- Simulation form -->
+  <string name="simulation_form_title">Simulate your mortgage</string>
+  <string name="simulation_form_subtitle">Enter the details of the home you want. You do not need an account.</string>
+  <string name="currency_prefix">S/\u0020</string>
+  <string name="field_property_price">Home price</string>
+  <string name="field_property_price_hint">Between %1$s and %2$s</string>
+  <string name="field_down_payment">Down payment</string>
+  <string name="field_down_payment_hint">%1$s of the home price (minimum %2$s)</string>
+  <string name="field_down_payment_hint_minimum">Minimum %1$s of the home price</string>
+  <string name="field_term_years">Term</string>
+  <string name="field_term_suffix">years</string>
+  <string name="field_term_hint">From %1$d to %2$d years</string>
+  <string name="bonus_checkbox_title">Apply the Good Payer Bonus (Bono del Buen Pagador)</string>
+  <string name="bonus_checkbox_body">State subsidy for homes within a price range. If your home does not qualify, the simulation is calculated without it.</string>
+  <string name="simulation_rate_note">Reference rate: %1$s effective annual rate (TEA). Each financial institution sets its own.</string>
+  <string name="simulation_submit">Simulate</string>
+  <string name="simulation_submitting">Calculating</string>
+  <string name="error_property_price_required">Enter the home price</string>
+  <string name="error_property_price_range">Enter a value between %1$s and %2$s</string>
+  <string name="error_down_payment_required">Enter the down payment</string>
+  <string name="error_down_payment_minimum">The down payment must be at least %1$s of the home price</string>
+  <string name="error_down_payment_too_high">The down payment must be lower than the home price</string>
+  <string name="error_term_required">Enter the term in years</string>
+  <string name="error_term_range">Enter a term between %1$d and %2$d years</string>
+  <string name="error_no_connection">We could not connect. Check your internet connection and try again.</string>
+  <string name="error_service_unavailable">The service is not available right now. Try again in a few minutes.</string>
+  <string name="error_request_rejected">We could not calculate the simulation with these values. Review them and try again.</string>
+  <string name="error_unexpected">Something went wrong. Try again.</string>
 
   <!-- Results -->
   <string name="results_title">Loan results</string>
   <string name="subsidy_banner_title">State subsidy applied</string>
   <string name="subsidy_banner_body">Good Payer Bonus (Bono del Buen Pagador): %1$s discounted</string>
+  <string name="bonus_not_eligible_title">Good Payer Bonus not applied</string>
+  <string name="bonus_not_eligible_body">This home price is outside the bonus range, so the simulation was calculated without it.</string>
   <string name="monthly_payment_label">Estimated monthly payment</string>
   <string name="per_month">/ month</string>
-  <string name="payment_includes_insurance">Includes life and property insurance</string>
+  <string name="payment_excludes_insurance">Principal and interest, without insurance</string>
   <string name="tcea_label">TCEA</string>
   <string name="tcea_description">TCEA %1$s, annual effective total cost rate</string>
   <string name="property_price_label">Home price</string>
@@ -20,9 +52,16 @@
   <string name="net_loan_label">Net loan</string>
   <string name="term_label">Term</string>
   <string name="term_value">%1$d years (%2$d months)</string>
-  <string name="npv_label">NPV</string>
+  <string name="npv_label">NPV (lender\'s side)</string>
+  <string name="npv_detail">Discounted at %1$s per year</string>
+  <string name="npv_explanation">The NPV is calculated from the side of the institution that lends the money. A negative value is not a loss for you: it means the loan rate is lower than the discount rate used.</string>
   <string name="irr_label">IRR</string>
-  <string name="example_value">Example value</string>
+  <string name="irr_detail">Annual</string>
+  <string name="total_interest_label">Total interest</string>
+  <string name="total_paid_label">Total to pay</string>
+  <string name="results_missing_title">We could not find your simulation</string>
+  <string name="results_missing_body">It may have been lost when the app was closed. Run it again to see your results.</string>
+  <string name="results_new_simulation">Simulate again</string>
   <string name="monthly_insurance_label">Monthly insurance</string>
   <string name="monthly_insurance_detail">Life + property</string>
   <string name="composition_title">First installment breakdown</string>
@@ -35,6 +74,12 @@
   <string name="installment_interest">Interest</string>
   <string name="installment_insurance">Insurance</string>
   <string name="installment_balance">Remaining balance</string>
+  <string name="installment_opening_balance">Opening balance</string>
+  <string name="installment_closing_balance">Closing balance</string>
+  <string name="schedule_full_action">View full schedule</string>
+  <string name="schedule_full_title">Payment schedule</string>
+  <string name="schedule_full_subtitle">%1$d monthly installments (French method). Each one shows how it splits between interest and principal.</string>
+  <string name="schedule_row_grace">%1$s, grace period</string>
   <string name="send_quote">Send quote to real estate agencies</string>
   <string name="send_quote_hint">(Unlocks projects in your range)</string>
   <string name="download_pdf">Download PDF summary</string>
@@ -48,8 +93,29 @@
 
   <!-- Login required sheet -->
   <string name="unlock_sheet_title">Unlock real estate agencies</string>
-  <string name="unlock_sheet_body">Create your account to send your financial profile to real estate agencies.</string>
-  <string name="unlock_sheet_email">Continue with email</string>
+  <string name="unlock_sheet_body">Create your account or sign in to send your simulation to real estate agencies.</string>
+  <string name="unlock_sheet_email">Create an account with email</string>
+  <string name="unlock_sheet_sign_in">I already have an account</string>
+
+  <!-- Send to a real estate agency -->
+  <string name="send_sheet_title">Send your simulation to a real estate agency</string>
+  <string name="send_sheet_body">Choose who receives it. We share nothing until you authorize it.</string>
+  <string name="send_sheet_loading">Loading real estate agencies</string>
+  <string name="send_sheet_empty">There are no real estate agencies available yet.</string>
+  <string name="send_consent_text">I expressly authorize sharing this simulation and my contact details (name, email and phone) with the selected real estate agency, in accordance with Law No. 29733 on Personal Data Protection.</string>
+  <string name="send_submit">Send simulation</string>
+  <string name="send_submitting">Sending</string>
+  <string name="send_success">We sent your simulation to %1$s. The agency can now contact you.</string>
+  <string name="send_done">Done</string>
+  <string name="error_agency_required">Choose a real estate agency</string>
+  <string name="error_send_consent_required">You must authorize the sharing to send your simulation</string>
+  <string name="error_send_not_found">We could not find the real estate agency or your simulation. Simulate again and retry.</string>
+  <string name="error_send_rejected">We could not send your simulation. Review your choice and try again.</string>
+  <string name="error_session_expired">Your session expired. Sign in again to send your simulation.</string>
+
+  <!-- Account sheet -->
+  <string name="account_sheet_title">Your account</string>
+  <string name="account_sign_out">Sign out</string>
 
   <!-- Contextual registration -->
   <string name="register_back_to_results">Back to results</string>
@@ -70,13 +136,26 @@
   <string name="field_password_placeholder">At least 8 characters</string>
   <string name="password_show">Show password</string>
   <string name="password_hide">Hide password</string>
-  <string name="consent_text">I authorize sharing my simulation with real estate agencies and the processing of my personal data in accordance with Law No. 29733 on Personal Data Protection.</string>
+  <string name="terms_text">I accept the Terms and Conditions.</string>
+  <string name="consent_text">I authorize the processing of my personal data in accordance with Law No. 29733 on Personal Data Protection.</string>
   <string name="register_submit">Create account and connect</string>
-  <string name="register_coming_soon">Account creation is coming soon</string>
   <string name="register_footer">HipoSim is an independent simulator: it does not recommend financial institutions.</string>
   <string name="error_name_required">Enter your full name</string>
   <string name="error_email_invalid">Enter a valid email</string>
   <string name="error_phone_invalid">Enter a 9-digit mobile number starting with 9</string>
   <string name="error_password_short">Use at least 8 characters</string>
-  <string name="error_consent_required">You must accept to continue</string>
+  <string name="error_email_taken">This email is already registered</string>
+  <string name="error_terms_required">You must accept the Terms and Conditions to continue</string>
+  <string name="error_consent_required">You must authorize the processing of your data to continue</string>
+  <string name="register_have_account">I already have an account. Sign in</string>
+
+  <!-- Sign in -->
+  <string name="login_title">Welcome back</string>
+  <string name="login_subtitle">Enter your email and password to continue with your simulation.</string>
+  <string name="login_submit">Sign in</string>
+  <string name="login_submitting">Signing in</string>
+  <string name="login_no_account">I do not have an account. Sign up</string>
+  <string name="error_password_required">Enter your password</string>
+  <string name="error_invalid_credentials">The email or the password is incorrect.</string>
+  <string name="error_not_a_buyer">This account belongs to a real estate advisor. Use the web app for advisors.</string>
 </resources>

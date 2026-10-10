@@ -1,0 +1,453 @@
+[
+  {
+    "name": "Landing example with bonus",
+    "request": {
+      "propertyPrice": 280000,
+      "downPayment": 42000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 240,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 219800,
+      "monthlyInstallment": 1908.88,
+      "totalPaid": 458131.2,
+      "totalInterest": 238331.13,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -15999.08,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 18200
+      },
+      "rows": 240,
+      "firstRow": {
+        "period": 1,
+        "installment": 1908.88,
+        "interest": 1558.77,
+        "amortization": 350.11,
+        "remainingBalance": 219449.89,
+        "totalPayment": 1908.88
+      },
+      "lastRow": {
+        "period": 240,
+        "installment": 1908.88,
+        "interest": 13.44,
+        "amortization": 1895.44,
+        "remainingBalance": 0,
+        "totalPayment": 1908.88
+      }
+    }
+  },
+  {
+    "name": "Landing example without bonus",
+    "request": {
+      "propertyPrice": 280000,
+      "downPayment": 42000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 240,
+      "applyGoodPayerBonus": false
+    },
+    "expected": {
+      "financedAmount": 238000,
+      "monthlyInstallment": 2066.94,
+      "totalPaid": 496065.6,
+      "totalInterest": 258065.6,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -17323.86,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 0
+      },
+      "rows": 240,
+      "firstRow": {
+        "period": 1,
+        "installment": 2066.94,
+        "interest": 1687.84,
+        "amortization": 379.1,
+        "remainingBalance": 237620.9,
+        "totalPayment": 2066.94
+      },
+      "lastRow": {
+        "period": 240,
+        "installment": 2066.94,
+        "interest": 14.55,
+        "amortization": 2052.39,
+        "remainingBalance": 0,
+        "totalPayment": 2066.94
+      }
+    }
+  },
+  {
+    "name": "Shortest term, cheapest home",
+    "request": {
+      "propertyPrice": 120000,
+      "downPayment": 12000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 60,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 81600,
+      "monthlyInstallment": 1674.55,
+      "totalPaid": 100473,
+      "totalInterest": 18872.74,
+      "additionalCosts": 0,
+      "tcea": 0.088501,
+      "irr": 0.088501,
+      "npv": -1994.4,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 26400
+      },
+      "rows": 60,
+      "firstRow": {
+        "period": 1,
+        "installment": 1674.55,
+        "interest": 578.69,
+        "amortization": 1095.86,
+        "remainingBalance": 80504.14,
+        "totalPayment": 1674.55
+      },
+      "lastRow": {
+        "period": 60,
+        "installment": 1674.55,
+        "interest": 11.79,
+        "amortization": 1662.75,
+        "remainingBalance": 0,
+        "totalPayment": 1674.55
+      }
+    }
+  },
+  {
+    "name": "Top of the first bonus range",
+    "request": {
+      "propertyPrice": 200000,
+      "downPayment": 40000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 120,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 133600,
+      "monthlyInstallment": 1657.17,
+      "totalPaid": 198860.4,
+      "totalInterest": 65260.5,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -5904.83,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 26400
+      },
+      "rows": 120,
+      "firstRow": {
+        "period": 1,
+        "installment": 1657.17,
+        "interest": 947.46,
+        "amortization": 709.71,
+        "remainingBalance": 132890.29,
+        "totalPayment": 1657.17
+      },
+      "lastRow": {
+        "period": 120,
+        "installment": 1657.17,
+        "interest": 11.67,
+        "amortization": 1645.5,
+        "remainingBalance": 0,
+        "totalPayment": 1657.17
+      }
+    }
+  },
+  {
+    "name": "Top of the second bonus range, longest term",
+    "request": {
+      "propertyPrice": 300000,
+      "downPayment": 30000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 360,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 251800,
+      "monthlyInstallment": 1937.93,
+      "totalPaid": 697654.8,
+      "totalInterest": 445853.19,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -22700.69,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 18200
+      },
+      "rows": 360,
+      "firstRow": {
+        "period": 1,
+        "installment": 1937.93,
+        "interest": 1785.7,
+        "amortization": 152.22,
+        "remainingBalance": 251647.78,
+        "totalPayment": 1937.93
+      },
+      "lastRow": {
+        "period": 360,
+        "installment": 1937.93,
+        "interest": 13.65,
+        "amortization": 1924.28,
+        "remainingBalance": 0,
+        "totalPayment": 1937.93
+      }
+    }
+  },
+  {
+    "name": "Second bonus range",
+    "request": {
+      "propertyPrice": 350000,
+      "downPayment": 70000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 180,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 270000,
+      "monthlyInstallment": 2660.39,
+      "totalPaid": 478870.2,
+      "totalInterest": 208871.04,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -16240.51,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 10000
+      },
+      "rows": 180,
+      "firstRow": {
+        "period": 1,
+        "installment": 2660.39,
+        "interest": 1914.77,
+        "amortization": 745.62,
+        "remainingBalance": 269254.38,
+        "totalPayment": 2660.39
+      },
+      "lastRow": {
+        "period": 180,
+        "installment": 2660.39,
+        "interest": 18.73,
+        "amortization": 2641.66,
+        "remainingBalance": 0,
+        "totalPayment": 2660.39
+      }
+    }
+  },
+  {
+    "name": "Top of the third bonus range",
+    "request": {
+      "propertyPrice": 400000,
+      "downPayment": 80000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 300,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 310000,
+      "monthlyInstallment": 2498.31,
+      "totalPaid": 749493,
+      "totalInterest": 439493.95,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -25614.99,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 10000
+      },
+      "rows": 300,
+      "firstRow": {
+        "period": 1,
+        "installment": 2498.31,
+        "interest": 2198.44,
+        "amortization": 299.87,
+        "remainingBalance": 309700.13,
+        "totalPayment": 2498.31
+      },
+      "lastRow": {
+        "period": 300,
+        "installment": 2498.31,
+        "interest": 17.59,
+        "amortization": 2480.72,
+        "remainingBalance": 0,
+        "totalPayment": 2498.31
+      }
+    }
+  },
+  {
+    "name": "Just above the bonus ranges",
+    "request": {
+      "propertyPrice": 400001,
+      "downPayment": 80000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 240,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 320001,
+      "monthlyInstallment": 2779.09,
+      "totalPaid": 666981.6,
+      "totalInterest": 346980.1,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -23292.41,
+      "benefit": {
+        "eligible": false,
+        "appliedAmount": 0
+      },
+      "rows": 240,
+      "firstRow": {
+        "period": 1,
+        "installment": 2779.09,
+        "interest": 2269.37,
+        "amortization": 509.72,
+        "remainingBalance": 319491.28,
+        "totalPayment": 2779.09
+      },
+      "lastRow": {
+        "period": 240,
+        "installment": 2779.09,
+        "interest": 19.57,
+        "amortization": 2759.52,
+        "remainingBalance": 0,
+        "totalPayment": 2779.09
+      }
+    }
+  },
+  {
+    "name": "Outside the bonus ranges",
+    "request": {
+      "propertyPrice": 450000,
+      "downPayment": 90000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 240,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 360000,
+      "monthlyInstallment": 3126.46,
+      "totalPaid": 750350.4,
+      "totalInterest": 390351.35,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -26204.57,
+      "benefit": {
+        "eligible": false,
+        "appliedAmount": 0
+      },
+      "rows": 240,
+      "firstRow": {
+        "period": 1,
+        "installment": 3126.46,
+        "interest": 2553.03,
+        "amortization": 573.44,
+        "remainingBalance": 359426.56,
+        "totalPayment": 3126.46
+      },
+      "lastRow": {
+        "period": 240,
+        "installment": 3126.46,
+        "interest": 22.02,
+        "amortization": 3104.45,
+        "remainingBalance": 0,
+        "totalPayment": 3126.46
+      }
+    }
+  },
+  {
+    "name": "Most expensive home, longest term",
+    "request": {
+      "propertyPrice": 800000,
+      "downPayment": 160000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 360,
+      "applyGoodPayerBonus": true
+    },
+    "expected": {
+      "financedAmount": 640000,
+      "monthlyInstallment": 4925.63,
+      "totalPaid": 1773226.8,
+      "totalInterest": 1133225.25,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -57699.08,
+      "benefit": {
+        "eligible": false,
+        "appliedAmount": 0
+      },
+      "rows": 360,
+      "firstRow": {
+        "period": 1,
+        "installment": 4925.63,
+        "interest": 4538.72,
+        "amortization": 386.91,
+        "remainingBalance": 639613.09,
+        "totalPayment": 4925.63
+      },
+      "lastRow": {
+        "period": 360,
+        "installment": 4925.63,
+        "interest": 34.69,
+        "amortization": 4890.94,
+        "remainingBalance": 0,
+        "totalPayment": 4925.63
+      }
+    }
+  },
+  {
+    "name": "Bonus not requested",
+    "request": {
+      "propertyPrice": 150000,
+      "downPayment": 15000,
+      "annualEffectiveRate": 0.0885,
+      "termInMonths": 180,
+      "applyGoodPayerBonus": false
+    },
+    "expected": {
+      "financedAmount": 135000,
+      "monthlyInstallment": 1330.2,
+      "totalPaid": 239436,
+      "totalInterest": 104435.51,
+      "additionalCosts": 0,
+      "tcea": 0.0885,
+      "irr": 0.0885,
+      "npv": -8119.78,
+      "benefit": {
+        "eligible": true,
+        "appliedAmount": 0
+      },
+      "rows": 180,
+      "firstRow": {
+        "period": 1,
+        "installment": 1330.2,
+        "interest": 957.39,
+        "amortization": 372.81,
+        "remainingBalance": 134627.19,
+        "totalPayment": 1330.2
+      },
+      "lastRow": {
+        "period": 180,
+        "installment": 1330.2,
+        "interest": 9.37,
+        "amortization": 1320.83,
+        "remainingBalance": 0,
+        "totalPayment": 1330.2
+      }
+    }
+  }
+]

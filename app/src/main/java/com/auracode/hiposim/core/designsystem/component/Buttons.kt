@@ -67,9 +67,11 @@ fun PrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingIcon: ImageVector? = null,
+    enabled: Boolean = true,
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier.defaultMinSize(minHeight = Spacing.minTouchTarget + Spacing.xs),
         shape = MaterialTheme.shapes.small,
         contentPadding = ButtonContentPadding,

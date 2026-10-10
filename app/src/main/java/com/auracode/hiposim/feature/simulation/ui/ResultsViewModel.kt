@@ -2,7 +2,12 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
+import com.auracode.hiposim.core.navigation.MainDestination
+import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
+import com.auracode.hiposim.feature.auth.domain.SessionState
+import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
+import com.auracode.hiposim.feature.auth.ui.AccountUi
+import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,29 +20,97 @@ import javax.inject.Inject
 class ResultsViewModel
     @Inject
     constructor(
-        private val getLoanSimulation: GetLoanSimulationUseCase,
+        private val observeCurrentSimulation: ObserveCurrentSimulationUseCase,
+        private val observeSession: ObserveSessionUseCase,
+        private val signOut: SignOutUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(ResultsUiState())
         val uiState: StateFlow<ResultsUiState> = _uiState.asStateFlow()
 
         init {
             viewModelScope.launch {
-                val summary = getLoanSimulation().toResultsSummaryUi()
-                _uiState.update { it.copy(isLoading = false, summary = summary) }
+                observeCurrentSimulation().collect { simulation ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            summary = simulation?.toResultsSummaryUi(),
+                            isSimulationMissing = simulation == null,
+                        )
+                    }
+                }
+            }
+            viewModelScope.launch {
+                observeSession().collect { session ->
+                    val account =
+                        (session as? SessionState.Authenticated)?.user?.let {
+                            AccountUi(
+                                it.fullName,
+                                it.email,
+                            )
+                        }
+                    _uiState.update { it.copy(account = account, isUnlockSheetVisible = false) }
+                }
             }
         }
 
-        /** Guests must sign up before sending the quote, so this opens the unlock sheet. */
-        fun onSendQuoteClick() = showUnlockSheet()
+        /** Guests must sign up or sign in first. Signed in buyers choose an agency and authorize the sending. */
+        fun onSendQuoteClick() = requireAccount { showSendSheet() }
 
-        /** Realtors, History and Profile need an account. */
-        fun onLockedDestinationClick() = showUnlockSheet()
+        /** The PDF summary is not generated yet. */
+        fun onDownloadPdfClick() = showComingSoon()
+
+        fun onDestinationClick(destination: MainDestination) {
+            when (destination) {
+                MainDestination.Simulate -> Unit
+                MainDestination.Profile -> requireAccount { showAccountSheet() }
+                MainDestination.Realtors -> requireAccount { showSendSheet() }
+                MainDestination.History -> requireAccount { showComingSoon() }
+            }
+        }
 
         fun onUnlockSheetDismiss() {
             _uiState.update { it.copy(isUnlockSheetVisible = false) }
         }
 
-        private fun showUnlockSheet() {
-            _uiState.update { it.copy(isUnlockSheetVisible = true) }
+        fun onSendSheetDismiss() {
+            _uiState.update { it.copy(isSendSheetVisible = false) }
+        }
+
+        fun onAccountSheetDismiss() {
+            _uiState.update { it.copy(isAccountSheetVisible = false) }
+        }
+
+        fun onSignOutClick() {
+            _uiState.update { it.copy(isAccountSheetVisible = false) }
+            viewModelScope.launch { signOut() }
+        }
+
+        fun onComingSoonShown() {
+            _uiState.update { it.copy(showComingSoon = false) }
+        }
+
+        private fun requireAccount(whenSignedIn: () -> Unit) {
+            if (_uiState.value.isAuthenticated) {
+                whenSignedIn()
+            } else {
+                _uiState.update {
+                    it.copy(
+                        isUnlockSheetVisible = true,
+                    )
+                }
+            }
+        }
+
+        private fun showComingSoon() {
+            _uiState.update { it.copy(showComingSoon = true) }
+        }
+
+        /** Nothing can be sent without a simulation on screen. */
+        private fun showSendSheet() {
+            if (_uiState.value.summary != null) _uiState.update { it.copy(isSendSheetVisible = true) }
+        }
+
+        private fun showAccountSheet() {
+            _uiState.update { it.copy(isAccountSheetVisible = true) }
         }
     }

@@ -6,14 +6,67 @@ Material 3. La elección de tecnología está documentada en [docs/adr/0001-mobi
 
 ## Estado
 
-Primer avance ejecutable con dos pantallas basadas en los mockups de `docs/design/mockups/`:
+La app arranca en el formulario de simulación y llega a los resultados con la respuesta de la API:
 
-1. **Resultados del Crédito**: subsidio (Bono del Buen Pagador), cuota, TCEA, VAN, TIR, plazo, seguro, cronograma
-   inicial, enviar cotización, PDF (aviso "Disponible próximamente") y barra inferior con destinos bloqueados.
-2. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
+1. **Simulación** (US01): valor de la vivienda, cuota inicial, plazo y casilla del Bono del Buen Pagador. Valida en
+   el cliente con los rangos del Landing (S/ 120,000 a 800,000, cuota inicial mínima 10%, plazo de 5 a 30 años) y
+   muestra junto a cada campo los errores que devuelva la API, que es la fuente de verdad.
+2. **Resultados del Crédito** (US04): muestra la simulación calculada desde el formulario, con los valores reales
+   de cuota (capital e interés, sin seguros), TCEA, VAN, TIR, intereses totales, total a pagar, seguro y cronograma
+   inicial. Si el bono se pidió y la vivienda está fuera de rango, lo explica sin tratarlo como error. Si no hay
+   simulación que mostrar (por ejemplo, el sistema recreó la app), ofrece volver a simular. Mantiene enviar
+   cotización, PDF (aviso "Disponible próximamente") y la barra inferior con destinos bloqueados.
+3. **Cronograma de pagos** (US02): desde Resultados, "Ver cronograma completo" abre todas las cuotas (hasta 360) en
+   una lista perezosa, con fecha, cuota, saldo inicial, interés, amortización y saldo final de cada mes.
+4. **Registro** (US13): nombre, correo, celular y contraseña, con dos aceptaciones obligatorias y desmarcadas por
+   defecto: Términos y Condiciones, y tratamiento de datos personales (Ley N° 29733).
+5. **Envío a inmobiliarias** (US21): con sesión iniciada, "Enviar cotización a inmobiliarias" abre un selector de
+   inmobiliaria con una casilla de consentimiento expreso (Ley N° 29733), desmarcada por defecto. Sin esa
+   autorización no se comparte nada. Sin sesión, pide crear una cuenta o iniciar sesión.
+6. **Inicio de sesión** (US26): correo y contraseña. Si las credenciales no son válidas, el mensaje no indica cuál
+   de los dos datos es incorrecto.
 
-Los datos salen de `FakeSimulationRepository`. El VAN y la TIR son valores de ejemplo hasta que exista el motor
-financiero. No hay API, autenticación real ni PDF todavía.
+La simulación sigue el contrato `POST /api/simulations` (v0.1.0). Mientras no exista el host de la API, responde
+`FakeSimulationService`, que respeta la forma del contrato y reproduce los números de sus ejemplos; ver
+"Conexión con la API".
+
+El VAN llega negativo porque la API lo calcula desde el lado del prestamista. La pantalla lo rotula "VAN (lado del
+prestamista)", indica la tasa de descuento y aclara que no es una pérdida para el Comprador. Pendiente de decisión
+del equipo (pregunta abierta 6 del contrato): cómo presentarlo, o si mostrarlo.
+
+La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFFECTIVE_RATE` (TEA 0.0885, es decir
+8.85%), la tasa de referencia acordada por el equipo y la misma que muestra el Landing. Con el ejemplo del Landing
+(S/ 280,000, 15% de inicial, 20 años, con bono) la cuota es S/ 1,909.
+
+### Envío a inmobiliarias
+
+`POST /api/leads` sigue el contrato del backend (`src/HipoSim.Api/Leads/LeadContracts.cs`): `agencyId`,
+`simulationId` y `acceptedContact`, solo con sesión de Comprador.
+
+- **La simulación debe ser del Comprador.** La API solo acepta un lead si la simulación se calculó con el token de
+  ese Comprador. Como en la app se simula primero y la cuenta se crea después, al enviar se vuelve a calcular la
+  misma simulación con la sesión iniciada (`SimulationRepository.recalculateCurrent`) y se envía ese
+  `simulationId` nuevo. Las cifras no cambian.
+- **Inmobiliarias.** `GET /api/agencies` responde `[{id, name}]` (`AgenciesService`) y ya está en `develop` del
+  backend. Contra un backend anterior a ese endpoint, `-Phiposim.useFakeAgencies=true` (`USE_FAKE_AGENCIES`, por
+  defecto `false`) mantiene en memoria la inmobiliaria demo del seed aunque el resto de la app use la API.
+- **Errores.** 404 (inmobiliaria o simulación inexistente), sin conexión y 5xx se muestran en la hoja y permiten
+  reintentar. Un 401 o 403 cierra la sesión y pide iniciarla de nuevo.
+- **Con `USE_FAKE_API`** el envío solo simula el 201: no se guarda nada ni lo recibe ninguna inmobiliaria.
+
+### Cuentas y sesión
+
+El registro y el inicio de sesión usan `POST /api/auth/register` y `POST /api/auth/login` del contrato v0.1.0, a
+través de `AuthService` y `DefaultAuthRepository`. Con `USE_FAKE_API` activo responde `FakeAuthService`, con cuentas
+en memoria y los mismos errores que el servidor.
+
+- Al registrarte o iniciar sesión, el `accessToken` se guarda en `TokenStore` y `AuthInterceptor` lo adjunta a las
+  peticiones siguientes. "Cerrar sesión" (hoja de "Perfil") lo borra.
+- La sesión y el token viven en memoria: se pierden al cerrar la app y hay que volver a iniciar sesión.
+- Errores del registro: el 409 se muestra como "Este correo ya está registrado" junto al correo, y los 400 junto al
+  campo que el servidor indique.
+- La app es del Comprador (rol `buyer`). Una cuenta de asesor no inicia sesión aquí: se le indica usar la web.
+- A las pantallas de cuenta se llega desde Resultados, por la hoja "Desbloquea Inmobiliarias", y se enlazan entre sí.
 
 ## Requisitos
 
@@ -46,6 +99,20 @@ Capturas para el informe:
 & "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" exec-out screencap -p > captura.png
 ```
 
+## Release y distribución
+
+```powershell
+.\gradlew assembleRelease
+```
+
+Genera `app/build/outputs/apk/release/hiposim-<versión>-demo-release.apk`, que responde desde memoria y funciona sin
+servidor. Con `-Phiposim.useFakeApi=false` y `-Phiposim.apiBaseUrl.release=https://<host>/` genera
+`hiposim-<versión>-api-release.apk`, conectado a la API desplegada. La firma usa un keystore local que no está en el
+repositorio; sin él, el APK sale sin firmar.
+
+La firma, los dos APK y los comandos de Firebase App Distribution están en
+[docs/firebase-app-distribution.md](docs/firebase-app-distribution.md).
+
 ## Pruebas y calidad
 
 ```powershell
@@ -56,6 +123,106 @@ Capturas para el informe:
 
 El workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) corre ktlint, lint, pruebas unitarias y
 `assembleDebug` en cada push a `main` y `develop` y en cada pull request.
+
+### Prueba de punta a punta con la API real
+
+El 10 de octubre de 2026 se recorrió el flujo completo en el emulador (Pixel 10 Pro) contra la API local de
+`hiposim-backEnd` con PostgreSQL, sin servicios en memoria:
+
+```powershell
+.\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5080/"
+```
+
+| Paso | Endpoint | Resultado | Captura |
+|---|---|---|---|
+| Simulación (S/ 280,000, inicial S/ 42,000, 20 años, con bono) | `POST /api/simulations` | Cuota S/ 1,909, TCEA 8.85%, bono S/ 18,200 | [formulario](docs/screenshots/e2e-01-formulario.png), [resultados](docs/screenshots/e2e-02-resultados.png) |
+| Cronograma completo | Ninguno (usa la simulación ya calculada) | 240 cuotas, de la primera a la última | [cronograma](docs/screenshots/e2e-03-cronograma.png) |
+| Registro del Comprador | `POST /api/auth/register` | 201, sesión iniciada | [hoja de cuenta](docs/screenshots/e2e-04-requiere-cuenta.png), [registro](docs/screenshots/e2e-05-registro.png), [sesión](docs/screenshots/e2e-06-registro-exitoso.png), [perfil](docs/screenshots/e2e-07-perfil.png) |
+| Inicio de sesión | `POST /api/auth/login` | 401 con mensaje genérico y luego 200 | [credenciales inválidas](docs/screenshots/e2e-08-login-credenciales-invalidas.png), [login](docs/screenshots/e2e-09-login.png) |
+| Envío a la inmobiliaria demo | `GET /api/agencies`, `POST /api/simulations` (recálculo con sesión), `POST /api/leads` | 201, lead en estado `New` | [hoja de envío](docs/screenshots/e2e-10-enviar-a-inmobiliaria.png), [confirmación](docs/screenshots/e2e-11-envio-exitoso.png) |
+
+El lead se comprobó del lado del Asesor: `GET /api/leads` con la cuenta de asesor del seed lo devuelve con la cuota
+de S/ 1,908.88 y la TCEA de 0.0885, y aparece en la bandeja de la aplicación web (`develop` de `hiposim-webApp`).
+Los datos del Comprador son de prueba.
+
+## Conexión con la API
+
+El contrato es `docs/api-contract/openapi.v0.yaml` del repo `hiposim-backEnd` (v0.1.0). La capa de red vive en
+`core/network` y se arma en `di/NetworkModule.kt` (Retrofit, OkHttp y kotlinx.serialization).
+
+| Ajuste | `BuildConfig` | Valor por defecto | Propiedad de Gradle |
+|---|---|---|---|
+| URL base en debug | `API_BASE_URL` | `http://10.0.2.2:5000/` | `hiposim.apiBaseUrl.debug` |
+| URL base en release | `API_BASE_URL` | `https://api.hiposim.invalid/` (marcador) | `hiposim.apiBaseUrl.release` |
+| Implementación falsa o real | `USE_FAKE_API` | `true` | `hiposim.useFakeApi` |
+| Lista de inmobiliarias en memoria | `USE_FAKE_AGENCIES` | `false` | `hiposim.useFakeAgencies` |
+
+Las propiedades se definen en `~/.gradle/gradle.properties` o en la línea de comandos, sin tocar el código. La URL
+debe terminar en `/`. Para probar contra la API real en el emulador:
+
+```powershell
+.\gradlew installDebug "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.debug=http://10.0.2.2:5000/"
+```
+
+- **Falsa o real**: mientras no exista el host de la API, `USE_FAKE_API` vale `true` y cada servicio es una
+  implementación en memoria que respeta la forma del contrato (por ejemplo `FakeSimulationService`). La elección se
+  hace solo en `di/ServiceModule.kt`; el repositorio, el dominio y la UI son los mismos en ambos casos.
+- **HTTP sin cifrar**: permitido solo en debug y solo hacia `10.0.2.2` y `localhost`
+  (`app/src/debug/res/xml/network_security_config.xml`). Release exige HTTPS.
+- **Token JWT**: `AuthInterceptor` agrega `Authorization: Bearer <accessToken>` cuando `TokenStore.token` tiene valor.
+  El registro y el inicio de sesión deben guardar ahí el `accessToken` y limpiarlo al cerrar sesión. Sin sesión la
+  petición sale sin cabecera (la simulación es pública).
+- **Registro de peticiones**: solo en debug (Logcat, etiqueta `okhttp.OkHttpClient`), con el token oculto.
+
+### Errores
+
+Los repositorios envuelven cada llamada con `safeApiCall { ... }` y devuelven `ApiResult<T>`, nunca lanzan. Un fallo
+llega como `ApiResult.Failure(error)` con uno de estos `ApiError`:
+
+| `ApiError` | Cuándo | Qué hace la UI |
+|---|---|---|
+| `NoConnection` | Sin red, tiempo agotado o servidor inaccesible | Mensaje de conexión y reintento |
+| `Validation(fieldErrors, title)` | 400 con `application/problem+json` | Muestra cada mensaje junto a su campo |
+| `Unauthorized(title)` | 401 | Credenciales inválidas o sesión vencida |
+| `Conflict(title)` | 409 | Por ejemplo, correo ya registrado |
+| `Client(code, title)` | Otro 4xx | Mensaje genérico |
+| `Server(code)` | 5xx | Mensaje genérico y reintento |
+| `Unexpected(cause)` | Respuesta que no coincide con el DTO u otro fallo | Mensaje genérico |
+
+`fieldErrors` usa como clave la propiedad de la petición en camelCase (`downPayment`), igual que el DTO. Si el
+servidor responde con PascalCase (`DownPayment`), se normaliza.
+
+### Agregar un servicio nuevo
+
+`feature/simulation/data` es el ejemplo completo. Los pasos:
+
+1. **DTO** en `feature/<nombre>/data`, con `@Serializable` y los mismos nombres del contrato. Las tasas son
+   fracciones (`0.085` es 8.5%).
+2. **Interfaz Retrofit** en la misma carpeta, con rutas relativas sin `/` inicial:
+
+   ```kotlin
+   interface AuthService {
+       @POST("api/auth/login")
+       suspend fun login(@Body request: LoginRequestDto): LoginResponseDto
+   }
+   ```
+
+3. **Servicio falso** que implementa esa misma interfaz y responde con la forma del contrato. Para simular un error,
+   lanza la misma `HttpException` que lanzaría Retrofit (ver `FakeSimulationService.validationError`).
+4. **Hilt**: en `di/ServiceModule.kt`, provee el falso o `retrofit.get().create(AuthService::class.java)` según
+   `BuildConfig.USE_FAKE_API`.
+5. **Repositorio** (uno solo) que implementa la interfaz del dominio, llama al servicio dentro de `safeApiCall`,
+   convierte el DTO al modelo del dominio y traduce `ApiError` a un resultado propio del dominio (ver
+   `SimulationResult` y `DefaultSimulationRepository`). `ApiResult` y `ApiError` no salen de la capa `data`: el
+   dominio y la UI no conocen HTTP. Se enlaza en `di/RepositoryModule.kt`.
+
+6. **Pruebas**: el mapeo del DTO con los ejemplos del contrato guardados en `app/src/test/resources/contract`
+   (ver `SimulationMapperTest`), el servicio falso contra esos mismos números, y el repositorio contra
+   `MockWebServer` (ver `DefaultSimulationRepositoryTest`). Además, `FakeSimulationParityTest` compara el servicio
+   falso con 11 casos calculados por el motor real de `hiposim-backEnd` con la TEA de 8.85%
+   (`app/src/test/resources/engine-parity`, con el bono aplicado, no solicitado y fuera de rango). Como la app usa el
+   falso por defecto, esa prueba asegura que la cuota que se ve es la del motor. Si el motor cambia a propósito, se
+   regenera el archivo con `make_engine_parity.py` (ver el README de esa carpeta).
 
 ## Idioma
 
@@ -73,13 +240,17 @@ implementaciones en `di/`, de modo que la UI nunca conoce la capa `data`.
 app/src/main/java/com/auracode/hiposim/
   core/designsystem/   theme (Color, Type, Shape, Spacing) y componentes reutilizables
   core/navigation/     rutas tipadas y NavHost
+  core/network/        ApiResult, ApiError, safeApiCall, AuthInterceptor, TokenStore
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
-  feature/simulation/  ui (Resultados), domain (modelos, casos de uso), data (FakeSimulationRepository)
-  feature/auth/        ui (Registro, LoginRequiredSheet), domain (validación), data (pendiente)
-  feature/leads/       reservado (US21)
+  feature/simulation/  ui (Formulario, Resultados, Cronograma), domain (modelos, validación, casos de uso),
+                       data (DTO del contrato, SimulationService, FakeSimulationService, repositorio)
+  feature/auth/        ui (Registro, Inicio de sesión, LoginRequiredSheet, AccountSheet), domain (validación, sesión),
+                       data (DTO del contrato, AuthService, FakeAuthService, repositorio)
+  feature/leads/       ui (hoja de envío), domain (inmobiliarias, lead, casos de uso),
+                       data (DTO del contrato, LeadsService, AgenciesService, falsos, repositorio)
   feature/history/     reservado
   feature/comparison/  reservado
-  di/                  módulos de Hilt
+  di/                  módulos de Hilt (red, servicios falsos o reales, repositorios)
   MainActivity.kt, HipoSimApp.kt
 ```
 
@@ -108,6 +279,11 @@ feat(auth): add contextual registration form (US13)
 | Historia | Alcance | Feature | Estado |
 |---|---|---|---|
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
-| US13 | Mockup de registro contextual | `feature/auth` | Mockup implementado |
-| US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
-| US01, US02, US04, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |
+| US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho y probado con la API real |
+| US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho y probado con la API real |
+| US21 | Enviar la simulación a una inmobiliaria con consentimiento, `POST /api/leads` | `feature/leads` | Hecho y probado con la API real |
+| US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
+| US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
+| US02 | Ver cronograma de pagos completo desde Resultados | `feature/simulation` | Hecho; usa el cronograma de la simulación ya calculada |
+| US05 | Bono del Buen Pagador | `feature/simulation` | Hecho (casilla en el formulario, verificado contra el motor) |
+| US06, US07, US08 | Fuera de esta entrega | Por asignar | Pendiente |
