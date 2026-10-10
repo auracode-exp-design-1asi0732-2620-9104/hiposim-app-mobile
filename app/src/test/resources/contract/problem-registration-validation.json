@@ -1,0 +1,15 @@
+{
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "email": [
+      "A valid email address is required."
+    ],
+    "acceptedTerms": [
+      "Terms and Conditions must be accepted."
+    ],
+    "acceptedDataProcessing": [
+      "Personal data processing must be accepted."
+    ]
+  }
+}

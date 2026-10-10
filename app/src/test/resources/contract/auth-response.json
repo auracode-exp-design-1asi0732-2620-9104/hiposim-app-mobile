@@ -1,0 +1,11 @@
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature",
+  "tokenType": "Bearer",
+  "expiresIn": 28800,
+  "user": {
+    "id": "7c1d0f52-4b3e-4a8d-9a1e-2f6b8c3d5e10",
+    "fullName": "Ana Torres",
+    "email": "ana.torres@example.com",
+    "role": "buyer"
+  }
+}

@@ -9,5 +9,12 @@ interface AuthRepository {
     /** Creates the account and, on success, signs the user in. */
     suspend fun register(form: RegistrationForm): RegisterResult
 
+    /** Starts a session with an existing buyer account. */
+    suspend fun signIn(
+        email: String,
+        password: String,
+    ): SignInResult
+
+    /** Ends the session and forgets its token. */
     suspend fun signOut()
 }

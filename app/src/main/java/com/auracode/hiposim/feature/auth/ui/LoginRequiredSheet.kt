@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Mail
@@ -26,14 +27,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.auracode.hiposim.R
 import com.auracode.hiposim.core.designsystem.component.AccentButton
+import com.auracode.hiposim.core.designsystem.component.OutlinedActionButton
 import com.auracode.hiposim.core.designsystem.theme.HipoSimTheme
 import com.auracode.hiposim.core.designsystem.theme.Spacing
 
-/** Bottom sheet that asks guests to create an account before using features that need one. */
+/** Bottom sheet that asks guests to create an account, or sign in, before using features that need one. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginRequiredSheet(
     onContinueWithEmail: () -> Unit,
+    onSignIn: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -86,6 +89,12 @@ fun LoginRequiredSheet(
                 text = stringResource(R.string.unlock_sheet_email),
                 icon = Icons.Filled.Mail,
                 onClick = onContinueWithEmail,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedActionButton(
+                text = stringResource(R.string.unlock_sheet_sign_in),
+                icon = Icons.AutoMirrored.Filled.Login,
+                onClick = onSignIn,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

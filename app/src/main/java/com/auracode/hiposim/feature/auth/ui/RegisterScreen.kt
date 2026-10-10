@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,13 +23,13 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -48,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.auracode.hiposim.R
+import com.auracode.hiposim.core.designsystem.component.ConsentCheckbox
+import com.auracode.hiposim.core.designsystem.component.ErrorBanner
 import com.auracode.hiposim.core.designsystem.component.HipoSimCard
 import com.auracode.hiposim.core.designsystem.component.HipoSimTextField
 import com.auracode.hiposim.core.designsystem.component.PrimaryButton
@@ -59,6 +59,7 @@ import com.auracode.hiposim.feature.auth.domain.RegistrationField
 fun RegisterScreen(
     onBack: () -> Unit,
     onRegistered: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -75,8 +76,10 @@ fun RegisterScreen(
         onPhoneChange = viewModel::onPhoneChange,
         onPasswordChange = viewModel::onPasswordChange,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibility,
+        onTermsChange = viewModel::onTermsChange,
         onConsentChange = viewModel::onConsentChange,
         onSubmit = viewModel::onSubmit,
+        onNavigateToLogin = onNavigateToLogin,
     )
 }
 
@@ -90,8 +93,10 @@ private fun RegisterContent(
     onPhoneChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onTogglePasswordVisibility: () -> Unit,
+    onTermsChange: (Boolean) -> Unit,
     onConsentChange: (Boolean) -> Unit,
     onSubmit: () -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -159,8 +164,10 @@ private fun RegisterContent(
                 onPhoneChange = onPhoneChange,
                 onPasswordChange = onPasswordChange,
                 onTogglePasswordVisibility = onTogglePasswordVisibility,
+                onTermsChange = onTermsChange,
                 onConsentChange = onConsentChange,
                 onSubmit = onSubmit,
+                onNavigateToLogin = onNavigateToLogin,
             )
 
             Text(
@@ -245,8 +252,10 @@ private fun RegistrationForm(
     onPhoneChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onTogglePasswordVisibility: () -> Unit,
+    onTermsChange: (Boolean) -> Unit,
     onConsentChange: (Boolean) -> Unit,
     onSubmit: () -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     val form = state.form
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -256,7 +265,7 @@ private fun RegistrationForm(
             label = stringResource(R.string.field_name),
             placeholder = stringResource(R.string.field_name_placeholder),
             leadingIcon = Icons.Filled.Person,
-            errorText = state.errors[RegistrationField.FullName]?.let { errorMessage(it) },
+            errorText = fieldError(state, RegistrationField.FullName),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -266,7 +275,7 @@ private fun RegistrationForm(
             label = stringResource(R.string.field_email),
             placeholder = stringResource(R.string.field_email_placeholder),
             leadingIcon = Icons.Filled.Mail,
-            errorText = state.errors[RegistrationField.Email]?.let { errorMessage(it) },
+            errorText = fieldError(state, RegistrationField.Email),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -277,7 +286,7 @@ private fun RegistrationForm(
             placeholder = stringResource(R.string.field_phone_placeholder),
             prefix = stringResource(R.string.field_phone_prefix),
             leadingIcon = Icons.Filled.Phone,
-            errorText = state.errors[RegistrationField.Phone]?.let { errorMessage(it) },
+            errorText = fieldError(state, RegistrationField.Phone),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -287,7 +296,7 @@ private fun RegistrationForm(
             label = stringResource(R.string.field_password),
             placeholder = stringResource(R.string.field_password_placeholder),
             leadingIcon = Icons.Filled.Lock,
-            errorText = state.errors[RegistrationField.Password]?.let { errorMessage(it) },
+            errorText = fieldError(state, RegistrationField.Password),
             visualTransformation =
                 if (state.isPasswordVisible) {
                     VisualTransformation.None
@@ -314,11 +323,21 @@ private fun RegistrationForm(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        ConsentRow(
-            accepted = form.consentAccepted,
-            error = state.errors[RegistrationField.Consent]?.let { errorMessage(it) },
-            onChange = onConsentChange,
+        // Two separate acceptances, as the API asks for them. Neither starts checked.
+        ConsentCheckbox(
+            text = stringResource(R.string.terms_text),
+            checked = form.termsAccepted,
+            onCheckedChange = onTermsChange,
+            error = fieldError(state, RegistrationField.Terms),
         )
+        ConsentCheckbox(
+            text = stringResource(R.string.consent_text),
+            checked = form.consentAccepted,
+            onCheckedChange = onConsentChange,
+            error = fieldError(state, RegistrationField.Consent),
+        )
+
+        state.failure?.let { ErrorBanner(stringResource(it.messageRes())) }
 
         PrimaryButton(
             text = stringResource(R.string.register_submit),
@@ -327,43 +346,25 @@ private fun RegistrationForm(
             enabled = !state.isSubmitting,
             modifier = Modifier.fillMaxWidth(),
         )
-    }
-}
 
-@Composable
-private fun ConsentRow(
-    accepted: Boolean,
-    error: String?,
-    onChange: (Boolean) -> Unit,
-) {
-    Column {
-        Row(
+        TextButton(
+            onClick = onNavigateToLogin,
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .heightIn(min = Spacing.minTouchTarget)
-                    .toggleable(value = accepted, role = Role.Checkbox, onValueChange = onChange),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    .heightIn(min = Spacing.minTouchTarget),
         ) {
-            // The whole row is the toggle target, so the checkbox itself does not handle clicks.
-            Checkbox(checked = accepted, onCheckedChange = null)
-            Text(
-                text = stringResource(R.string.consent_text),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (error != null) {
-            Text(
-                text = error,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(start = Spacing.xl + Spacing.sm),
-            )
+            Text(text = stringResource(R.string.register_have_account), style = MaterialTheme.typography.labelLarge)
         }
     }
 }
+
+/** The client message when there is one, otherwise what the API said about the field. */
+@Composable
+private fun fieldError(
+    state: RegisterUiState,
+    field: RegistrationField,
+): String? = state.errors[field]?.let { errorMessage(it) } ?: state.serverErrors[field]
 
 @Composable
 private fun errorMessage(error: RegistrationError): String =
@@ -373,6 +374,7 @@ private fun errorMessage(error: RegistrationError): String =
             RegistrationError.EmailInvalid -> R.string.error_email_invalid
             RegistrationError.PhoneInvalid -> R.string.error_phone_invalid
             RegistrationError.PasswordTooShort -> R.string.error_password_short
+            RegistrationError.TermsRequired -> R.string.error_terms_required
             RegistrationError.ConsentRequired -> R.string.error_consent_required
             RegistrationError.EmailAlreadyRegistered -> R.string.error_email_taken
         },

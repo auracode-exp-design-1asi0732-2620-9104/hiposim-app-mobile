@@ -1,7 +1,7 @@
 package com.auracode.hiposim.feature.simulation.ui
 
 import com.auracode.hiposim.core.navigation.MainDestination
-import com.auracode.hiposim.feature.auth.data.FakeAuthRepository
+import com.auracode.hiposim.feature.auth.data.DefaultAuthRepository
 import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
@@ -11,6 +11,7 @@ import com.auracode.hiposim.feature.simulation.domain.SimulationParams
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import com.auracode.hiposim.testing.MainDispatcherRule
 import com.auracode.hiposim.testing.contractExampleParams
+import com.auracode.hiposim.testing.fakeBackedAuthRepository
 import com.auracode.hiposim.testing.fakeBackedSimulationRepository
 import com.auracode.hiposim.testing.simulationRepositoryWithContractExample
 import kotlinx.coroutines.runBlocking
@@ -28,12 +29,12 @@ class ResultsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private lateinit var authRepository: FakeAuthRepository
+    private lateinit var authRepository: DefaultAuthRepository
     private lateinit var viewModel: ResultsViewModel
 
     @Before
     fun setUp() {
-        authRepository = FakeAuthRepository()
+        authRepository = fakeBackedAuthRepository()
         viewModel = viewModelWith(runBlocking { simulationRepositoryWithContractExample() })
     }
 
@@ -51,6 +52,7 @@ class ResultsViewModelTest {
                 email = "carlos@ejemplo.com",
                 phone = "987654321",
                 password = "secret123",
+                termsAccepted = true,
                 consentAccepted = true,
             ),
         )
