@@ -7,6 +7,11 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+// The base URL always ends with a slash (Retrofit requirement). The release one is a reserved ".invalid" name until the
+// API is deployed: set it with -Phiposim.apiBaseUrl.release=https://<host>/ when building a release.
+val debugApiBaseUrl = providers.gradleProperty("hiposim.apiBaseUrl.debug").getOrElse("http://10.0.2.2:5000/")
+val releaseApiBaseUrl = providers.gradleProperty("hiposim.apiBaseUrl.release").getOrElse("https://hiposim-api.invalid/")
+
 android {
     namespace = "com.auracode.hiposim"
     compileSdk {
@@ -24,7 +29,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 10.0.2.2 is the host machine as seen from the Android emulator. Override with
+            // -Phiposim.apiBaseUrl.debug=http://<lan-ip>:5000/ to test on a physical device.
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
+        }
         release {
+            buildConfigField("String", "API_BASE_URL", "\"$releaseApiBaseUrl\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -40,7 +51,7 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = false
+        buildConfig = true
     }
 
     lint {
@@ -65,8 +76,12 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
-    // Prepared for the future REST client (Retrofit/OkHttp are intentionally not added yet).
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -76,6 +91,8 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(platform(libs.okhttp.bom))
+    testImplementation(libs.okhttp.mockwebserver)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
