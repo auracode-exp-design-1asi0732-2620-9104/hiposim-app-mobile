@@ -101,8 +101,8 @@ Comprobar la firma:
 & "$env:LOCALAPPDATA\Android\Sdk\build-tools\<versión>\apksigner.bat" verify --print-certs app\build\outputs\apk\release\hiposim-0.1.0-demo-release.apk
 ```
 
-Antes de cada subida nueva hay que aumentar `versionCode` en `app/build.gradle.kts`, y `appVersionName` si cambia
-la versión visible.
+Cada subida nueva necesita un `versionCode` mayor: se pasa con `-Phiposim.versionCode=<n>` (por defecto 1). Cambia
+`appVersionName` en `app/build.gradle.kts` si cambia la versión visible.
 
 ## Configurar Firebase (una sola vez)
 
@@ -151,6 +151,34 @@ firebase appdistribution:distribute app\build\outputs\apk\release\hiposim-0.1.0-
 Opciones útiles: `--testers "correo1@ejemplo.com,correo2@ejemplo.com"` en lugar de `--groups`, y
 `--release-notes-file notas.txt` para notas largas. Cada verificador recibe un correo con el enlace de instalación.
 
-Si la subida se automatiza más adelante, usar una cuenta de servicio con la variable `GOOGLE_APPLICATION_CREDENTIALS`
-apuntando a un archivo fuera del repositorio, o un secreto del CI. No usar `firebase login:ci` con el token en un
-archivo versionado.
+## Distribución automática con GitHub Actions
+
+El workflow [.github/workflows/distribute.yml](../.github/workflows/distribute.yml) compila el APK `api` firmado y
+lo sube a Firebase App Distribution en cada push a `develop` (también se puede lanzar a mano desde la pestaña
+Actions). Usa como `versionCode` el número de ejecución más 100, así cada subida es mayor que la anterior.
+
+Necesita estos secretos del repositorio (Settings, Secrets and variables, Actions, pestaña Secrets). Mientras falte
+alguno, el workflow termina con un aviso y no sube nada:
+
+| Secreto | Valor |
+|---|---|
+| `RELEASE_KEYSTORE_BASE64` | El keystore codificado en base64 (comando abajo). |
+| `RELEASE_STORE_PASSWORD` | `storePassword` de `keystore.properties`. |
+| `RELEASE_KEY_ALIAS` | `keyAlias` de `keystore.properties`. |
+| `RELEASE_KEY_PASSWORD` | `keyPassword` de `keystore.properties`. |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | El contenido completo del archivo JSON de una cuenta de servicio con el rol "Administrador de Firebase App Distribution". |
+
+Copiar el keystore en base64 al portapapeles (PowerShell):
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\Users\<usuario>\HipoSim\hiposim-signing\hiposim-release.jks")) | Set-Clipboard
+```
+
+La cuenta de servicio se crea en la consola de Google Cloud del proyecto de Firebase (IAM y administración, Cuentas
+de servicio): crear la cuenta, darle el rol "Administrador de Firebase App Distribution" y, en la pestaña Claves,
+agregar una clave JSON. Ese archivo no se guarda en el repositorio.
+
+Opcionalmente, estas variables (pestaña Variables) cambian los valores por defecto del workflow:
+`HIPOSIM_API_BASE_URL` (URL de la API, HTTPS y terminada en `/`), `FIREBASE_APP_ID` y `FIREBASE_GROUPS`.
+
+Para una subida manual, pasar un `versionCode` mayor que el último con `-Phiposim.versionCode=<n>`.

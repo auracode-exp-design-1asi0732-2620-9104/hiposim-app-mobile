@@ -20,6 +20,8 @@ class ValidateRegistrationFormUseCase
                     }
                     if (form.password.length < MIN_PASSWORD_LENGTH) {
                         put(RegistrationField.Password, RegistrationError.PasswordTooShort)
+                    } else if (form.password.none { it.isLetter() } || form.password.none { it.isDigit() }) {
+                        put(RegistrationField.Password, RegistrationError.PasswordTooWeak)
                     }
                     if (!form.termsAccepted) {
                         put(RegistrationField.Terms, RegistrationError.TermsRequired)

@@ -131,7 +131,10 @@
   <string name="field_phone">Mobile phone</string>
   <string name="field_phone_hint">For real estate contact</string>
   <string name="field_phone_prefix">+51</string>
-  <string name="field_phone_placeholder">987 654 321</string>
+  <string name="field_phone_placeholder">987654321</string>
+  <string name="field_phone_rule">9 digits, starting with 9</string>
+  <string name="field_password_rule">At least 8 characters, with a letter and a number</string>
+  <string name="error_password_weak">Include at least one letter and one number</string>
   <string name="field_password">Password</string>
   <string name="field_password_placeholder">At least 8 characters</string>
   <string name="password_show">Show password</string>
