@@ -288,8 +288,9 @@ private fun RegistrationForm(
             placeholder = stringResource(R.string.field_phone_placeholder),
             prefix = stringResource(R.string.field_phone_prefix),
             leadingIcon = Icons.Filled.Phone,
+            supportingText = stringResource(R.string.field_phone_rule),
             errorText = fieldError(state, RegistrationField.Phone),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
         )
         HipoSimTextField(
@@ -298,6 +299,7 @@ private fun RegistrationForm(
             label = stringResource(R.string.field_password),
             placeholder = stringResource(R.string.field_password_placeholder),
             leadingIcon = Icons.Filled.Lock,
+            supportingText = stringResource(R.string.field_password_rule),
             errorText = fieldError(state, RegistrationField.Password),
             visualTransformation =
                 if (state.isPasswordVisible) {
@@ -387,6 +389,7 @@ private fun errorMessage(error: RegistrationError): String =
             RegistrationError.EmailInvalid -> R.string.error_email_invalid
             RegistrationError.PhoneInvalid -> R.string.error_phone_invalid
             RegistrationError.PasswordTooShort -> R.string.error_password_short
+            RegistrationError.PasswordTooWeak -> R.string.error_password_weak
             RegistrationError.TermsRequired -> R.string.error_terms_required
             RegistrationError.ConsentRequired -> R.string.error_consent_required
             RegistrationError.EmailAlreadyRegistered -> R.string.error_email_taken

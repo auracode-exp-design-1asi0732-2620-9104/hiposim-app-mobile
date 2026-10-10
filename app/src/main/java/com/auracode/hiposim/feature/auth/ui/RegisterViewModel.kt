@@ -52,10 +52,11 @@ class RegisterViewModel
 
         fun onPhoneChange(value: String) =
             updateForm(RegistrationField.Phone) {
-                it.copy(phone = value.filter { char -> char.isDigit() || char == ' ' }.take(MAX_PHONE_INPUT_LENGTH))
+                it.copy(phone = value.filter { char -> char.isDigit() }.take(MAX_PHONE_DIGITS))
             }
 
-        fun onPasswordChange(value: String) = updateForm(RegistrationField.Password) { it.copy(password = value) }
+        fun onPasswordChange(value: String) =
+            updateForm(RegistrationField.Password) { it.copy(password = value.take(MAX_PASSWORD_LENGTH)) }
 
         fun onTermsChange(accepted: Boolean) = updateForm(RegistrationField.Terms) { it.copy(termsAccepted = accepted) }
 
@@ -120,8 +121,11 @@ class RegisterViewModel
         }
 
         private companion object {
-            /** Nine digits plus the two separating spaces of `987 654 321`. */
-            const val MAX_PHONE_INPUT_LENGTH = 11
+            /** A Peruvian mobile number has 9 digits: the field accepts nothing else. */
+            const val MAX_PHONE_DIGITS = 9
+
+            /** Upper limit of the API for a password. */
+            const val MAX_PASSWORD_LENGTH = 128
 
             val EMAIL_TAKEN_ERROR = RegistrationField.Email to RegistrationError.EmailAlreadyRegistered
         }

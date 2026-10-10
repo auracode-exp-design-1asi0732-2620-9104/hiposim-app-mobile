@@ -3,7 +3,7 @@ package com.auracode.hiposim.feature.auth.domain
 data class RegistrationForm(
     val fullName: String = "",
     val email: String = "",
-    /** National number typed by the user, without the +51 prefix. Spaces are allowed. */
+    /** National number typed by the user, without the +51 prefix: up to 9 digits. */
     val phone: String = "",
     val password: String = "",
     /** Acceptance of the Terms and Conditions. It must never start checked. */
@@ -34,6 +34,9 @@ enum class RegistrationError {
     EmailInvalid,
     PhoneInvalid,
     PasswordTooShort,
+
+    /** Long enough, but without a letter or without a number. */
+    PasswordTooWeak,
     TermsRequired,
     ConsentRequired,
 
