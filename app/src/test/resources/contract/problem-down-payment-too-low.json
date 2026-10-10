@@ -1,0 +1,9 @@
+{
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "downPayment": [
+      "The down payment must be at least 10% of the property price."
+    ]
+  }
+}

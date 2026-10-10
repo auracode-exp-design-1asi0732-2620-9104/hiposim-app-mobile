@@ -73,6 +73,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ResultsScreen(
     onNavigateToRegister: () -> Unit,
+    onNoSimulation: () -> Unit,
     viewModel: ResultsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,6 +81,11 @@ fun ResultsScreen(
     val scope = rememberCoroutineScope()
     val comingSoon = stringResource(R.string.coming_soon)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    // The simulation lives in memory: if the system recreated the app process there is nothing to show.
+    LaunchedEffect(state.hasNoSimulation) {
+        if (state.hasNoSimulation) onNoSimulation()
+    }
 
     LaunchedEffect(state.showComingSoon) {
         if (state.showComingSoon) {
@@ -178,7 +184,7 @@ private fun ResultsContent(
                         .padding(horizontal = Spacing.md, vertical = Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                SubsidyBanner(summary)
+                if (summary.isBonusApplied) SubsidyBanner(summary)
                 SummaryCard(summary)
                 ScheduleSection(summary)
             }
@@ -272,22 +278,8 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                 },
             )
             TileRow(
-                first = {
-                    MetricTile(
-                        label = stringResource(R.string.npv_label),
-                        value = summary.npv,
-                        modifier = it,
-                        detail = stringResource(R.string.example_value),
-                    )
-                },
-                second = {
-                    MetricTile(
-                        label = stringResource(R.string.irr_label),
-                        value = summary.irr,
-                        modifier = it,
-                        detail = stringResource(R.string.example_value),
-                    )
-                },
+                first = { MetricTile(stringResource(R.string.npv_label), summary.npv, it) },
+                second = { MetricTile(stringResource(R.string.irr_label), summary.irr, it) },
             )
             MetricTile(
                 label = stringResource(R.string.monthly_insurance_label),

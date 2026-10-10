@@ -28,6 +28,9 @@ class ResultsToRegisterFlowTest {
     @Before
     fun setUp() {
         hiltRule.inject()
+        // The app starts on the simulation form; these tests begin on the results it opens.
+        composeRule.onNodeWithText(text(R.string.simulation_submit)).performClick()
+        composeRule.waitUntilAtLeastOneExists(hasText(text(R.string.send_quote)))
     }
 
     private fun text(id: Int) = composeRule.activity.getString(id)

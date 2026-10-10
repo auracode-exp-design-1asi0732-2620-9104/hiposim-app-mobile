@@ -6,6 +6,27 @@
   <string name="coming_soon">Coming soon</string>
   <string name="loading">Loading</string>
 
+  <!-- Simulation form -->
+  <string name="simulation_title">Simulate your loan</string>
+  <string name="simulation_headline">Calculate your mortgage payment</string>
+  <string name="simulation_subtitle">No account needed. Enter the home price, your down payment and the term.</string>
+  <string name="currency_prefix">S/</string>
+  <string name="field_property_price">Home price</string>
+  <string name="field_property_price_placeholder">E.g. 280,000</string>
+  <string name="field_down_payment">Down payment</string>
+  <string name="down_payment_hint">%1$s of the home price (minimum %2$d%%)</string>
+  <string name="years_short">%1$d years</string>
+  <string name="simulation_submit">Simulate</string>
+  <string name="simulation_submitting">Simulating</string>
+  <string name="error_property_price_required">Enter the home price</string>
+  <string name="error_down_payment_required">Enter your down payment</string>
+  <string name="error_down_payment_too_low">The down payment must be at least %1$d%% of the price</string>
+  <string name="error_down_payment_too_high">The down payment must be lower than the home price</string>
+  <string name="error_term_out_of_range">Choose a term between 5 and 30 years</string>
+  <string name="error_rejected_by_server">The server did not accept this value</string>
+  <string name="error_no_connection">We could not reach HipoSim. Check your connection and try again.</string>
+  <string name="error_server">Something went wrong on our side. Try again in a moment.</string>
+
   <!-- Results -->
   <string name="results_title">Loan results</string>
   <string name="subsidy_banner_title">State subsidy applied</string>
@@ -22,7 +43,6 @@
   <string name="term_value">%1$d years (%2$d months)</string>
   <string name="npv_label">NPV</string>
   <string name="irr_label">IRR</string>
-  <string name="example_value">Example value</string>
   <string name="monthly_insurance_label">Monthly insurance</string>
   <string name="monthly_insurance_detail">Life + property</string>
   <string name="composition_title">First installment breakdown</string>
