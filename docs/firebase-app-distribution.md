@@ -12,8 +12,13 @@ El nombre del archivo indica de dónde salen los datos:
 | `hiposim-<versión>-demo-release.apk` | Mientras no exista una URL del backend desplegado. Responde desde memoria, funciona sin servidor y sin red. | Ninguna (`hiposim.useFakeApi` es `true` por defecto) |
 | `hiposim-<versión>-api-release.apk` | Cuando el backend esté desplegado con HTTPS. | `-Phiposim.useFakeApi=false` y `-Phiposim.apiBaseUrl.release=https://<host>/` |
 
-Los dos quedan en `app/build/outputs/apk/release/`. Tienen el mismo `applicationId` y la misma versión, así que en un
-teléfono se instala uno u otro, no los dos a la vez.
+Cada compilación deja su APK en `app/build/outputs/apk/release/` y borra el de la compilación anterior: si necesitas
+los dos, copia el primero a otra carpeta antes de generar el segundo. Tienen el mismo `applicationId` y la misma
+versión, así que en un teléfono se instala uno u otro, no los dos a la vez.
+
+El despliegue de demostración del backend está en Render: `https://hiposim-api.onrender.com/` (documentación en
+`/swagger`). Es el plan gratuito: tras unos 15 minutos sin uso el servicio se suspende y la primera petición puede
+tardar cerca de un minuto, así que la primera simulación puede mostrar un error de conexión y funcionar al reintentar.
 
 En el APK `demo` el registro, el inicio de sesión y el envío a la inmobiliaria se simulan: las cuentas viven en
 memoria y ninguna inmobiliaria recibe nada. Conviene decirlo en las notas de la versión.
@@ -82,6 +87,12 @@ APK conectado a la API desplegada:
 
 ```powershell
 .\gradlew assembleRelease "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.release=https://<host>/"
+```
+
+Con el despliegue de demostración:
+
+```powershell
+.\gradlew assembleRelease "-Phiposim.useFakeApi=false" "-Phiposim.apiBaseUrl.release=https://hiposim-api.onrender.com/"
 ```
 
 Comprobar la firma:
