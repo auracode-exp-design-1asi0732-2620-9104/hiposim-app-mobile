@@ -4,6 +4,7 @@
   <string name="action_close">Close</string>
   <string name="action_back">Back</string>
   <string name="coming_soon">Coming soon</string>
+  <string name="action_retry">Try again</string>
   <string name="loading">Loading</string>
 
   <!-- Simulation form -->
@@ -95,6 +96,22 @@
   <string name="unlock_sheet_body">Create your account or sign in to send your simulation to real estate agencies.</string>
   <string name="unlock_sheet_email">Create an account with email</string>
   <string name="unlock_sheet_sign_in">I already have an account</string>
+
+  <!-- Send to a real estate agency -->
+  <string name="send_sheet_title">Send your simulation to a real estate agency</string>
+  <string name="send_sheet_body">Choose who receives it. We share nothing until you authorize it.</string>
+  <string name="send_sheet_loading">Loading real estate agencies</string>
+  <string name="send_sheet_empty">There are no real estate agencies available yet.</string>
+  <string name="send_consent_text">I expressly authorize sharing this simulation and my contact details (name, email and phone) with the selected real estate agency, in accordance with Law No. 29733 on Personal Data Protection.</string>
+  <string name="send_submit">Send simulation</string>
+  <string name="send_submitting">Sending</string>
+  <string name="send_success">We sent your simulation to %1$s. The agency can now contact you.</string>
+  <string name="send_done">Done</string>
+  <string name="error_agency_required">Choose a real estate agency</string>
+  <string name="error_send_consent_required">You must authorize the sharing to send your simulation</string>
+  <string name="error_send_not_found">We could not find the real estate agency or your simulation. Simulate again and retry.</string>
+  <string name="error_send_rejected">We could not send your simulation. Review your choice and try again.</string>
+  <string name="error_session_expired">Your session expired. Sign in again to send your simulation.</string>
 
   <!-- Account sheet -->
   <string name="account_sheet_title">Your account</string>

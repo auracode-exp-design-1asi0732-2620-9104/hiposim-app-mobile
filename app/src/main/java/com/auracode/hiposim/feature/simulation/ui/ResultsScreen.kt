@@ -75,6 +75,7 @@ import com.auracode.hiposim.core.designsystem.theme.Spacing
 import com.auracode.hiposim.core.navigation.MainDestination
 import com.auracode.hiposim.feature.auth.ui.AccountSheet
 import com.auracode.hiposim.feature.auth.ui.LoginRequiredSheet
+import com.auracode.hiposim.feature.leads.ui.SendToAgencySheet
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
 import kotlinx.coroutines.launch
 
@@ -120,6 +121,16 @@ fun ResultsScreen(
                 onNavigateToLogin()
             },
             onDismiss = viewModel::onUnlockSheetDismiss,
+        )
+    }
+
+    if (state.isSendSheetVisible) {
+        SendToAgencySheet(
+            onDismiss = viewModel::onSendSheetDismiss,
+            onSignIn = {
+                viewModel.onSendSheetDismiss()
+                onNavigateToLogin()
+            },
         )
     }
 

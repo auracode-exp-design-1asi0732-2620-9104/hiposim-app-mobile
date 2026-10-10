@@ -16,6 +16,10 @@ val releaseApiBaseUrl = providers.gradleProperty("hiposim.apiBaseUrl.release").g
 // Stays true by default until the API host (hiposim-platform) exists.
 val useFakeApi = providers.gradleProperty("hiposim.useFakeApi").getOrElse("true").toBoolean()
 
+// GET /api/agencies does not exist in the API yet. While this is true the list of agencies is the demo agency
+// of the backend seed, even when the rest of the app talks to the real API. Set it to false when the endpoint ships.
+val useFakeAgencies = providers.gradleProperty("hiposim.useFakeAgencies").getOrElse("true").toBoolean()
+
 android {
     namespace = "com.auracode.hiposim"
     compileSdk {
@@ -32,6 +36,7 @@ android {
         testInstrumentationRunner = "com.auracode.hiposim.HiltTestRunner"
 
         buildConfigField("boolean", "USE_FAKE_API", useFakeApi.toString())
+        buildConfigField("boolean", "USE_FAKE_AGENCIES", useFakeAgencies.toString())
     }
 
     buildTypes {

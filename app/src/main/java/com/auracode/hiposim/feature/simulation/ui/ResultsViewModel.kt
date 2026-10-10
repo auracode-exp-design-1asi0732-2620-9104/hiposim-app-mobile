@@ -53,8 +53,8 @@ class ResultsViewModel
             }
         }
 
-        /** Guests must sign up first. Signed in users get "coming soon" until the agencies feature exists. */
-        fun onSendQuoteClick() = requireAccount { showComingSoon() }
+        /** Guests must sign up or sign in first. Signed in buyers choose an agency and authorize the sending. */
+        fun onSendQuoteClick() = requireAccount { showSendSheet() }
 
         /** The PDF summary is not generated yet. */
         fun onDownloadPdfClick() = showComingSoon()
@@ -63,12 +63,17 @@ class ResultsViewModel
             when (destination) {
                 MainDestination.Simulate -> Unit
                 MainDestination.Profile -> requireAccount { showAccountSheet() }
-                MainDestination.Realtors, MainDestination.History -> requireAccount { showComingSoon() }
+                MainDestination.Realtors -> requireAccount { showSendSheet() }
+                MainDestination.History -> requireAccount { showComingSoon() }
             }
         }
 
         fun onUnlockSheetDismiss() {
             _uiState.update { it.copy(isUnlockSheetVisible = false) }
+        }
+
+        fun onSendSheetDismiss() {
+            _uiState.update { it.copy(isSendSheetVisible = false) }
         }
 
         fun onAccountSheetDismiss() {
@@ -98,6 +103,11 @@ class ResultsViewModel
 
         private fun showComingSoon() {
             _uiState.update { it.copy(showComingSoon = true) }
+        }
+
+        /** Nothing can be sent without a simulation on screen. */
+        private fun showSendSheet() {
+            if (_uiState.value.summary != null) _uiState.update { it.copy(isSendSheetVisible = true) }
         }
 
         private fun showAccountSheet() {
