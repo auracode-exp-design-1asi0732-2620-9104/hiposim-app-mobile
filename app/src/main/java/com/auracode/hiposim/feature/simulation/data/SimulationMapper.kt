@@ -26,9 +26,13 @@ fun SimulationParams.toRequestDto(): SimulationRequestDto =
  * Contract name to model name: `financedAmount` is [LoanSimulation.netLoan], `monthlyInstallment` is
  * [LoanSimulation.monthlyPayment], `benefit.appliedAmount` is [LoanSimulation.goodPayerBonus]; in each row
  * `amortization` is [Installment.principal] and `totalPayment` is [Installment.payment].
+ *
+ * Returns null when the API sent no installments.
  */
-fun SimulationResponseDto.toDomain(params: SimulationParams): LoanSimulation =
-    LoanSimulation(
+fun SimulationResponseDto.toDomainOrNull(params: SimulationParams): LoanSimulation? {
+    // A valid simulation always has installments: without them the answer is not usable.
+    if (amortizationSchedule.isEmpty()) return null
+    return LoanSimulation(
         id = simulationId,
         propertyPrice = params.propertyPrice,
         downPayment = params.downPayment,
@@ -48,6 +52,7 @@ fun SimulationResponseDto.toDomain(params: SimulationParams): LoanSimulation =
         assumptions = assumptions.toDomain(),
         schedule = amortizationSchedule.map { it.toDomain() },
     )
+}
 
 private fun AssumptionsDto.toDomain() =
     SimulationAssumptions(

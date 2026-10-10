@@ -16,7 +16,7 @@ data class SimulationFormUiState(
     val generalError: SimulationGeneralError? = null,
     /** Down payment as a share of the price (`15%`), or null while it cannot be calculated. */
     val downPaymentPercent: String? = null,
-    /** Reference rate used for the simulation, already formatted (`8.50%`). */
+    /** Reference rate used for the simulation, already formatted (`8.85%`). */
     val annualRate: String = "",
     val isSubmitting: Boolean = false,
     /** One-off request to open Results, cleared by [SimulationFormViewModel.onResultsNavigated]. */

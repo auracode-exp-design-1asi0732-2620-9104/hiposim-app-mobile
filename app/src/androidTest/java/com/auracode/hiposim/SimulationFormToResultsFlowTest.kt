@@ -62,7 +62,7 @@ class SimulationFormToResultsFlowTest {
         composeRule.onNodeWithText("S/ 240,000").assertIsDisplayed()
         // TCEA and IRR show the same figure, so the TCEA badge is found by its description.
         composeRule
-            .onNodeWithContentDescription(composeRule.activity.getString(R.string.tcea_description, "8.50%"))
+            .onNodeWithContentDescription(composeRule.activity.getString(R.string.tcea_description, "8.85%"))
             .assertIsDisplayed()
 
         composeRule.onNodeWithContentDescription(text(R.string.action_back)).performClick()
@@ -91,19 +91,19 @@ class SimulationFormToResultsFlowTest {
         composeRule.onNodeWithText(text(R.string.subsidy_banner_title)).assertIsDisplayed()
     }
 
-    /** US04: the indicators of the contract example (S/ 280,000, 15%, 20 years, bonus applied). */
+    /** US04: the indicators of the Landing example (S/ 280,000, 15%, 20 years, bonus applied, 8.85%). */
     @Test
     fun results_showTheRealIndicators_andExplainTheNegativeNpv() {
         composeRule.onNodeWithText(text(R.string.bonus_checkbox_title)).performScrollTo().performClick()
         submit()
         waitForResults()
 
-        composeRule.onNodeWithText("S/ 1,864").assertIsDisplayed()
+        composeRule.onNodeWithText("S/ 1,909").assertIsDisplayed()
         composeRule
-            .onNodeWithContentDescription(composeRule.activity.getString(R.string.tcea_description, "8.50%"))
+            .onNodeWithContentDescription(composeRule.activity.getString(R.string.tcea_description, "8.85%"))
             .assertIsDisplayed()
         composeRule.onNodeWithText(text(R.string.npv_label)).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("-S/ 20,792").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("-S/ 15,999").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(text(R.string.npv_explanation)).performScrollTo().assertIsDisplayed()
     }
 

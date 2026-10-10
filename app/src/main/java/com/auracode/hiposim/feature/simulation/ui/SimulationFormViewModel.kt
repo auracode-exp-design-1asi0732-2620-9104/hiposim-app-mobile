@@ -2,13 +2,13 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.auracode.hiposim.core.network.ApiError
-import com.auracode.hiposim.core.network.ApiResult
 import com.auracode.hiposim.core.util.PeruFormat
 import com.auracode.hiposim.feature.simulation.domain.SimulateLoanUseCase
 import com.auracode.hiposim.feature.simulation.domain.SimulationConfig
+import com.auracode.hiposim.feature.simulation.domain.SimulationFailure
 import com.auracode.hiposim.feature.simulation.domain.SimulationField
 import com.auracode.hiposim.feature.simulation.domain.SimulationForm
+import com.auracode.hiposim.feature.simulation.domain.SimulationResult
 import com.auracode.hiposim.feature.simulation.domain.ValidateSimulationFormUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,10 +59,10 @@ class SimulationFormViewModel
             _uiState.update { it.copy(isSubmitting = true) }
             viewModelScope.launch {
                 when (val result = simulateLoan(params)) {
-                    is ApiResult.Success ->
+                    is SimulationResult.Success ->
                         _uiState.update { it.copy(isSubmitting = false, navigateToResults = true) }
 
-                    is ApiResult.Failure -> showFailure(result.error)
+                    is SimulationResult.Failure -> showFailure(result.reason)
                 }
             }
         }
@@ -71,34 +71,22 @@ class SimulationFormViewModel
             _uiState.update { it.copy(navigateToResults = false) }
         }
 
-        private fun showFailure(error: ApiError) {
-            val serverErrors = (error as? ApiError.Validation)?.toFieldMessages().orEmpty()
+        private fun showFailure(reason: SimulationFailure) {
+            // The API text of a field is shown as it arrives, next to that field.
+            val serverErrors = (reason as? SimulationFailure.Rejected)?.fieldMessages.orEmpty()
             val generalError =
-                when (error) {
+                when (reason) {
                     // A 400 about something the form does not show (the rate, the bonus) has no field to sit next to.
-                    is ApiError.Validation -> if (serverErrors.isEmpty()) SimulationGeneralError.Rejected else null
-                    ApiError.NoConnection -> SimulationGeneralError.NoConnection
-                    is ApiError.Server -> SimulationGeneralError.ServiceUnavailable
-                    is ApiError.Unauthorized,
-                    is ApiError.Conflict,
-                    is ApiError.Client,
-                    is ApiError.Unexpected,
-                    -> SimulationGeneralError.Unexpected
+                    is SimulationFailure.Rejected ->
+                        if (serverErrors.isEmpty()) SimulationGeneralError.Rejected else null
+                    SimulationFailure.NoConnection -> SimulationGeneralError.NoConnection
+                    SimulationFailure.ServiceUnavailable -> SimulationGeneralError.ServiceUnavailable
+                    SimulationFailure.Unexpected -> SimulationGeneralError.Unexpected
                 }
             _uiState.update {
                 it.copy(isSubmitting = false, serverErrors = serverErrors, generalError = generalError)
             }
         }
-
-        /** First message of each field the form knows. The server text is shown as it arrives. */
-        private fun ApiError.Validation.toFieldMessages(): Map<SimulationField, String> =
-            buildMap {
-                fieldErrors.forEach { (property, messages) ->
-                    val field = SimulationField.fromRequestProperty(property)
-                    val message = messages.firstOrNull()
-                    if (field != null && message != null) put(field, message)
-                }
-            }
 
         private fun updateForm(
             edited: SimulationField?,

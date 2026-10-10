@@ -1,0 +1,63 @@
+{
+  "simulationId": "3f9b8c2e-6a1d-4c58-9e0f-7d2b5a1c4e90",
+  "financedAmount": 219800,
+  "monthlyInstallment": 1863.99,
+  "totalPaid": 447357.6,
+  "totalInterest": 227557.97,
+  "additionalCosts": 0,
+  "tcea": 0.085,
+  "irr": 0.085,
+  "npv": -20791.75,
+  "benefit": {
+    "name": "Good Payer Bonus",
+    "eligible": true,
+    "appliedAmount": 18200
+  },
+  "assumptions": {
+    "monthlyPropertyInsurance": 0,
+    "monthlyCreditLifeInsurance": 0,
+    "administrativeExpenses": 0,
+    "annualDiscountRate": 0.1
+  },
+  "amortizationSchedule": [
+    {
+      "period": 1,
+      "paymentDate": "2026-11-01",
+      "openingBalance": 219800,
+      "installment": 1863.99,
+      "interest": 1499.36,
+      "amortization": 364.63,
+      "remainingBalance": 219435.37,
+      "propertyInsurance": 0,
+      "creditLifeInsurance": 0,
+      "totalPayment": 1863.99,
+      "isGracePeriod": false
+    },
+    {
+      "period": 2,
+      "paymentDate": "2026-12-01",
+      "openingBalance": 219435.37,
+      "installment": 1863.99,
+      "interest": 1496.88,
+      "amortization": 367.11,
+      "remainingBalance": 219068.26,
+      "propertyInsurance": 0,
+      "creditLifeInsurance": 0,
+      "totalPayment": 1863.99,
+      "isGracePeriod": false
+    },
+    {
+      "period": 240,
+      "paymentDate": "2046-10-01",
+      "openingBalance": 1851.36,
+      "installment": 1863.99,
+      "interest": 12.63,
+      "amortization": 1851.36,
+      "remainingBalance": 0,
+      "propertyInsurance": 0,
+      "creditLifeInsurance": 0,
+      "totalPayment": 1863.99,
+      "isGracePeriod": false
+    }
+  ]
+}

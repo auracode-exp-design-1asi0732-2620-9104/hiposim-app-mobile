@@ -1,6 +1,5 @@
 package com.auracode.hiposim.feature.simulation.domain
 
-import com.auracode.hiposim.core.network.ApiResult
 import kotlinx.coroutines.flow.StateFlow
 
 /** Source of mortgage simulations. The UI depends on this interface, never on an implementation. */
@@ -13,5 +12,5 @@ interface SimulationRepository {
     val currentSimulation: StateFlow<LoanSimulation?>
 
     /** Calculates a simulation and, on success, makes it the [currentSimulation]. */
-    suspend fun simulate(params: SimulationParams): ApiResult<LoanSimulation>
+    suspend fun simulate(params: SimulationParams): SimulationResult
 }

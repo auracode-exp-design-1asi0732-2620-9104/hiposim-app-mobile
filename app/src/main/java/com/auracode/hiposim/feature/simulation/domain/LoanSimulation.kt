@@ -15,7 +15,7 @@ data class LoanSimulation(
     val propertyPrice: BigDecimal,
     val downPayment: BigDecimal,
     val termMonths: Int,
-    /** Effective annual rate used, `0.085` for 8.5%. */
+    /** Effective annual rate used, `0.0885` for 8.85%. */
     val annualEffectiveRate: BigDecimal,
     /** The buyer asked for the Bono del Buen Pagador. */
     val bonusRequested: Boolean,

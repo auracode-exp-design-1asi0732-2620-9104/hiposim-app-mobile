@@ -44,7 +44,7 @@ class SimulationFormViewModelTest {
         assertEquals("20", state.form.termYears)
         assertFalse(state.form.applyGoodPayerBonus)
         assertEquals("15.0%", state.downPaymentPercent)
-        assertEquals("8.50%", state.annualRate)
+        assertEquals("8.85%", state.annualRate)
         assertTrue(state.errors.isEmpty())
     }
 
@@ -72,7 +72,7 @@ class SimulationFormViewModelTest {
         assertTrue(state.navigateToResults)
         assertFalse(state.isSubmitting)
         val simulation = requireNotNull(repository.currentSimulation.value)
-        assertEquals(BigDecimal("1863.99"), simulation.monthlyPayment)
+        assertEquals(BigDecimal("1908.88"), simulation.monthlyPayment)
         assertEquals(BonusStatus.Applied, simulation.bonusStatus)
 
         viewModel.onResultsNavigated()
@@ -89,7 +89,7 @@ class SimulationFormViewModelTest {
         assertEquals(280_000.0, request.propertyPrice, 0.0)
         assertEquals(42_000.0, request.downPayment, 0.0)
         assertEquals(180, request.termInMonths)
-        assertEquals(0.085, request.annualEffectiveRate, 0.0)
+        assertEquals(0.0885, request.annualEffectiveRate, 0.0)
         assertFalse(request.applyGoodPayerBonus)
     }
 
