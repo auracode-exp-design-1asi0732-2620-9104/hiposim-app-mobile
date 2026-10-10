@@ -1,6 +1,5 @@
 package com.auracode.hiposim.feature.simulation.domain
 
-import com.auracode.hiposim.core.network.ApiResult
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
@@ -9,7 +8,7 @@ class SimulateLoanUseCase
     constructor(
         private val repository: SimulationRepository,
     ) {
-        suspend operator fun invoke(params: SimulationParams): ApiResult<LoanSimulation> = repository.simulate(params)
+        suspend operator fun invoke(params: SimulationParams): SimulationResult = repository.simulate(params)
     }
 
 class ObserveCurrentSimulationUseCase

@@ -101,6 +101,8 @@ class ResultsViewModelTest {
                     downPayment = BigDecimal("90000"),
                     termYears = 20,
                     applyGoodPayerBonus = true,
+                    // Rate of the contract example, not the app's reference rate.
+                    annualEffectiveRate = BigDecimal("0.085"),
                 ),
             )
 

@@ -5,12 +5,12 @@ import java.math.BigDecimal
 /** Values of the simulator that do not come from the buyer. Change them here and nowhere else. */
 object SimulationConfig {
     /**
-     * Effective annual rate (TEA) sent with every simulation, as a fraction: `0.085` means 8.5%.
+     * Effective annual rate (TEA) sent with every simulation, as a fraction: `0.0885` means 8.85%.
      *
-     * The buyer does not type a rate in this delivery, so the app uses the reference rate of the API contract
-     * example (openapi.v0.yaml). PENDING TEAM DECISION: the Landing Page shows 8.85%; both must agree.
+     * The buyer does not type a rate in this delivery. This is the reference rate agreed by the team, the same
+     * one the Landing Page shows, so both give the same figures for the same home.
      */
-    val ANNUAL_EFFECTIVE_RATE: BigDecimal = BigDecimal("0.085")
+    val ANNUAL_EFFECTIVE_RATE: BigDecimal = BigDecimal("0.0885")
 
     // Form ranges, taken from the Landing Page sliders. They are a first filter for the buyer:
     // the API validates again and is the source of truth.

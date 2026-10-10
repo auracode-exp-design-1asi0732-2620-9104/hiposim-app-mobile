@@ -1,13 +1,15 @@
 package com.auracode.hiposim.feature.simulation.data
 
-import com.auracode.hiposim.core.network.ApiError
-import com.auracode.hiposim.core.network.ApiResult
 import com.auracode.hiposim.core.network.AuthInterceptor
 import com.auracode.hiposim.core.network.TokenStore
 import com.auracode.hiposim.di.NetworkModule
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.SimulationFailure
+import com.auracode.hiposim.feature.simulation.domain.SimulationField
 import com.auracode.hiposim.feature.simulation.domain.SimulationParams
+import com.auracode.hiposim.feature.simulation.domain.SimulationResult
 import com.auracode.hiposim.testing.contractExampleParams
+import com.auracode.hiposim.testing.contractResource
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -123,7 +125,7 @@ class DefaultSimulationRepositoryTest {
 
             val result = repository.simulate(contractExampleParams)
 
-            val simulation = (result as ApiResult.Success).data
+            val simulation = (result as SimulationResult.Success).simulation
             assertSame(simulation, repository.currentSimulation.value)
             assertEquals("3f9b8c2e-6a1d-4c58-9e0f-7d2b5a1c4e90", simulation.id)
             assertEquals(BigDecimal("280000"), simulation.propertyPrice)
@@ -164,7 +166,7 @@ class DefaultSimulationRepositoryTest {
                     applyGoodPayerBonus = true,
                 )
 
-            val simulation = (repository.simulate(params) as ApiResult.Success).data
+            val simulation = (repository.simulate(params) as SimulationResult.Success).simulation
 
             assertEquals(BonusStatus.NotEligible, simulation.bonusStatus)
             assertEquals(BigDecimal("0.00"), simulation.goodPayerBonus)
@@ -177,20 +179,23 @@ class DefaultSimulationRepositoryTest {
             enqueue(200, WITH_BONUS_RESPONSE)
             enqueue(
                 400,
-                """
-                {"title":"One or more validation errors occurred.","status":400,
-                 "errors":{"downPayment":["The down payment must be at least 10% of the property price."]}}
-                """.trimIndent(),
+                contractResource("problem-down-payment-too-low.json"),
                 contentType = "application/problem+json",
             )
-            val previous = (repository.simulate(contractExampleParams) as ApiResult.Success).data
+            val previous = (repository.simulate(contractExampleParams) as SimulationResult.Success).simulation
 
             val result = repository.simulate(contractExampleParams.copy(downPayment = BigDecimal("1000")))
 
-            val error = (result as ApiResult.Failure).error as ApiError.Validation
             assertEquals(
-                mapOf("downPayment" to listOf("The down payment must be at least 10% of the property price.")),
-                error.fieldErrors,
+                SimulationResult.Failure(
+                    SimulationFailure.Rejected(
+                        mapOf(
+                            SimulationField.DownPayment to
+                                "The down payment must be at least 10% of the property price.",
+                        ),
+                    ),
+                ),
+                result,
             )
             assertSame(previous, repository.currentSimulation.value)
         }
@@ -199,10 +204,16 @@ class DefaultSimulationRepositoryTest {
     fun serverErrorAndNoConnection_areFailures() =
         runTest {
             enqueue(503)
-            assertEquals(ApiResult.Failure(ApiError.Server(503)), repository.simulate(contractExampleParams))
+            assertEquals(
+                SimulationResult.Failure(SimulationFailure.ServiceUnavailable),
+                repository.simulate(contractExampleParams),
+            )
 
             server.close()
-            assertEquals(ApiResult.Failure(ApiError.NoConnection), repository.simulate(contractExampleParams))
+            assertEquals(
+                SimulationResult.Failure(SimulationFailure.NoConnection),
+                repository.simulate(contractExampleParams),
+            )
             assertNull(repository.currentSimulation.value)
         }
 
@@ -213,38 +224,57 @@ class DefaultSimulationRepositoryTest {
 
             val result = repository.simulate(contractExampleParams)
 
-            assertTrue(result is ApiResult.Failure && result.error is ApiError.Unexpected)
+            assertEquals(SimulationResult.Failure(SimulationFailure.Unexpected), result)
+        }
+
+    @Test
+    fun responseWithoutScheduleOrWithABadDate_isUnexpectedAndNotStored() =
+        runTest {
+            val withoutSchedule =
+                WITH_BONUS_RESPONSE.substringBefore("\"amortizationSchedule\"") + "\"amortizationSchedule\": []}"
+            enqueue(200, withoutSchedule)
+            enqueue(200, WITH_BONUS_RESPONSE.replace("2026-11-01", "next month"))
+
+            assertEquals(
+                SimulationResult.Failure(SimulationFailure.Unexpected),
+                repository.simulate(contractExampleParams),
+            )
+            assertEquals(
+                SimulationResult.Failure(SimulationFailure.Unexpected),
+                repository.simulate(contractExampleParams),
+            )
+            assertNull(repository.currentSimulation.value)
+        }
+
+    @Test
+    fun rejectionAboutAPropertyTheFormDoesNotShow_hasNoFieldMessages() =
+        runTest {
+            enqueue(
+                400,
+                """{"title":"Invalid.","status":400,"errors":{"annualEffectiveRate":["Must be a fraction."]}}""",
+                contentType = "application/problem+json",
+            )
+
+            assertEquals(
+                SimulationResult.Failure(SimulationFailure.Rejected(emptyMap())),
+                repository.simulate(contractExampleParams),
+            )
+        }
+
+    @Test
+    fun otherClientErrors_areUnexpected() =
+        runTest {
+            enqueue(401, """{"title":"Unauthorized.","status":401}""", contentType = "application/problem+json")
+
+            assertEquals(
+                SimulationResult.Failure(SimulationFailure.Unexpected),
+                repository.simulate(contractExampleParams),
+            )
         }
 
     private companion object {
-        // Examples of POST /api/simulations in openapi.v0.yaml, with the schedule shortened like there.
-        const val WITH_BONUS_RESPONSE = """
-            {"simulationId":"3f9b8c2e-6a1d-4c58-9e0f-7d2b5a1c4e90","financedAmount":219800,
-             "monthlyInstallment":1863.99,"totalPaid":447357.6,"totalInterest":227557.97,"additionalCosts":0,
-             "tcea":0.085,"irr":0.085,"npv":-20791.75,
-             "benefit":{"name":"Good Payer Bonus","eligible":true,"appliedAmount":18200},
-             "assumptions":{"monthlyPropertyInsurance":0,"monthlyCreditLifeInsurance":0,
-                            "administrativeExpenses":0,"annualDiscountRate":0.1},
-             "amortizationSchedule":[
-               {"period":1,"paymentDate":"2026-11-01","openingBalance":219800,"installment":1863.99,
-                "interest":1499.36,"amortization":364.63,"remainingBalance":219435.37,"propertyInsurance":0,
-                "creditLifeInsurance":0,"totalPayment":1863.99,"isGracePeriod":false},
-               {"period":2,"paymentDate":"2026-12-01","openingBalance":219435.37,"installment":1863.99,
-                "interest":1496.88,"amortization":367.11,"remainingBalance":219068.26,"propertyInsurance":0,
-                "creditLifeInsurance":0,"totalPayment":1863.99,"isGracePeriod":false}]}
-        """
-
-        const val OUT_OF_RANGE_RESPONSE = """
-            {"simulationId":"8d2e41a7-5c9b-4f03-b6a8-1e7c3f9d2a64","financedAmount":360000,
-             "monthlyInstallment":3052.94,"totalPaid":732705.6,"totalInterest":372706.38,"additionalCosts":0,
-             "tcea":0.085,"irr":0.085,"npv":-34053.91,
-             "benefit":{"name":"Good Payer Bonus","eligible":false,"appliedAmount":0},
-             "assumptions":{"monthlyPropertyInsurance":0,"monthlyCreditLifeInsurance":0,
-                            "administrativeExpenses":0,"annualDiscountRate":0.1},
-             "amortizationSchedule":[
-               {"period":1,"paymentDate":"2026-11-01","openingBalance":360000,"installment":3052.94,
-                "interest":2455.74,"amortization":597.21,"remainingBalance":359402.79,"propertyInsurance":0,
-                "creditLifeInsurance":0,"totalPayment":3052.94,"isGracePeriod":false}]}
-        """
+        // Examples of POST /api/simulations in openapi.v0.yaml (test/resources/contract).
+        val WITH_BONUS_RESPONSE = contractResource("simulation-response-with-bonus.json")
+        val OUT_OF_RANGE_RESPONSE = contractResource("simulation-response-out-of-range.json")
     }
 }

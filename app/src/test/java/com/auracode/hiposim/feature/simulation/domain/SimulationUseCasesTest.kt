@@ -1,7 +1,5 @@
 package com.auracode.hiposim.feature.simulation.domain
 
-import com.auracode.hiposim.core.network.ApiError
-import com.auracode.hiposim.core.network.ApiResult
 import com.auracode.hiposim.feature.simulation.data.DefaultSimulationRepository
 import com.auracode.hiposim.testing.StubSimulationService
 import com.auracode.hiposim.testing.contractExampleParams
@@ -23,7 +21,7 @@ class SimulationUseCasesTest {
 
             val result = SimulateLoanUseCase(repository)(contractExampleParams)
 
-            val simulation = (result as ApiResult.Success).data
+            val simulation = (result as SimulationResult.Success).simulation
             assertSame(simulation, observe().value)
             assertEquals(contractExampleParams.propertyPrice, simulation.propertyPrice)
         }
@@ -35,7 +33,7 @@ class SimulationUseCasesTest {
 
             val result = SimulateLoanUseCase(repository)(contractExampleParams)
 
-            assertEquals(ApiResult.Failure(ApiError.NoConnection), result)
+            assertEquals(SimulationResult.Failure(SimulationFailure.NoConnection), result)
             assertNull(ObserveCurrentSimulationUseCase(repository)().value)
         }
 }

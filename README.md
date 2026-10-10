@@ -26,8 +26,9 @@ El VAN llega negativo porque la API lo calcula desde el lado del prestamista. La
 prestamista)", indica la tasa de descuento y aclara que no es una pérdida para el Comprador. Pendiente de decisión
 del equipo (pregunta abierta 6 del contrato): cómo presentarlo, o si mostrarlo.
 
-La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFFECTIVE_RATE` (TEA 0.085, la del
-ejemplo del contrato). Pendiente de decisión del equipo: alinearla con el 8.85% que muestra el Landing.
+La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFFECTIVE_RATE` (TEA 0.0885, es decir
+8.85%), la tasa de referencia acordada por el equipo y la misma que muestra el Landing. Con el ejemplo del Landing
+(S/ 280,000, 15% de inicial, 20 años, con bono) la cuota es S/ 1,909.
 
 ### Cuentas y sesión (provisional)
 
@@ -149,15 +150,13 @@ servidor responde con PascalCase (`DownPayment`), se normaliza.
    lanza la misma `HttpException` que lanzaría Retrofit (ver `FakeSimulationService.validationError`).
 4. **Hilt**: en `di/ServiceModule.kt`, provee el falso o `retrofit.get().create(AuthService::class.java)` según
    `BuildConfig.USE_FAKE_API`.
-5. **Repositorio** (uno solo) que implementa la interfaz del dominio, llama al servicio dentro de `safeApiCall` y
-   convierte el DTO al modelo del dominio con `map`. Se enlaza en `di/RepositoryModule.kt`:
+5. **Repositorio** (uno solo) que implementa la interfaz del dominio, llama al servicio dentro de `safeApiCall`,
+   convierte el DTO al modelo del dominio y traduce `ApiError` a un resultado propio del dominio (ver
+   `SimulationResult` y `DefaultSimulationRepository`). `ApiResult` y `ApiError` no salen de la capa `data`: el
+   dominio y la UI no conocen HTTP. Se enlaza en `di/RepositoryModule.kt`.
 
-   ```kotlin
-   override suspend fun login(email: String, password: String): ApiResult<AuthenticatedUser> =
-       safeApiCall { service.login(LoginRequestDto(email, password)) }.map { it.toDomain() }
-   ```
-
-6. **Pruebas**: el mapeo del DTO, el servicio falso contra los ejemplos del contrato, y el repositorio contra
+6. **Pruebas**: el mapeo del DTO con los ejemplos del contrato guardados en `app/src/test/resources/contract`
+   (ver `SimulationMapperTest`), el servicio falso contra esos mismos números, y el repositorio contra
    `MockWebServer` (ver `DefaultSimulationRepositoryTest`).
 
 ## Idioma

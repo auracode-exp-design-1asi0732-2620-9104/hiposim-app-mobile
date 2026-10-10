@@ -12,14 +12,24 @@ import retrofit2.HttpException
 import retrofit2.Response
 import java.math.BigDecimal
 
-/** Request of the `withBonus` example of the contract: S/ 280,000, 15% down payment, 20 years, bonus applied. */
+/**
+ * Request of the `withBonus` example of the contract: S/ 280,000, 15% down payment, 20 years, bonus applied,
+ * at the 8.5% rate of that example (not the app's reference rate).
+ */
 val contractExampleParams =
     SimulationParams(
         propertyPrice = BigDecimal("280000"),
         downPayment = BigDecimal("42000"),
         termYears = 20,
         applyGoodPayerBonus = true,
+        annualEffectiveRate = BigDecimal("0.085"),
     )
+
+/** Text of a contract example in `test/resources/contract`. */
+fun contractResource(name: String): String =
+    requireNotNull(
+        object {}.javaClass.getResource("/contract/$name"),
+    ) { "Missing test resource contract/$name" }.readText()
 
 /** A repository backed by the in-memory service, without latency. */
 fun fakeBackedSimulationRepository() = DefaultSimulationRepository(FakeSimulationService())
