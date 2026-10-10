@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import androidx.test.espresso.Espresso
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
@@ -47,6 +48,9 @@ class ResultsToRegisterFlowTest {
         val phoneLabel = text(R.string.field_phone) + " (" + text(R.string.field_phone_hint) + ")"
         composeRule.onNodeWithText(phoneLabel).performTextInput("987654321")
         composeRule.onNodeWithText(text(R.string.field_password)).performTextInput("secret123")
+        // The keyboard covers the bottom of the form and makes the assertions below flaky.
+        Espresso.closeSoftKeyboard()
+        composeRule.waitForIdle()
         if (acceptConsent) {
             composeRule.onNodeWithText(text(R.string.consent_text)).performScrollTo().performClick()
         }

@@ -11,14 +11,20 @@ La app arranca en el formulario de simulación y llega a los resultados con la r
 1. **Simulación** (US01): valor de la vivienda, cuota inicial, plazo y casilla del Bono del Buen Pagador. Valida en
    el cliente con los rangos del Landing (S/ 120,000 a 800,000, cuota inicial mínima 10%, plazo de 5 a 30 años) y
    muestra junto a cada campo los errores que devuelva la API, que es la fuente de verdad.
-2. **Resultados del Crédito**: cuota, TCEA, VAN, TIR, plazo, seguro, cronograma inicial, enviar cotización, PDF
-   (aviso "Disponible próximamente") y barra inferior con destinos bloqueados. Si el bono se pidió y la vivienda está
-   fuera de rango, lo explica sin tratarlo como error.
+2. **Resultados del Crédito** (US04): muestra la simulación calculada desde el formulario, con los valores reales
+   de cuota (capital e interés, sin seguros), TCEA, VAN, TIR, intereses totales, total a pagar, seguro y cronograma
+   inicial. Si el bono se pidió y la vivienda está fuera de rango, lo explica sin tratarlo como error. Si no hay
+   simulación que mostrar (por ejemplo, el sistema recreó la app), ofrece volver a simular. Mantiene enviar
+   cotización, PDF (aviso "Disponible próximamente") y la barra inferior con destinos bloqueados.
 3. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
 
 La simulación sigue el contrato `POST /api/simulations` (v0.1.0). Mientras no exista el host de la API, responde
 `FakeSimulationService`, que respeta la forma del contrato y reproduce los números de sus ejemplos; ver
 "Conexión con la API".
+
+El VAN llega negativo porque la API lo calcula desde el lado del prestamista. La pantalla lo rotula "VAN (lado del
+prestamista)", indica la tasa de descuento y aclara que no es una pérdida para el Comprador. Pendiente de decisión
+del equipo (pregunta abierta 6 del contrato): cómo presentarlo, o si mostrarlo.
 
 La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFFECTIVE_RATE` (TEA 0.085, la del
 ejemplo del contrato). Pendiente de decisión del equipo: alinearla con el 8.85% que muestra el Landing.
@@ -210,4 +216,5 @@ feat(auth): add contextual registration form (US13)
 | US13 | Mockup de registro contextual | `feature/auth` | Mockup implementado |
 | US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
-| US02, US04, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |
+| US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
+| US02, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |

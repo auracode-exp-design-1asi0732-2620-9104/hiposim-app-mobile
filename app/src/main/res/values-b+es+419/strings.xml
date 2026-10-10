@@ -43,7 +43,7 @@
   <string name="bonus_not_eligible_body">El valor de esta vivienda está fuera del rango del bono, por eso la simulación se calculó sin él.</string>
   <string name="monthly_payment_label">Cuota mensual estimada</string>
   <string name="per_month">/ mes</string>
-  <string name="payment_includes_insurance">Incluye seguros de desgravamen e inmueble</string>
+  <string name="payment_excludes_insurance">Capital e interés, sin seguros</string>
   <string name="tcea_label">TCEA</string>
   <string name="tcea_description">TCEA %1$s, tasa de costo efectivo anual</string>
   <string name="property_price_label">Vivienda</string>
@@ -51,9 +51,16 @@
   <string name="net_loan_label">Préstamo neto</string>
   <string name="term_label">Plazo</string>
   <string name="term_value">%1$d años (%2$d meses)</string>
-  <string name="npv_label">VAN</string>
+  <string name="npv_label">VAN (lado del prestamista)</string>
+  <string name="npv_detail">Descontado al %1$s anual</string>
+  <string name="npv_explanation">El VAN se calcula desde el lado de la entidad que presta el dinero. Un valor negativo no es una pérdida para ti: indica que la tasa del préstamo es menor que la tasa de descuento usada.</string>
   <string name="irr_label">TIR</string>
-  <string name="example_value">Valor de ejemplo</string>
+  <string name="irr_detail">Anual</string>
+  <string name="total_interest_label">Intereses totales</string>
+  <string name="total_paid_label">Total a pagar</string>
+  <string name="results_missing_title">No encontramos tu simulación</string>
+  <string name="results_missing_body">Puede haberse perdido al cerrar la aplicación. Vuelve a simular para ver tus resultados.</string>
+  <string name="results_new_simulation">Simular de nuevo</string>
   <string name="monthly_insurance_label">Seguro mensual</string>
   <string name="monthly_insurance_detail">Desgravamen + inmueble</string>
   <string name="composition_title">Composición de la primera cuota</string>

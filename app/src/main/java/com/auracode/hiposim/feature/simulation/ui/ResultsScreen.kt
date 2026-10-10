@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +66,7 @@ import com.auracode.hiposim.core.designsystem.component.LoadingIndicator
 import com.auracode.hiposim.core.designsystem.component.MetricTile
 import com.auracode.hiposim.core.designsystem.component.NavBarItem
 import com.auracode.hiposim.core.designsystem.component.OutlinedActionButton
+import com.auracode.hiposim.core.designsystem.component.PrimaryButton
 import com.auracode.hiposim.core.designsystem.component.SegmentedBar
 import com.auracode.hiposim.core.designsystem.theme.HipoSimTheme
 import com.auracode.hiposim.core.designsystem.theme.MetricDisplayStyle
@@ -157,6 +161,7 @@ private fun ResultsContent(
         bottomBar = {
             ResultsBottomBar(
                 isAuthenticated = state.isAuthenticated,
+                showActions = state.summary != null,
                 onSendQuote = onSendQuote,
                 onDownloadPdf = onDownloadPdf,
                 onDestinationClick = onDestinationClick,
@@ -166,7 +171,9 @@ private fun ResultsContent(
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         val summary = state.summary
-        if (state.isLoading || summary == null) {
+        if (summary == null && state.isSimulationMissing) {
+            MissingSimulation(onNewSimulation = onBack, modifier = Modifier.padding(innerPadding))
+        } else if (summary == null) {
             LoadingIndicator(
                 description = stringResource(R.string.loading),
                 modifier = Modifier.padding(innerPadding),
@@ -217,6 +224,46 @@ private fun SubsidyBanner(summary: ResultsSummaryUi) {
     )
 }
 
+/** Nothing to show: the buyer goes back to the form, which is the previous screen. */
+@Composable
+private fun MissingSimulation(
+    onNewSimulation: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.SearchOff,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(Spacing.minTouchTarget),
+        )
+        Text(
+            text = stringResource(R.string.results_missing_title),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(R.string.results_missing_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        PrimaryButton(
+            text = stringResource(R.string.results_new_simulation),
+            onClick = onNewSimulation,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
 /** The bonus was requested but the home price is outside its range: a normal result, explained, not an error. */
 @Composable
 private fun BonusNotEligibleBanner() {
@@ -255,7 +302,7 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                     )
                 }
                 Text(
-                    text = stringResource(R.string.payment_includes_insurance),
+                    text = stringResource(R.string.payment_excludes_insurance),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -294,7 +341,7 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                         label = stringResource(R.string.npv_label),
                         value = summary.npv,
                         modifier = it,
-                        detail = stringResource(R.string.example_value),
+                        detail = stringResource(R.string.npv_detail, summary.npvDiscountRate),
                     )
                 },
                 second = {
@@ -302,7 +349,7 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                         label = stringResource(R.string.irr_label),
                         value = summary.irr,
                         modifier = it,
-                        detail = stringResource(R.string.example_value),
+                        detail = stringResource(R.string.irr_detail),
                     )
                 },
             )
@@ -311,6 +358,18 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                 value = summary.monthlyInsurance,
                 modifier = Modifier.fillMaxWidth(),
                 detail = stringResource(R.string.monthly_insurance_detail),
+            )
+            TileRow(
+                first = { MetricTile(stringResource(R.string.total_interest_label), summary.totalInterest, it) },
+                second = { MetricTile(stringResource(R.string.total_paid_label), summary.totalPaid, it) },
+            )
+            // PENDING TEAM DECISION (contract v0, open question 6): how to present the NPV to a buyer.
+            // The API calculates it from the lender's side, so it is negative for a normal loan. Until the
+            // team decides, the label says whose side it is and this note says it is not a loss.
+            Text(
+                text = stringResource(R.string.npv_explanation),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -502,6 +561,7 @@ private fun InstallmentLine(
 @Composable
 private fun ResultsBottomBar(
     isAuthenticated: Boolean,
+    showActions: Boolean,
     onSendQuote: () -> Unit,
     onDownloadPdf: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
@@ -517,23 +577,26 @@ private fun ResultsBottomBar(
         }
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest, shadowElevation = 8.dp) {
         Column {
-            Column(
-                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
-                AccentButton(
-                    text = stringResource(R.string.send_quote),
-                    supportingText = stringResource(R.string.send_quote_hint),
-                    icon = Icons.AutoMirrored.Filled.Send,
-                    onClick = onSendQuote,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedActionButton(
-                    text = stringResource(R.string.download_pdf),
-                    icon = Icons.Filled.PictureAsPdf,
-                    onClick = onDownloadPdf,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+            // Sending or downloading only makes sense when there is a simulation on screen.
+            if (showActions) {
+                Column(
+                    modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    AccentButton(
+                        text = stringResource(R.string.send_quote),
+                        supportingText = stringResource(R.string.send_quote_hint),
+                        icon = Icons.AutoMirrored.Filled.Send,
+                        onClick = onSendQuote,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedActionButton(
+                        text = stringResource(R.string.download_pdf),
+                        icon = Icons.Filled.PictureAsPdf,
+                        onClick = onDownloadPdf,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
             HipoSimNavigationBar(
                 items = items,

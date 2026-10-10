@@ -6,6 +6,13 @@ import java.math.BigDecimal
 
 class PeruFormatTest {
     @Test
+    fun soles_negativeAmount_putsTheSignBeforeTheSymbol() {
+        assertEquals("-S/ 20,792", PeruFormat.soles(BigDecimal("-20791.75")))
+        assertEquals("-S/ 20,791.75", PeruFormat.soles(BigDecimal("-20791.75"), fractionDigits = 2))
+        assertEquals("S/ 0", PeruFormat.soles(BigDecimal("-0.40")))
+    }
+
+    @Test
     fun soles_withoutDecimals_groupsThousands() {
         assertEquals("S/ 280,000", PeruFormat.soles(BigDecimal("280000")))
         assertEquals("S/ 1,909", PeruFormat.soles(BigDecimal("1909")))
