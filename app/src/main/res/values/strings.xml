@@ -73,6 +73,12 @@
   <string name="installment_interest">Interest</string>
   <string name="installment_insurance">Insurance</string>
   <string name="installment_balance">Remaining balance</string>
+  <string name="installment_opening_balance">Opening balance</string>
+  <string name="installment_closing_balance">Closing balance</string>
+  <string name="schedule_full_action">View full schedule</string>
+  <string name="schedule_full_title">Payment schedule</string>
+  <string name="schedule_full_subtitle">%1$d monthly installments (French method). Each one shows how it splits between interest and principal.</string>
+  <string name="schedule_row_grace">%1$s, grace period</string>
   <string name="send_quote">Send quote to real estate agencies</string>
   <string name="send_quote_hint">(Unlocks projects in your range)</string>
   <string name="download_pdf">Download PDF summary</string>

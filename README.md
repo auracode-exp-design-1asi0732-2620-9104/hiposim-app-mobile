@@ -16,9 +16,11 @@ La app arranca en el formulario de simulación y llega a los resultados con la r
    inicial. Si el bono se pidió y la vivienda está fuera de rango, lo explica sin tratarlo como error. Si no hay
    simulación que mostrar (por ejemplo, el sistema recreó la app), ofrece volver a simular. Mantiene enviar
    cotización, PDF (aviso "Disponible próximamente") y la barra inferior con destinos bloqueados.
-3. **Registro** (US13): nombre, correo, celular y contraseña, con dos aceptaciones obligatorias y desmarcadas por
+3. **Cronograma de pagos** (US02): desde Resultados, "Ver cronograma completo" abre todas las cuotas (hasta 360) en
+   una lista perezosa, con fecha, cuota, saldo inicial, interés, amortización y saldo final de cada mes.
+4. **Registro** (US13): nombre, correo, celular y contraseña, con dos aceptaciones obligatorias y desmarcadas por
    defecto: Términos y Condiciones, y tratamiento de datos personales (Ley N° 29733).
-4. **Inicio de sesión** (US26): correo y contraseña. Si las credenciales no son válidas, el mensaje no indica cuál
+5. **Inicio de sesión** (US26): correo y contraseña. Si las credenciales no son válidas, el mensaje no indica cuál
    de los dos datos es incorrecto.
 
 La simulación sigue el contrato `POST /api/simulations` (v0.1.0). Mientras no exista el host de la API, responde
@@ -185,7 +187,7 @@ app/src/main/java/com/auracode/hiposim/
   core/navigation/     rutas tipadas y NavHost
   core/network/        ApiResult, ApiError, safeApiCall, AuthInterceptor, TokenStore
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
-  feature/simulation/  ui (Formulario, Resultados), domain (modelos, validación, casos de uso),
+  feature/simulation/  ui (Formulario, Resultados, Cronograma), domain (modelos, validación, casos de uso),
                        data (DTO del contrato, SimulationService, FakeSimulationService, repositorio)
   feature/auth/        ui (Registro, Inicio de sesión, LoginRequiredSheet, AccountSheet), domain (validación, sesión),
                        data (DTO del contrato, AuthService, FakeAuthService, repositorio)
@@ -226,4 +228,6 @@ feat(auth): add contextual registration form (US13)
 | US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
 | US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |
-| US02, US05, US06, US07, US08 | Por completar con el detalle de cada historia en Jira | Por asignar | Pendiente |
+| US02 | Ver cronograma de pagos completo desde Resultados | `feature/simulation` | Hecho; usa el cronograma de la simulación ya calculada |
+| US05 | Bono del Buen Pagador | `feature/simulation` | Hecho (casilla en el formulario, verificado contra el motor) |
+| US06, US07, US08 | Fuera de esta entrega | Por asignar | Pendiente |
