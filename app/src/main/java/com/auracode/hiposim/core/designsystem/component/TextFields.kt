@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 
-/** Outlined text field with a leading icon and an optional error line. */
+/** Outlined text field with a leading icon and an optional error line. [helperText] shows while there is no error. */
 @Composable
 fun HipoSimTextField(
     value: String,
@@ -21,6 +21,7 @@ fun HipoSimTextField(
     placeholder: String? = null,
     prefix: String? = null,
     errorText: String? = null,
+    helperText: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -34,7 +35,7 @@ fun HipoSimTextField(
         prefix = prefix?.let { { Text(it, style = MaterialTheme.typography.labelMedium) } },
         leadingIcon = { Icon(leadingIcon, contentDescription = null) },
         trailingIcon = trailingIcon,
-        supportingText = errorText?.let { { Text(it) } },
+        supportingText = (errorText ?: helperText)?.let { { Text(it) } },
         isError = errorText != null,
         singleLine = true,
         visualTransformation = visualTransformation,
