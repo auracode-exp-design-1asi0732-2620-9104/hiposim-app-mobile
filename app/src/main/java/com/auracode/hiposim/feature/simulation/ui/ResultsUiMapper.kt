@@ -15,6 +15,7 @@ fun LoanSimulation.toResultsSummaryUi(): ResultsSummaryUi =
         propertyPrice = PeruFormat.soles(propertyPrice),
         downPayment = PeruFormat.soles(downPayment),
         downPaymentPercent = PeruFormat.percent(downPaymentRate, fractionDigits = 0),
+        isBonusApplied = goodPayerBonus.signum() > 0,
         goodPayerBonus = PeruFormat.soles(goodPayerBonus),
         netLoan = PeruFormat.soles(netLoan),
         termYears = termYears,

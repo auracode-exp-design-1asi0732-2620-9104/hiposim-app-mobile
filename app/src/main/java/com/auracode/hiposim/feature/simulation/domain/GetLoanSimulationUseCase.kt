@@ -7,5 +7,5 @@ class GetLoanSimulationUseCase
     constructor(
         private val repository: SimulationRepository,
     ) {
-        suspend operator fun invoke(): LoanSimulation = repository.getCurrentSimulation()
+        suspend operator fun invoke(): LoanSimulation? = repository.getCurrentSimulation()
     }

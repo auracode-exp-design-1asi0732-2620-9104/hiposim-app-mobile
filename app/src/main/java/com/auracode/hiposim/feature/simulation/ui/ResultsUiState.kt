@@ -8,6 +8,8 @@ import com.auracode.hiposim.feature.auth.ui.AccountUi
 data class ResultsUiState(
     val isLoading: Boolean = true,
     val summary: ResultsSummaryUi? = null,
+    /** There is no simulation to show (the app process was recreated), so the screen should go back to the form. */
+    val hasNoSimulation: Boolean = false,
     /** The signed in user, or null for a guest. */
     val account: AccountUi? = null,
     val isUnlockSheetVisible: Boolean = false,
@@ -23,6 +25,8 @@ data class ResultsSummaryUi(
     val propertyPrice: String,
     val downPayment: String,
     val downPaymentPercent: String,
+    /** The Bono del Buen Pagador was subtracted from the loan. Without it the subsidy banner is hidden. */
+    val isBonusApplied: Boolean,
     val goodPayerBonus: String,
     val netLoan: String,
     val termYears: Int,

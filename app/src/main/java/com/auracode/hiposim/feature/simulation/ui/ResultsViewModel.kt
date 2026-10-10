@@ -29,8 +29,14 @@ class ResultsViewModel
 
         init {
             viewModelScope.launch {
-                val summary = getLoanSimulation().toResultsSummaryUi()
-                _uiState.update { it.copy(isLoading = false, summary = summary) }
+                val simulation = getLoanSimulation()
+                _uiState.update {
+                    if (simulation == null) {
+                        it.copy(isLoading = false, hasNoSimulation = true)
+                    } else {
+                        it.copy(isLoading = false, summary = simulation.toResultsSummaryUi())
+                    }
+                }
             }
             viewModelScope.launch {
                 observeSession().collect { session ->

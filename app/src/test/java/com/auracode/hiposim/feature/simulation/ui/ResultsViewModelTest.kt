@@ -8,6 +8,8 @@ import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
 import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.StubSimulationRepository
+import com.auracode.hiposim.testing.sampleSimulation
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -16,6 +18,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.math.BigDecimal
 
 class ResultsViewModelTest {
     @get:Rule
@@ -64,6 +67,48 @@ class ResultsViewModelTest {
         assertEquals(240, summary.termMonths)
         assertEquals("S/ 1,909", summary.monthlyPayment)
         assertEquals("8.85%", summary.tcea)
+    }
+
+    private fun viewModelWith(repository: StubSimulationRepository): ResultsViewModel {
+        val auth = FakeAuthRepository()
+        return ResultsViewModel(
+            getLoanSimulation = GetLoanSimulationUseCase(repository),
+            observeSession = ObserveSessionUseCase(auth),
+            signOut = SignOutUseCase(auth),
+        )
+    }
+
+    @Test
+    fun init_withTheApiFigures_showsThemAsTheyCome() {
+        val state = viewModelWith(StubSimulationRepository()).uiState.value
+
+        val summary = requireNotNull(state.summary)
+        assertFalse(state.hasNoSimulation)
+        assertEquals("S/ 1,864", summary.monthlyPayment)
+        assertEquals("S/ 219,800", summary.netLoan)
+        assertEquals("8.50%", summary.tcea)
+        assertEquals("8.50%", summary.irr)
+        assertEquals("S/ -20,792", summary.npv)
+        assertTrue(summary.isBonusApplied)
+    }
+
+    @Test
+    fun init_withoutBonus_hidesTheSubsidyBanner() {
+        val repository = StubSimulationRepository(current = sampleSimulation(goodPayerBonus = BigDecimal.ZERO))
+
+        val summary = requireNotNull(viewModelWith(repository).uiState.value.summary)
+
+        assertFalse(summary.isBonusApplied)
+        assertEquals("S/ 238,000", summary.netLoan)
+    }
+
+    @Test
+    fun init_withoutASimulation_asksTheScreenToGoBackToTheForm() {
+        val state = viewModelWith(StubSimulationRepository(current = null)).uiState.value
+
+        assertTrue(state.hasNoSimulation)
+        assertFalse(state.isLoading)
+        assertNull(state.summary)
     }
 
     @Test

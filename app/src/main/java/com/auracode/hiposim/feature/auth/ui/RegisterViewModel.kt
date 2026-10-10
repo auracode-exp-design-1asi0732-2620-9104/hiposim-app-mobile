@@ -31,13 +31,14 @@ class RegisterViewModel
 
         init {
             viewModelScope.launch {
-                val simulation = getLoanSimulation()
                 val quote =
-                    QuoteSummaryUi(
-                        monthlyPayment = PeruFormat.soles(simulation.monthlyPayment),
-                        tcea = PeruFormat.percent(simulation.tcea),
-                        propertyPrice = PeruFormat.soles(simulation.propertyPrice),
-                    )
+                    getLoanSimulation()?.let { simulation ->
+                        QuoteSummaryUi(
+                            monthlyPayment = PeruFormat.soles(simulation.monthlyPayment),
+                            tcea = PeruFormat.percent(simulation.tcea),
+                            propertyPrice = PeruFormat.soles(simulation.propertyPrice),
+                        )
+                    }
                 _uiState.update { it.copy(quote = quote) }
             }
         }

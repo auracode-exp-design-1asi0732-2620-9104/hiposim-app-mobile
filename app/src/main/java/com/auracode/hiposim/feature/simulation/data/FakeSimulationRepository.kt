@@ -3,11 +3,14 @@ package com.auracode.hiposim.feature.simulation.data
 import com.auracode.hiposim.feature.simulation.domain.Installment
 import com.auracode.hiposim.feature.simulation.domain.LoanSimulation
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
+import com.auracode.hiposim.feature.simulation.domain.SimulationRequest
+import com.auracode.hiposim.feature.simulation.domain.SimulationResult
 import java.math.BigDecimal
 import javax.inject.Inject
 
 /**
- * Fixed data with the landing page figures, until the API and the financial engine exist.
+ * Fixed data with the landing page figures. The app uses [RemoteSimulationRepository]; this fake keeps the unit and
+ * instrumented tests independent of the network. It ignores the request and always answers with the same simulation.
  *
  * Price 280,000 - down payment 42,000 (15%) - bonus 18,200 = net loan 219,800, 20 years, payment 1,909.
  * The schedule rows are a French-method run at 0.645% monthly with 105.80 of insurance, rounded to cents.
@@ -15,6 +18,9 @@ import javax.inject.Inject
 class FakeSimulationRepository
     @Inject
     constructor() : SimulationRepository {
+        override suspend fun simulate(request: SimulationRequest): SimulationResult =
+            SimulationResult.Success(SIMULATION)
+
         override suspend fun getCurrentSimulation(): LoanSimulation = SIMULATION
 
         private companion object {

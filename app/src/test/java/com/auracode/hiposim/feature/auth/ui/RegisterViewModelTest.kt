@@ -10,9 +10,11 @@ import com.auracode.hiposim.feature.auth.domain.ValidateRegistrationFormUseCase
 import com.auracode.hiposim.feature.simulation.data.FakeSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.GetLoanSimulationUseCase
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.StubSimulationRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -50,6 +52,18 @@ class RegisterViewModelTest {
         assertEquals("S/ 1,909", quote.monthlyPayment)
         assertEquals("8.85%", quote.tcea)
         assertEquals("S/ 280,000", quote.propertyPrice)
+    }
+
+    @Test
+    fun init_withoutASimulation_hasNoQuoteSummary() {
+        val registerViewModel =
+            RegisterViewModel(
+                getLoanSimulation = GetLoanSimulationUseCase(StubSimulationRepository(current = null)),
+                validateForm = ValidateRegistrationFormUseCase(),
+                registerUser = RegisterUserUseCase(authRepository),
+            )
+
+        assertNull(registerViewModel.uiState.value.quote)
     }
 
     @Test

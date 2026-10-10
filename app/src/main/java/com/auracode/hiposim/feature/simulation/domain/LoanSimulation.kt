@@ -21,6 +21,8 @@ data class LoanSimulation(
     /** Internal rate of return as a fraction. */
     val irr: BigDecimal,
     val initialSchedule: List<Installment>,
+    /** Identifier the API gave to this simulation, needed later to send it to a real estate agency. */
+    val simulationId: String? = null,
 ) {
     val termMonths: Int get() = termYears * MONTHS_PER_YEAR
 
