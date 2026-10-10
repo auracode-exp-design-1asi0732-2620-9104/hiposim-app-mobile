@@ -1,6 +1,8 @@
 package com.auracode.hiposim.di
 
 import com.auracode.hiposim.BuildConfig
+import com.auracode.hiposim.feature.auth.data.AuthService
+import com.auracode.hiposim.feature.auth.data.FakeAuthService
 import com.auracode.hiposim.feature.simulation.data.FakeSimulationService
 import com.auracode.hiposim.feature.simulation.data.SimulationService
 import dagger.Lazy
@@ -26,5 +28,14 @@ object ServiceModule {
             FakeSimulationService(latencyMillis = FakeSimulationService.DEFAULT_LATENCY_MILLIS)
         } else {
             retrofit.get().create(SimulationService::class.java)
+        }
+
+    @Provides
+    @Singleton
+    fun provideAuthService(retrofit: Lazy<Retrofit>): AuthService =
+        if (BuildConfig.USE_FAKE_API) {
+            FakeAuthService(latencyMillis = FakeAuthService.DEFAULT_LATENCY_MILLIS)
+        } else {
+            retrofit.get().create(AuthService::class.java)
         }
 }

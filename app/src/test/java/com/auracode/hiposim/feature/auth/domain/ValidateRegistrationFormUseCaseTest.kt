@@ -14,6 +14,7 @@ class ValidateRegistrationFormUseCaseTest {
             email = "carlos@ejemplo.com",
             phone = "987 654 321",
             password = "secret123",
+            termsAccepted = true,
             consentAccepted = true,
         )
 
@@ -21,6 +22,22 @@ class ValidateRegistrationFormUseCaseTest {
         form: RegistrationForm,
         field: RegistrationField,
     ) = validate(form).errors[field]
+
+    @Test
+    fun withoutTheTerms_isInvalidEvenIfEverythingElseIsValid() {
+        val result = validate(validForm.copy(termsAccepted = false))
+
+        assertFalse(result.isValid)
+        assertEquals(mapOf(RegistrationField.Terms to RegistrationError.TermsRequired), result.errors)
+    }
+
+    @Test
+    fun fields_knowTheirRequestProperty() {
+        assertEquals(RegistrationField.Terms, RegistrationField.fromRequestProperty("acceptedTerms"))
+        assertEquals(RegistrationField.Consent, RegistrationField.fromRequestProperty("acceptedDataProcessing"))
+        assertEquals(RegistrationField.FullName, RegistrationField.fromRequestProperty("fullName"))
+        assertEquals(null, RegistrationField.fromRequestProperty("request"))
+    }
 
     @Test
     fun validForm_hasNoErrors() {

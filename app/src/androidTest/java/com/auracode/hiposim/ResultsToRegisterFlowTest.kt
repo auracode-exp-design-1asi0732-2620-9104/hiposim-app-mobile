@@ -51,6 +51,7 @@ class ResultsToRegisterFlowTest {
         // The keyboard covers the bottom of the form and makes the assertions below flaky.
         Espresso.closeSoftKeyboard()
         composeRule.waitForIdle()
+        composeRule.onNodeWithText(text(R.string.terms_text)).performScrollTo().performClick()
         if (acceptConsent) {
             composeRule.onNodeWithText(text(R.string.consent_text)).performScrollTo().performClick()
         }
@@ -96,7 +97,9 @@ class ResultsToRegisterFlowTest {
 
         fillRegistrationForm(acceptConsent = true)
 
-        // Back on Results, signed in: the padlock is gone and the sheet does not open.
+        // Creating the account takes a moment; then the app is back on Results, signed in:
+        // the padlock is gone and the sheet does not open.
+        composeRule.waitUntilAtLeastOneExists(hasText(text(R.string.send_quote)), RESULTS_TIMEOUT_MILLIS)
         composeRule.onNodeWithText(text(R.string.send_quote)).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(lockedDescription).assertDoesNotExist()
         composeRule.onNodeWithText(text(R.string.send_quote)).performClick()

@@ -1,15 +1,9 @@
 package com.auracode.hiposim.feature.simulation.data
 
+import com.auracode.hiposim.core.network.validationProblemException
 import kotlinx.coroutines.delay
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonObject
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
-import retrofit2.Response
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -98,17 +92,7 @@ class FakeSimulationService(
             }
         }
 
-    private fun validationError(errors: Map<String, List<String>>): HttpException {
-        val body =
-            buildJsonObject {
-                put("title", "One or more validation errors occurred.")
-                put("status", BAD_REQUEST)
-                putJsonObject("errors") {
-                    errors.forEach { (field, messages) -> put(field, JsonArray(messages.map(::JsonPrimitive))) }
-                }
-            }.toString()
-        return HttpException(Response.error<Unit>(BAD_REQUEST, body.toResponseBody(PROBLEM_JSON)))
-    }
+    private fun validationError(errors: Map<String, List<String>>): HttpException = validationProblemException(errors)
 
     private fun frenchInstallment(
         capital: Double,
@@ -209,8 +193,6 @@ class FakeSimulationService(
         private const val MIN_DOWN_PAYMENT_DIVISOR = 10
         private const val RATE_SCALE = 6
         private const val IRR_ITERATIONS = 100
-        private const val BAD_REQUEST = 400
-        private val PROBLEM_JSON = "application/problem+json".toMediaType()
         private val LIMA: ZoneId = ZoneId.of("America/Lima")
     }
 }

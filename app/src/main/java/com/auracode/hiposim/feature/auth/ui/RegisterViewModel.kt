@@ -3,6 +3,7 @@ package com.auracode.hiposim.feature.auth.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.auracode.hiposim.core.util.PeruFormat
+import com.auracode.hiposim.feature.auth.domain.AuthFailure
 import com.auracode.hiposim.feature.auth.domain.RegisterResult
 import com.auracode.hiposim.feature.auth.domain.RegisterUserUseCase
 import com.auracode.hiposim.feature.auth.domain.RegistrationError
@@ -45,18 +46,21 @@ class RegisterViewModel
             }
         }
 
-        fun onFullNameChange(value: String) = updateForm { it.copy(fullName = value) }
+        fun onFullNameChange(value: String) = updateForm(RegistrationField.FullName) { it.copy(fullName = value) }
 
-        fun onEmailChange(value: String) = updateForm { it.copy(email = value) }
+        fun onEmailChange(value: String) = updateForm(RegistrationField.Email) { it.copy(email = value) }
 
         fun onPhoneChange(value: String) =
-            updateForm {
+            updateForm(RegistrationField.Phone) {
                 it.copy(phone = value.filter { char -> char.isDigit() || char == ' ' }.take(MAX_PHONE_INPUT_LENGTH))
             }
 
-        fun onPasswordChange(value: String) = updateForm { it.copy(password = value) }
+        fun onPasswordChange(value: String) = updateForm(RegistrationField.Password) { it.copy(password = value) }
 
-        fun onConsentChange(accepted: Boolean) = updateForm { it.copy(consentAccepted = accepted) }
+        fun onTermsChange(accepted: Boolean) = updateForm(RegistrationField.Terms) { it.copy(termsAccepted = accepted) }
+
+        fun onConsentChange(accepted: Boolean) =
+            updateForm(RegistrationField.Consent) { it.copy(consentAccepted = accepted) }
 
         fun onTogglePasswordVisibility() {
             _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
@@ -68,31 +72,38 @@ class RegisterViewModel
             if (state.isSubmitting) return
 
             val validation = validateForm(state.form)
-            _uiState.update { it.copy(errors = validation.errors) }
+            _uiState.update { it.copy(errors = validation.errors, serverErrors = emptyMap(), failure = null) }
             if (!validation.isValid) return
 
             _uiState.update { it.copy(isSubmitting = true) }
             viewModelScope.launch {
-                when (registerUser(state.form)) {
-                    is RegisterResult.Success ->
-                        _uiState.update { it.copy(isSubmitting = false, isRegistered = true) }
-
-                    RegisterResult.EmailAlreadyRegistered ->
-                        _uiState.update {
-                            it.copy(
-                                isSubmitting = false,
-                                errors = it.errors + EMAIL_TAKEN_ERROR,
-                            )
-                        }
-                }
+                val result = registerUser(state.form)
+                _uiState.update { it.copy(isSubmitting = false).with(result) }
             }
         }
 
-        private fun updateForm(transform: (RegistrationForm) -> RegistrationForm) {
+        private fun RegisterUiState.with(result: RegisterResult): RegisterUiState =
+            when (result) {
+                is RegisterResult.Success -> copy(isRegistered = true)
+                RegisterResult.EmailAlreadyRegistered -> copy(errors = errors + EMAIL_TAKEN_ERROR)
+                is RegisterResult.Rejected ->
+                    if (result.fieldMessages.isEmpty()) {
+                        // The API rejected something the form does not show: there is no field to point at.
+                        copy(failure = AuthFailure.Unexpected)
+                    } else {
+                        copy(serverErrors = result.fieldMessages)
+                    }
+                is RegisterResult.Failed -> copy(failure = result.reason)
+            }
+
+        private fun updateForm(
+            edited: RegistrationField,
+            transform: (RegistrationForm) -> RegistrationForm,
+        ) {
             _uiState.update { state ->
                 val form = transform(state.form)
                 val errors = if (state.errors.isEmpty()) state.errors else revalidate(state, form)
-                state.copy(form = form, errors = errors)
+                state.copy(form = form, errors = errors, serverErrors = state.serverErrors - edited, failure = null)
             }
         }
 

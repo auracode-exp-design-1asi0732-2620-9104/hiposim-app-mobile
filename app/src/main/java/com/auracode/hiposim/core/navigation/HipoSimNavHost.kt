@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.auracode.hiposim.feature.auth.ui.LoginScreen
 import com.auracode.hiposim.feature.auth.ui.RegisterScreen
 import com.auracode.hiposim.feature.simulation.ui.ResultsScreen
 import com.auracode.hiposim.feature.simulation.ui.SimulationFormScreen
@@ -27,12 +28,26 @@ fun HipoSimNavHost(
         composable<Route.Results> {
             ResultsScreen(
                 onNavigateToRegister = { navController.navigate(Route.Register) },
+                onNavigateToLogin = { navController.navigate(Route.Login) },
             )
         }
         composable<Route.Register> {
             RegisterScreen(
                 onBack = { navController.popBackStack() },
                 onRegistered = { navController.popBackStack() },
+                // Registration and sign in replace each other, so "back" always returns to Results.
+                onNavigateToLogin = {
+                    navController.navigate(Route.Login) { popUpTo<Route.Register> { inclusive = true } }
+                },
+            )
+        }
+        composable<Route.Login> {
+            LoginScreen(
+                onBack = { navController.popBackStack() },
+                onSignedIn = { navController.popBackStack() },
+                onNavigateToRegister = {
+                    navController.navigate(Route.Register) { popUpTo<Route.Login> { inclusive = true } }
+                },
             )
         }
     }

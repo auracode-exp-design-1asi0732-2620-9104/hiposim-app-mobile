@@ -13,6 +13,11 @@ sealed interface Route {
     @Serializable
     data object Results : Route
 
+    /** Creates a buyer account. Reached from Results, where the buyer already has a simulation. */
     @Serializable
     data object Register : Route
+
+    /** Signs in with an existing buyer account. */
+    @Serializable
+    data object Login : Route
 }

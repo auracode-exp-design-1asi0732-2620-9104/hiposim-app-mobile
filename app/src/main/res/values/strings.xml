@@ -86,8 +86,9 @@
 
   <!-- Login required sheet -->
   <string name="unlock_sheet_title">Unlock real estate agencies</string>
-  <string name="unlock_sheet_body">Create your account to send your financial profile to real estate agencies.</string>
-  <string name="unlock_sheet_email">Continue with email</string>
+  <string name="unlock_sheet_body">Create your account or sign in to send your simulation to real estate agencies.</string>
+  <string name="unlock_sheet_email">Create an account with email</string>
+  <string name="unlock_sheet_sign_in">I already have an account</string>
 
   <!-- Account sheet -->
   <string name="account_sheet_title">Your account</string>
@@ -112,7 +113,8 @@
   <string name="field_password_placeholder">At least 8 characters</string>
   <string name="password_show">Show password</string>
   <string name="password_hide">Hide password</string>
-  <string name="consent_text">I authorize sharing my simulation with real estate agencies and the processing of my personal data in accordance with Law No. 29733 on Personal Data Protection.</string>
+  <string name="terms_text">I accept the Terms and Conditions.</string>
+  <string name="consent_text">I authorize the processing of my personal data in accordance with Law No. 29733 on Personal Data Protection.</string>
   <string name="register_submit">Create account and connect</string>
   <string name="register_footer">HipoSim is an independent simulator: it does not recommend financial institutions.</string>
   <string name="error_name_required">Enter your full name</string>
@@ -120,5 +122,17 @@
   <string name="error_phone_invalid">Enter a 9-digit mobile number starting with 9</string>
   <string name="error_password_short">Use at least 8 characters</string>
   <string name="error_email_taken">This email is already registered</string>
-  <string name="error_consent_required">You must accept to continue</string>
+  <string name="error_terms_required">You must accept the Terms and Conditions to continue</string>
+  <string name="error_consent_required">You must authorize the processing of your data to continue</string>
+  <string name="register_have_account">I already have an account. Sign in</string>
+
+  <!-- Sign in -->
+  <string name="login_title">Welcome back</string>
+  <string name="login_subtitle">Enter your email and password to continue with your simulation.</string>
+  <string name="login_submit">Sign in</string>
+  <string name="login_submitting">Signing in</string>
+  <string name="login_no_account">I do not have an account. Sign up</string>
+  <string name="error_password_required">Enter your password</string>
+  <string name="error_invalid_credentials">The email or the password is incorrect.</string>
+  <string name="error_not_a_buyer">This account belongs to a real estate advisor. Use the web app for advisors.</string>
 </resources>

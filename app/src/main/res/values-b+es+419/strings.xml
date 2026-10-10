@@ -86,8 +86,9 @@
 
   <!-- Login required sheet -->
   <string name="unlock_sheet_title">Desbloquea Inmobiliarias</string>
-  <string name="unlock_sheet_body">Crea tu cuenta para enviar tu perfil financiero a las inmobiliarias.</string>
-  <string name="unlock_sheet_email">Continuar con correo</string>
+  <string name="unlock_sheet_body">Crea tu cuenta o inicia sesión para enviar tu simulación a las inmobiliarias.</string>
+  <string name="unlock_sheet_email">Crear cuenta con correo</string>
+  <string name="unlock_sheet_sign_in">Ya tengo una cuenta</string>
 
   <!-- Account sheet -->
   <string name="account_sheet_title">Tu cuenta</string>
@@ -112,7 +113,8 @@
   <string name="field_password_placeholder">Mínimo 8 caracteres</string>
   <string name="password_show">Mostrar contraseña</string>
   <string name="password_hide">Ocultar contraseña</string>
-  <string name="consent_text">Autorizo compartir mi simulación con inmobiliarias y el tratamiento de mis datos personales conforme a la Ley N° 29733 de Protección de Datos Personales.</string>
+  <string name="terms_text">Acepto los Términos y Condiciones.</string>
+  <string name="consent_text">Autorizo el tratamiento de mis datos personales conforme a la Ley N° 29733 de Protección de Datos Personales.</string>
   <string name="register_submit">Crear cuenta y conectar con inmobiliarias</string>
   <string name="register_footer">HipoSim es un simulador independiente: no recomienda entidades financieras.</string>
   <string name="error_name_required">Ingresa tu nombre completo</string>
@@ -120,5 +122,17 @@
   <string name="error_phone_invalid">Ingresa un celular de 9 dígitos que empiece con 9</string>
   <string name="error_password_short">Usa al menos 8 caracteres</string>
   <string name="error_email_taken">Este correo ya está registrado</string>
-  <string name="error_consent_required">Debes aceptar para continuar</string>
+  <string name="error_terms_required">Debes aceptar los Términos y Condiciones para continuar</string>
+  <string name="error_consent_required">Debes autorizar el tratamiento de tus datos para continuar</string>
+  <string name="register_have_account">Ya tengo una cuenta. Iniciar sesión</string>
+
+  <!-- Sign in -->
+  <string name="login_title">Inicia sesión</string>
+  <string name="login_subtitle">Ingresa tu correo y tu contraseña para continuar con tu simulación.</string>
+  <string name="login_submit">Iniciar sesión</string>
+  <string name="login_submitting">Ingresando</string>
+  <string name="login_no_account">No tengo una cuenta. Registrarme</string>
+  <string name="error_password_required">Ingresa tu contraseña</string>
+  <string name="error_invalid_credentials">El correo o la contraseña son incorrectos.</string>
+  <string name="error_not_a_buyer">Esta cuenta es de un asesor inmobiliario. Usa la aplicación web para asesores.</string>
 </resources>

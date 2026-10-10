@@ -80,6 +80,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ResultsScreen(
     onNavigateToRegister: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     viewModel: ResultsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -110,6 +111,10 @@ fun ResultsScreen(
             onContinueWithEmail = {
                 viewModel.onUnlockSheetDismiss()
                 onNavigateToRegister()
+            },
+            onSignIn = {
+                viewModel.onUnlockSheetDismiss()
+                onNavigateToLogin()
             },
             onDismiss = viewModel::onUnlockSheetDismiss,
         )

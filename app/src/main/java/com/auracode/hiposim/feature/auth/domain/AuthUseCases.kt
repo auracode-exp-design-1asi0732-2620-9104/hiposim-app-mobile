@@ -19,6 +19,14 @@ class RegisterUserUseCase
         suspend operator fun invoke(form: RegistrationForm): RegisterResult = repository.register(form)
     }
 
+class SignInUseCase
+    @Inject
+    constructor(
+        private val repository: AuthRepository,
+    ) {
+        suspend operator fun invoke(form: LoginForm): SignInResult = repository.signIn(form.email, form.password)
+    }
+
 class SignOutUseCase
     @Inject
     constructor(

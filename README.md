@@ -16,7 +16,10 @@ La app arranca en el formulario de simulación y llega a los resultados con la r
    inicial. Si el bono se pidió y la vivienda está fuera de rango, lo explica sin tratarlo como error. Si no hay
    simulación que mostrar (por ejemplo, el sistema recreó la app), ofrece volver a simular. Mantiene enviar
    cotización, PDF (aviso "Disponible próximamente") y la barra inferior con destinos bloqueados.
-3. **Registro Contextual**: formulario con consentimiento obligatorio (Ley N° 29733).
+3. **Registro** (US13): nombre, correo, celular y contraseña, con dos aceptaciones obligatorias y desmarcadas por
+   defecto: Términos y Condiciones, y tratamiento de datos personales (Ley N° 29733).
+4. **Inicio de sesión** (US26): correo y contraseña. Si las credenciales no son válidas, el mensaje no indica cuál
+   de los dos datos es incorrecto.
 
 La simulación sigue el contrato `POST /api/simulations` (v0.1.0). Mientras no exista el host de la API, responde
 `FakeSimulationService`, que respeta la forma del contrato y reproduce los números de sus ejemplos; ver
@@ -30,18 +33,19 @@ La tasa no la escribe el Comprador: es la constante `SimulationConfig.ANNUAL_EFF
 8.85%), la tasa de referencia acordada por el equipo y la misma que muestra el Landing. Con el ejemplo del Landing
 (S/ 280,000, 15% de inicial, 20 años, con bono) la cuota es S/ 1,909.
 
-### Cuentas y sesión (provisional)
+### Cuentas y sesión
 
-El registro crea una cuenta en memoria con `FakeAuthRepository` detrás de la interfaz `AuthRepository`. Al registrarte
-quedas con la sesión iniciada: los candados de la barra inferior desaparecen y "Perfil" abre una hoja con tu cuenta y
-"Cerrar sesión". Es solo para la demo:
+El registro y el inicio de sesión usan `POST /api/auth/register` y `POST /api/auth/login` del contrato v0.1.0, a
+través de `AuthService` y `DefaultAuthRepository`. Con `USE_FAKE_API` activo responde `FakeAuthService`, con cuentas
+en memoria y los mismos errores que el servidor.
 
-- Las cuentas y la sesión no se guardan: se pierden al cerrar la app.
-- No hay inicio de sesión todavía (no está en los mockups) ni se guarda la contraseña.
-- "Enviar cotización" e "Inmobiliarias" muestran "Disponible próximamente" con sesión iniciada, hasta que exista `feature/leads`.
-
-Cuando exista el backend, se reemplaza `FakeAuthRepository` por una implementación con la API en `di/RepositoryModule.kt`.
-No hay API real ni PDF todavía.
+- Al registrarte o iniciar sesión, el `accessToken` se guarda en `TokenStore` y `AuthInterceptor` lo adjunta a las
+  peticiones siguientes. "Cerrar sesión" (hoja de "Perfil") lo borra.
+- La sesión y el token viven en memoria: se pierden al cerrar la app y hay que volver a iniciar sesión.
+- Errores del registro: el 409 se muestra como "Este correo ya está registrado" junto al correo, y los 400 junto al
+  campo que el servidor indique.
+- La app es del Comprador (rol `buyer`). Una cuenta de asesor no inicia sesión aquí: se le indica usar la web.
+- A las pantallas de cuenta se llega desde Resultados, por la hoja "Desbloquea Inmobiliarias", y se enlazan entre sí.
 
 ## Requisitos
 
@@ -183,7 +187,8 @@ app/src/main/java/com/auracode/hiposim/
   core/util/           formato de moneda y porcentaje (S/, es-PE), idioma de la demo
   feature/simulation/  ui (Formulario, Resultados), domain (modelos, validación, casos de uso),
                        data (DTO del contrato, SimulationService, FakeSimulationService, repositorio)
-  feature/auth/        ui (Registro, LoginRequiredSheet, AccountSheet), domain (validación, sesión), data (FakeAuthRepository)
+  feature/auth/        ui (Registro, Inicio de sesión, LoginRequiredSheet, AccountSheet), domain (validación, sesión),
+                       data (DTO del contrato, AuthService, FakeAuthService, repositorio)
   feature/leads/       reservado (US21)
   feature/history/     reservado
   feature/comparison/  reservado
@@ -216,7 +221,8 @@ feat(auth): add contextual registration form (US13)
 | Historia | Alcance | Feature | Estado |
 |---|---|---|---|
 | SP03 | Spike de tecnología móvil | `docs/adr` | Hecho |
-| US13 | Mockup de registro contextual | `feature/auth` | Mockup implementado |
+| US13 | Registrarse como Comprador con `POST /api/auth/register` | `feature/auth` | Hecho con la API en memoria, listo para la API real |
+| US26 | Iniciar sesión como Comprador con `POST /api/auth/login` | `feature/auth` | Hecho con la API en memoria, listo para la API real |
 | US21 | Mockup de resultados y conexión inmobiliaria | `feature/simulation`, `feature/leads` | Pantalla de resultados implementada, conexión pendiente |
 | US01 | Simular crédito base: formulario, validación y conexión con `POST /api/simulations` | `feature/simulation`, `core/network` | Hecho con la API en memoria, listo para la API real |
 | US04 | Visualizar TCEA, VAN y TIR con la respuesta de la API | `feature/simulation` | Hecho con la API en memoria; verificado contra los ejemplos del contrato |

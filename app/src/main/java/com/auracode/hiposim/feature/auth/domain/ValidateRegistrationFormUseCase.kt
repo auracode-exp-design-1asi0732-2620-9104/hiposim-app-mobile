@@ -12,7 +12,7 @@ class ValidateRegistrationFormUseCase
                     if (form.fullName.trim().length < MIN_NAME_LENGTH) {
                         put(RegistrationField.FullName, RegistrationError.NameRequired)
                     }
-                    if (!EMAIL_REGEX.matches(form.email.trim())) {
+                    if (!EmailFormat.isValid(form.email)) {
                         put(RegistrationField.Email, RegistrationError.EmailInvalid)
                     }
                     if (!MOBILE_REGEX.matches(phoneDigits)) {
@@ -20,6 +20,9 @@ class ValidateRegistrationFormUseCase
                     }
                     if (form.password.length < MIN_PASSWORD_LENGTH) {
                         put(RegistrationField.Password, RegistrationError.PasswordTooShort)
+                    }
+                    if (!form.termsAccepted) {
+                        put(RegistrationField.Terms, RegistrationError.TermsRequired)
                     }
                     if (!form.consentAccepted) {
                         put(RegistrationField.Consent, RegistrationError.ConsentRequired)
@@ -31,7 +34,6 @@ class ValidateRegistrationFormUseCase
         private companion object {
             const val MIN_NAME_LENGTH = 2
             const val MIN_PASSWORD_LENGTH = 8
-            val EMAIL_REGEX = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
 
             /** Peruvian mobile numbers have 9 digits and start with 9. */
             val MOBILE_REGEX = Regex("^9\\d{8}$")
