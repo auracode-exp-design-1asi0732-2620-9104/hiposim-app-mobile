@@ -25,6 +25,22 @@ captures/
 .DS_Store
 Thumbs.db
 
-# Signing (never commit keystores)
+# Signing (never commit keystores or their passwords)
 *.jks
 *.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
+*-signing.properties
+
+# Firebase and other secrets
+google-services.json
+GoogleService-Info.plist
+*service-account*.json
+*firebase-adminsdk*.json
+.firebaserc
+firebase-debug.log
+.env
+.env.*
+!.env.example

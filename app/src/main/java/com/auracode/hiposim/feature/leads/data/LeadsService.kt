@@ -18,8 +18,8 @@ interface LeadsService {
 }
 
 /**
- * Agencies a buyer can send a simulation to. PROPOSED endpoint, not in the backend yet: while it does not
- * exist the app uses [FakeAgenciesService] (`BuildConfig.USE_FAKE_AGENCIES`), even against the real API.
+ * Agencies a buyer can send a simulation to: a public list sorted by name. [FakeAgenciesService] stands in
+ * with `BuildConfig.USE_FAKE_API`, or with `BuildConfig.USE_FAKE_AGENCIES` against a backend without the endpoint.
  */
 interface AgenciesService {
     @GET("api/agencies")

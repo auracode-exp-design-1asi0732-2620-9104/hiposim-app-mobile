@@ -53,8 +53,8 @@ object ServiceModule {
         }
 
     /**
-     * GET /api/agencies is not in the backend yet, so the list stays in memory (`USE_FAKE_AGENCIES`) even
-     * when everything else talks to the real API. It is the demo agency of the backend seed, which is real there.
+     * `USE_FAKE_AGENCIES` keeps the list in memory even when everything else talks to the real API, for a
+     * backend older than GET /api/agencies. It is the demo agency of the backend seed, which is real there.
      */
     @Provides
     @Singleton

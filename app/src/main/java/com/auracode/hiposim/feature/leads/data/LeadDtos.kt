@@ -25,8 +25,7 @@ data class LeadResponseDto(
 )
 
 /**
- * PROPOSED shape: GET /api/agencies does not exist in the backend yet. Adjust this DTO, [AgenciesService] and the
- * mapper in [DefaultLeadsRepository] when the real endpoint is published.
+ * `AgencyResponse` of GET /api/agencies (hiposim-backEnd, docs/api-contract/openapi.v0.yaml).
  */
 @Serializable
 data class AgencyDto(
