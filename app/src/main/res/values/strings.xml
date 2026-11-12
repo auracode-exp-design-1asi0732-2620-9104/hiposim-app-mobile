@@ -226,6 +226,17 @@
   <string name="scenarios_back_to_results">Back to my simulation</string>
   <string name="scenarios_sign_in">Sign in</string>
   <string name="error_scenario_name">Enter a name of up to 60 characters</string>
+  <string name="compare_title">Compare scenarios</string>
+  <string name="compare_intro">The lowest figure of each row is highlighted. A lower payment or cost is better.</string>
+  <string name="compare_lowest">Lowest</string>
+  <string name="compare_higher">%1$s more</string>
+  <string name="compare_no_value">–</string>
+  <string name="compare_button">Compare scenarios (%1$d of 3)</string>
+  <string name="compare_hint">Pick 2 or 3 scenarios to compare</string>
+  <string name="compare_need_two">Save at least two scenarios to compare them.</string>
+  <string name="compare_select_description">Select %1$s to compare</string>
+  <string name="compare_back_to_list">Back to my scenarios</string>
+  <string name="error_compare_selection">Pick two or three scenarios to compare</string>
   <string name="error_scenario_not_found">We could not find your simulation. Simulate again and save it.</string>
   <string name="error_scenario_session_expired">Your session expired. Sign in again to see and save your scenarios.</string>
 </resources>

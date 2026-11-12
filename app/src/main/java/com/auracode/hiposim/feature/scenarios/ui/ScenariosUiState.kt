@@ -2,6 +2,8 @@ package com.auracode.hiposim.feature.scenarios.ui
 
 import androidx.compose.runtime.Immutable
 import com.auracode.hiposim.core.util.PeruFormat
+import com.auracode.hiposim.feature.scenarios.domain.MAX_COMPARED_SCENARIOS
+import com.auracode.hiposim.feature.scenarios.domain.MIN_COMPARED_SCENARIOS
 import com.auracode.hiposim.feature.scenarios.domain.SavedScenario
 import com.auracode.hiposim.feature.scenarios.domain.ScenarioFailure
 import com.auracode.hiposim.feature.simulation.domain.GraceType
@@ -15,8 +17,18 @@ data class ScenariosUiState(
     val scenarios: List<ScenarioUi> = emptyList(),
     /** Why the list could not be read; null when it was read (even if empty). */
     val failure: ScenarioFailure? = null,
+    /** Ids of the scenarios picked to compare (US07), in the order they were picked. */
+    val selectedIds: List<String> = emptyList(),
 ) {
     val isEmpty: Boolean get() = !isLoading && failure == null && scenarios.isEmpty()
+
+    /** Comparing needs at least two scenarios saved, otherwise the picking controls are not shown. */
+    val canPick: Boolean get() = scenarios.size >= MIN_COMPARED_SCENARIOS
+
+    val canCompare: Boolean get() = selectedIds.size in MIN_COMPARED_SCENARIOS..MAX_COMPARED_SCENARIOS
+
+    /** No more can be picked until one is dropped. */
+    val isSelectionFull: Boolean get() = selectedIds.size >= MAX_COMPARED_SCENARIOS
 }
 
 /** One saved scenario as a card. A figure is null when the API did not send it, and its line is not drawn. */

@@ -30,6 +30,9 @@ enum class ScenarioFailure {
     /** The name is empty or too long. Checked before calling the API, and also returned by it (400). */
     NameInvalid,
 
+    /** Fewer than two or more than three scenarios were picked to compare (US07). */
+    SelectionInvalid,
+
     /** There is no simulation on screen to save. */
     SimulationMissing,
 
