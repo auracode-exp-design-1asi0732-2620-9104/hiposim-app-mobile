@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.auracode.hiposim.feature.auth.ui.LoginScreen
 import com.auracode.hiposim.feature.auth.ui.RegisterScreen
+import com.auracode.hiposim.feature.scenarios.ui.CompareScenariosScreen
 import com.auracode.hiposim.feature.scenarios.ui.ScenariosScreen
 import com.auracode.hiposim.feature.simulation.ui.ResultsScreen
 import com.auracode.hiposim.feature.simulation.ui.ScheduleScreen
@@ -39,6 +40,13 @@ fun HipoSimNavHost(
             ScenariosScreen(
                 onBack = { navController.popBackStack() },
                 // The session expired while the list was open: signing in comes back here.
+                onSignIn = { navController.navigate(Route.Login) },
+                onCompare = { ids -> navController.navigate(Route.CompareScenarios.of(ids)) },
+            )
+        }
+        composable<Route.CompareScenarios> {
+            CompareScenariosScreen(
+                onBack = { navController.popBackStack() },
                 onSignIn = { navController.navigate(Route.Login) },
             )
         }
