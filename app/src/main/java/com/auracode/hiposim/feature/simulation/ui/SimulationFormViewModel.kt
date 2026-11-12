@@ -2,6 +2,8 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.auracode.hiposim.core.analytics.UsageEvents
+import com.auracode.hiposim.core.analytics.UsageTracker
 import com.auracode.hiposim.core.util.PeruFormat
 import com.auracode.hiposim.feature.simulation.domain.GraceType
 import com.auracode.hiposim.feature.simulation.domain.SimulateLoanUseCase
@@ -26,7 +28,17 @@ class SimulationFormViewModel
     constructor(
         private val validateForm: ValidateSimulationFormUseCase,
         private val simulateLoan: SimulateLoanUseCase,
+        private val usageTracker: UsageTracker = UsageTracker.None,
     ) : ViewModel() {
+        /** `simulation_started` goes once per form: on the first edit or on the first submit. */
+        private var startTracked = false
+
+        private fun trackStart() {
+            if (startTracked) return
+            startTracked = true
+            usageTracker.track(UsageEvents.SIMULATION_STARTED)
+        }
+
         private val _uiState =
             MutableStateFlow(
                 SimulationFormUiState(
@@ -69,6 +81,7 @@ class SimulationFormViewModel
         fun onSubmit() {
             val state = _uiState.value
             if (state.isSubmitting) return
+            trackStart()
 
             val validation = validateForm(state.form)
             _uiState.update { it.copy(errors = validation.errors, serverErrors = emptyMap(), generalError = null) }
@@ -110,6 +123,7 @@ class SimulationFormViewModel
             edited: SimulationField?,
             transform: (SimulationForm) -> SimulationForm,
         ) {
+            trackStart()
             _uiState.update { state ->
                 val form = transform(state.form)
                 state.copy(

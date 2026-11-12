@@ -1,5 +1,7 @@
 package com.auracode.hiposim.feature.scenarios.domain
 
+import com.auracode.hiposim.core.analytics.UsageEvents
+import com.auracode.hiposim.core.analytics.UsageTracker
 import com.auracode.hiposim.feature.auth.domain.AuthRepository
 import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.simulation.domain.SimulationFailure
@@ -22,6 +24,7 @@ class SaveScenarioUseCase
         private val scenariosRepository: ScenariosRepository,
         private val simulationRepository: SimulationRepository,
         private val authRepository: AuthRepository,
+        private val usageTracker: UsageTracker = UsageTracker.None,
     ) {
         suspend operator fun invoke(name: String): SaveScenarioResult {
             val trimmed = name.trim()
@@ -39,6 +42,13 @@ class SaveScenarioUseCase
             val simulation =
                 simulationRepository.currentSimulation.value ?: return failure(ScenarioFailure.SimulationMissing)
             val result = scenariosRepository.save(trimmed, simulation.id)
+            if (result is SaveScenarioResult.Success) {
+                // The name the buyer typed is not sent: it is free text and could hold personal data.
+                usageTracker.track(
+                    UsageEvents.SCENARIO_SAVED,
+                    mapOf("termYears" to simulation.termYears, "graceType" to simulation.graceType.apiValue),
+                )
+            }
             if (result is SaveScenarioResult.Failure && result.reason == ScenarioFailure.SessionExpired) {
                 // The token is no longer good: keeping the session would only repeat the failure.
                 authRepository.signOut()
