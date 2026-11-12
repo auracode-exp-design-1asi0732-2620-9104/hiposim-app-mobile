@@ -167,4 +167,25 @@
   <string name="legal_privacy_read">Read the Privacy Policy</string>
   <string name="legal_terms_description">Terms and Conditions, opens in the browser</string>
   <string name="legal_privacy_description">Privacy Policy, opens in the browser</string>
+  <!-- US03: grace period -->
+  <string name="grace_title">Grace period</string>
+  <string name="grace_none">None</string>
+  <string name="grace_partial">Partial</string>
+  <string name="grace_total">Total</string>
+  <string name="grace_none_body">You start paying the full installment in the first month.</string>
+  <string name="grace_partial_body">During the grace months you pay only the interest. The regular installment starts afterwards.</string>
+  <string name="grace_total_body">During the grace months you pay nothing. That interest is added to your balance, so the later installments are higher.</string>
+  <string name="field_grace_months">Grace months</string>
+  <string name="field_grace_months_suffix">months</string>
+  <string name="field_grace_months_hint">From %1$d to %2$d months</string>
+  <string name="error_grace_months_required">Enter the grace months</string>
+  <string name="error_grace_months_range">Enter between %1$d and %2$d grace months</string>
+  <plurals name="grace_note_partial">
+    <item quantity="one">Partial grace of %1$d month: you pay only the interest at the start.</item>
+    <item quantity="other">Partial grace of %1$d months: you pay only the interest at the start.</item>
+  </plurals>
+  <plurals name="grace_note_total">
+    <item quantity="one">Total grace of %1$d month: no payment at the start, the interest is added to the balance.</item>
+    <item quantity="other">Total grace of %1$d months: no payments at the start, the interest is added to the balance.</item>
+  </plurals>
 </resources>

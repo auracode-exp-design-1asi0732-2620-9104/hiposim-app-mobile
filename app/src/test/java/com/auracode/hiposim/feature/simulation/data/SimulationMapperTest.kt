@@ -2,6 +2,7 @@ package com.auracode.hiposim.feature.simulation.data
 
 import com.auracode.hiposim.di.NetworkModule
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import com.auracode.hiposim.feature.simulation.domain.SimulationParams
 import com.auracode.hiposim.testing.contractExampleParams
 import com.auracode.hiposim.testing.contractResource
@@ -131,5 +132,37 @@ class SimulationMapperTest {
     @Test
     fun responseWithoutSchedule_isNotASimulation() {
         assertNull(withBonus.copy(amortizationSchedule = emptyList()).toDomainOrNull(contractExampleParams))
+    }
+
+    // US03: the grace fields travel only when the buyer chose a grace period.
+
+    @Test
+    fun requestWithGrace_sendsTheMonthsAndTheApiType() {
+        val dto =
+            SimulationParams(
+                propertyPrice = BigDecimal("280000"),
+                downPayment = BigDecimal("42000"),
+                termYears = 20,
+                applyGoodPayerBonus = true,
+                graceType = GraceType.Total,
+                graceMonths = 3,
+            ).toRequestDto()
+
+        assertEquals(3, dto.gracePeriodMonths)
+        assertEquals("total", dto.graceType)
+    }
+
+    @Test
+    fun requestWithoutGrace_sendsNoGraceFields() {
+        val dto =
+            SimulationParams(
+                propertyPrice = BigDecimal("280000"),
+                downPayment = BigDecimal("42000"),
+                termYears = 20,
+                applyGoodPayerBonus = false,
+            ).toRequestDto()
+
+        assertNull(dto.gracePeriodMonths)
+        assertNull(dto.graceType)
     }
 }

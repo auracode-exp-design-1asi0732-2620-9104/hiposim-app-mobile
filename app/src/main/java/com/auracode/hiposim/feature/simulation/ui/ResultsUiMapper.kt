@@ -31,7 +31,10 @@ fun LoanSimulation.toResultsSummaryUi(): ResultsSummaryUi =
         npv = PeruFormat.soles(npv),
         npvDiscountRate = PeruFormat.percent(assumptions.annualDiscountRate),
         irr = PeruFormat.percent(irr),
-        composition = schedule.firstOrNull().toComposition(),
+        graceType = graceType,
+        graceMonths = graceMonths,
+        // The first regular installment: a grace month pays only interest (partial) or nothing (total).
+        composition = schedule.firstOrNull { !it.isGracePeriod }.toComposition(),
         schedule = schedule.take(INITIAL_SCHEDULE_ROWS).map { it.toUi() },
     )
 

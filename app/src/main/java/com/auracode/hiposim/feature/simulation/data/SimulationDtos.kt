@@ -12,7 +12,7 @@ data class SimulationRequestDto(
     val annualEffectiveRate: Double,
     val termInMonths: Int,
     val applyGoodPayerBonus: Boolean,
-    // Optional in the contract and not used by the app in this delivery (US03). Null fields are not sent.
+    // Optional in the contract: sent only with a grace period (US03). Null fields are not sent.
     val gracePeriodMonths: Int? = null,
     val graceType: String? = null,
     val startDate: String? = null,

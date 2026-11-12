@@ -3,6 +3,7 @@ package com.auracode.hiposim.feature.simulation.ui
 import androidx.compose.runtime.Immutable
 import com.auracode.hiposim.feature.auth.ui.AccountUi
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 
 /** Everything the Results screen draws. Money and rates are already formatted (es-PE). */
 @Immutable
@@ -35,6 +36,9 @@ data class ResultsSummaryUi(
     val netLoan: String,
     val termYears: Int,
     val termMonths: Int,
+    /** Grace period of the simulation (US03); [graceMonths] is 0 without grace. */
+    val graceType: GraceType = GraceType.None,
+    val graceMonths: Int = 0,
     val monthlyPayment: String,
     val monthlyInsurance: String,
     val totalPaid: String,

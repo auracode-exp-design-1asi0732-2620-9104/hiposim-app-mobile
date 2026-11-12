@@ -116,4 +116,40 @@ class ValidateSimulationFormUseCaseTest {
         assertEquals(SimulationField.TermYears, SimulationField.fromRequestProperty("termInMonths"))
         assertNull(SimulationField.fromRequestProperty("annualEffectiveRate"))
     }
+
+    // US03: grace period.
+
+    @Test
+    fun noGrace_ignoresTheMonthsField() {
+        val validation = validate(form().copy(graceType = GraceType.None, graceMonths = "abc"))
+
+        assertTrue(validation.isValid)
+        assertEquals(GraceType.None, validation.params?.graceType)
+        assertEquals(0, validation.params?.graceMonths)
+    }
+
+    @Test
+    fun partialGrace_withMonths_isCarriedToTheParams() {
+        val params = requireNotNull(validate(form().copy(graceType = GraceType.Partial, graceMonths = "3")).params)
+
+        assertEquals(GraceType.Partial, params.graceType)
+        assertEquals(3, params.graceMonths)
+    }
+
+    @Test
+    fun graceWithoutMonths_isRequired() {
+        val form = form().copy(graceType = GraceType.Total, graceMonths = "")
+
+        assertEquals(SimulationFormError.GraceMonthsRequired, errorOf(form, SimulationField.GraceMonths))
+        assertFalse(validate(form).isValid)
+    }
+
+    @Test
+    fun graceMonthsOutsideTheRange_areRejected() {
+        listOf("0", "13").forEach { months ->
+            val form = form().copy(graceType = GraceType.Partial, graceMonths = months)
+
+            assertEquals(SimulationFormError.GraceMonthsOutOfRange, errorOf(form, SimulationField.GraceMonths))
+        }
+    }
 }
