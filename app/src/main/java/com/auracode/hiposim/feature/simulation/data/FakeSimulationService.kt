@@ -50,26 +50,29 @@ class FakeSimulationService(
         val monthlyIrr = irr(financedAmount, payments)
         val annualIrr = rate((1 + monthlyIrr).pow(MONTHS_PER_YEAR) - 1)
 
-        return SimulationResponseDto(
-            simulationId = UUID.randomUUID().toString(),
-            financedAmount = financedAmount,
-            monthlyInstallment = money(regularInstallment),
-            totalPaid = money(payments.sum()),
-            totalInterest = money(schedule.sumOf { it.interest }),
-            additionalCosts = 0.0,
-            tcea = annualIrr,
-            irr = annualIrr,
-            npv = money(npv(financedAmount, payments, (1 + ANNUAL_DISCOUNT_RATE).pow(1.0 / MONTHS_PER_YEAR) - 1)),
-            benefit = BenefitDto(name = BONUS_NAME, eligible = eligibleBonus != null, appliedAmount = appliedBonus),
-            assumptions =
-                AssumptionsDto(
-                    monthlyPropertyInsurance = 0.0,
-                    monthlyCreditLifeInsurance = 0.0,
-                    administrativeExpenses = 0.0,
-                    annualDiscountRate = ANNUAL_DISCOUNT_RATE,
-                ),
-            amortizationSchedule = schedule,
-        )
+        val response =
+            SimulationResponseDto(
+                simulationId = UUID.randomUUID().toString(),
+                financedAmount = financedAmount,
+                monthlyInstallment = money(regularInstallment),
+                totalPaid = money(payments.sum()),
+                totalInterest = money(schedule.sumOf { it.interest }),
+                additionalCosts = 0.0,
+                tcea = annualIrr,
+                irr = annualIrr,
+                npv = money(npv(financedAmount, payments, (1 + ANNUAL_DISCOUNT_RATE).pow(1.0 / MONTHS_PER_YEAR) - 1)),
+                benefit = BenefitDto(name = BONUS_NAME, eligible = eligibleBonus != null, appliedAmount = appliedBonus),
+                assumptions =
+                    AssumptionsDto(
+                        monthlyPropertyInsurance = 0.0,
+                        monthlyCreditLifeInsurance = 0.0,
+                        administrativeExpenses = 0.0,
+                        annualDiscountRate = ANNUAL_DISCOUNT_RATE,
+                    ),
+                amortizationSchedule = schedule,
+            )
+        FakeSimulationStore.put(request, response)
+        return response
     }
 
     private fun validate(request: SimulationRequestDto): Map<String, List<String>> =

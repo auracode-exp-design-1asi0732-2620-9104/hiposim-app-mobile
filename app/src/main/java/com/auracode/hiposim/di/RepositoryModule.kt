@@ -4,6 +4,8 @@ import com.auracode.hiposim.feature.auth.data.DefaultAuthRepository
 import com.auracode.hiposim.feature.auth.domain.AuthRepository
 import com.auracode.hiposim.feature.leads.data.DefaultLeadsRepository
 import com.auracode.hiposim.feature.leads.domain.LeadsRepository
+import com.auracode.hiposim.feature.scenarios.data.DefaultScenariosRepository
+import com.auracode.hiposim.feature.scenarios.domain.ScenariosRepository
 import com.auracode.hiposim.feature.simulation.data.DefaultSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import dagger.Binds
@@ -28,4 +30,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindLeadsRepository(impl: DefaultLeadsRepository): LeadsRepository
+
+    @Binds
+    abstract fun bindScenariosRepository(impl: DefaultScenariosRepository): ScenariosRepository
 }
