@@ -157,9 +157,12 @@ private fun ComparisonTable(
                 DetailValue(years?.let { pluralStringResource(R.plurals.scenario_term_years, it, it) })
             }
             ComparisonRow(label = stringResource(R.string.grace_title), count = count) { index ->
-                DetailValue(graceText(comparison.scenarios[index]))
+                // "None" is a real answer, not a missing figure: say it instead of showing a dash.
+                DetailValue(graceText(comparison.scenarios[index]) ?: stringResource(R.string.compare_no_grace))
             }
-            DetailRow(R.string.scenario_bonus_label, comparison.scenarios) { it.goodPayerBonus }
+            ComparisonRow(label = stringResource(R.string.scenario_bonus_label), count = count) { index ->
+                DetailValue(comparison.scenarios[index].goodPayerBonus ?: stringResource(R.string.compare_no_bonus))
+            }
         }
     }
 }

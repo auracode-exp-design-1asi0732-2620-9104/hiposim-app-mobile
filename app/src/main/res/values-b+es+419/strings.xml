@@ -239,6 +239,8 @@
   <string name="compare_lowest">Más baja</string>
   <string name="compare_higher">%1$s más</string>
   <string name="compare_no_value">–</string>
+  <string name="compare_no_grace">Sin periodo de gracia</string>
+  <string name="compare_no_bonus">No aplicado</string>
   <string name="compare_button">Comparar escenarios (%1$d de 3)</string>
   <string name="compare_hint">Elige 2 o 3 escenarios para compararlos</string>
   <string name="compare_need_two">Guarda al menos dos escenarios para compararlos.</string>

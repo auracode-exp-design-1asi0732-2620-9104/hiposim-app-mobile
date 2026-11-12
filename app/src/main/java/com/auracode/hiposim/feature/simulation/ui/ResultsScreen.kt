@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -249,6 +250,7 @@ private fun ResultsContent(
                 onSendQuote = onSendQuote,
                 onDownloadPdf = onDownloadPdf,
                 onSaveScenario = { onSaveScenario(suggestedName) },
+                onNewSimulation = onBack,
                 onDestinationClick = onDestinationClick,
             )
         },
@@ -690,6 +692,7 @@ private fun ResultsBottomBar(
     onSendQuote: () -> Unit,
     onDownloadPdf: () -> Unit,
     onSaveScenario: () -> Unit,
+    onNewSimulation: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
 ) {
     val items =
@@ -734,6 +737,13 @@ private fun ResultsBottomBar(
                             modifier = Modifier.weight(1f).testTag(DOWNLOAD_PDF_TAG),
                         )
                     }
+                    // Back to the form with the values still there, to try another price, down payment or term.
+                    OutlinedActionButton(
+                        text = stringResource(R.string.results_new_simulation),
+                        icon = Icons.Filled.Refresh,
+                        onClick = onNewSimulation,
+                        modifier = Modifier.fillMaxWidth().testTag(NEW_SIMULATION_TAG),
+                    )
                 }
             }
             HipoSimNavigationBar(
@@ -747,6 +757,9 @@ private fun ResultsBottomBar(
 
 /** Test tag of the "Save scenario" button, used by the UI tests. */
 const val SAVE_SCENARIO_TAG = "save_scenario"
+
+/** Test tag of the "Simulate again" button, used by the UI tests. */
+const val NEW_SIMULATION_TAG = "new_simulation"
 
 /** Test tag of the "Download PDF" button, used by the UI tests. */
 const val DOWNLOAD_PDF_TAG = "download_pdf"
