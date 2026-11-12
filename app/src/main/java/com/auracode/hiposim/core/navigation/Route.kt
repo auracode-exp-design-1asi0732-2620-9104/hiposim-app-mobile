@@ -24,4 +24,8 @@ sealed interface Route {
     /** Signs in with an existing buyer account. */
     @Serializable
     data object Login : Route
+
+    /** The signed in buyer's saved scenarios (US06). */
+    @Serializable
+    data object Scenarios : Route
 }

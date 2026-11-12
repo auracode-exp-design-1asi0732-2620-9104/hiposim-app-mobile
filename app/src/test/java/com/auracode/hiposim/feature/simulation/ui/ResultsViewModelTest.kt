@@ -5,11 +5,16 @@ import com.auracode.hiposim.feature.auth.data.DefaultAuthRepository
 import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
+import com.auracode.hiposim.feature.scenarios.data.DefaultScenariosRepository
+import com.auracode.hiposim.feature.scenarios.domain.MAX_SCENARIO_NAME_LENGTH
+import com.auracode.hiposim.feature.scenarios.domain.SaveScenarioUseCase
+import com.auracode.hiposim.feature.scenarios.domain.ScenarioFailure
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
 import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
 import com.auracode.hiposim.feature.simulation.domain.SimulationParams
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.StubScenariosService
 import com.auracode.hiposim.testing.contractExampleParams
 import com.auracode.hiposim.testing.fakeBackedAuthRepository
 import com.auracode.hiposim.testing.fakeBackedSimulationRepository
@@ -23,6 +28,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.io.IOException
 import java.math.BigDecimal
 
 class ResultsViewModelTest {
@@ -38,11 +44,15 @@ class ResultsViewModelTest {
         viewModel = viewModelWith(runBlocking { simulationRepositoryWithContractExample() })
     }
 
+    private val scenariosService = StubScenariosService()
+
     private fun viewModelWith(simulationRepository: SimulationRepository) =
         ResultsViewModel(
             observeCurrentSimulation = ObserveCurrentSimulationUseCase(simulationRepository),
             observeSession = ObserveSessionUseCase(authRepository),
             signOut = SignOutUseCase(authRepository),
+            saveScenario =
+                SaveScenarioUseCase(DefaultScenariosRepository(scenariosService), simulationRepository, authRepository),
         )
 
     private suspend fun signIn() {
@@ -236,7 +246,7 @@ class ResultsViewModelTest {
         }
 
     @Test
-    fun signedIn_sendQuoteAndAgenciesOpenTheSendSheet_andHistoryIsStillComingSoon() =
+    fun signedIn_sendQuoteAndAgenciesOpenTheSendSheet_andHistoryOpensMyScenarios() =
         runTest {
             signIn()
 
@@ -253,8 +263,12 @@ class ResultsViewModelTest {
 
             viewModel.onSendSheetDismiss()
             viewModel.onDestinationClick(MainDestination.History)
-            assertTrue(viewModel.uiState.value.showComingSoon)
+            assertTrue(viewModel.uiState.value.navigateToScenarios)
+            assertFalse(viewModel.uiState.value.showComingSoon)
             assertFalse(viewModel.uiState.value.isSendSheetVisible)
+
+            viewModel.onScenariosNavigated()
+            assertFalse(viewModel.uiState.value.navigateToScenarios)
         }
 
     @Test
@@ -290,5 +304,81 @@ class ResultsViewModelTest {
             assertFalse(state.isAccountSheetVisible)
             assertFalse(state.isAuthenticated)
             assertNull(state.account)
+        }
+
+    // US06: save the simulation as a named scenario.
+
+    @Test
+    fun guest_saveScenario_opensTheUnlockSheetInsteadOfTheDialog() {
+        viewModel.onSaveScenarioClick("S/ 280,000 a 20 años")
+
+        assertTrue(viewModel.uiState.value.isUnlockSheetVisible)
+        assertNull(viewModel.uiState.value.saveScenario)
+    }
+
+    @Test
+    fun signedIn_savesTheScenarioWithTheTypedName_andConfirmsOnce() =
+        runTest {
+            signIn()
+
+            viewModel.onSaveScenarioClick("S/ 280,000 a 20 años")
+            assertEquals(
+                "S/ 280,000 a 20 años",
+                viewModel.uiState.value.saveScenario
+                    ?.name,
+            )
+
+            viewModel.onScenarioNameChange("Mi primera casa")
+            viewModel.onSaveScenarioConfirm()
+
+            assertNull(viewModel.uiState.value.saveScenario)
+            assertTrue(viewModel.uiState.value.scenarioSaved)
+            assertEquals("Mi primera casa", scenariosService.requests.single().name)
+
+            viewModel.onScenarioSavedShown()
+            assertFalse(viewModel.uiState.value.scenarioSaved)
+
+            viewModel.onViewScenariosClick()
+            assertTrue(viewModel.uiState.value.navigateToScenarios)
+        }
+
+    @Test
+    fun saveFailure_staysInTheDialogWithTheReason() =
+        runTest {
+            signIn()
+            scenariosService.onCreate = { throw IOException("offline") }
+
+            viewModel.onSaveScenarioClick("Mío")
+            viewModel.onSaveScenarioConfirm()
+
+            val dialog = requireNotNull(viewModel.uiState.value.saveScenario)
+            assertEquals(ScenarioFailure.NoConnection, dialog.failure)
+            assertFalse(dialog.isSaving)
+            assertFalse(viewModel.uiState.value.scenarioSaved)
+
+            viewModel.onScenarioNameChange("Mío 2")
+            assertNull(
+                viewModel.uiState.value.saveScenario
+                    ?.failure,
+            )
+
+            viewModel.onSaveScenarioDismiss()
+            assertNull(viewModel.uiState.value.saveScenario)
+        }
+
+    @Test
+    fun scenarioName_isCutAtTheLimitOfTheApi() =
+        runTest {
+            signIn()
+            viewModel.onSaveScenarioClick("Mío")
+
+            viewModel.onScenarioNameChange("a".repeat(MAX_SCENARIO_NAME_LENGTH + 10))
+
+            assertEquals(
+                MAX_SCENARIO_NAME_LENGTH,
+                viewModel.uiState.value.saveScenario
+                    ?.name
+                    ?.length,
+            )
         }
 }
