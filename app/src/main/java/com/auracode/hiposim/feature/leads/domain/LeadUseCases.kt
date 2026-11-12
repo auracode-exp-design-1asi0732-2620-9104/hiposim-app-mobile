@@ -1,5 +1,7 @@
 package com.auracode.hiposim.feature.leads.domain
 
+import com.auracode.hiposim.core.analytics.UsageEvents
+import com.auracode.hiposim.core.analytics.UsageTracker
 import com.auracode.hiposim.feature.auth.domain.AuthRepository
 import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.simulation.domain.SimulationFailure
@@ -28,6 +30,7 @@ class SendSimulationToAgencyUseCase
         private val leadsRepository: LeadsRepository,
         private val simulationRepository: SimulationRepository,
         private val authRepository: AuthRepository,
+        private val usageTracker: UsageTracker = UsageTracker.None,
     ) {
         suspend operator fun invoke(
             agencyId: String,
@@ -45,6 +48,12 @@ class SendSimulationToAgencyUseCase
                 simulationRepository.currentSimulation.value ?: return failure(LeadFailure.SimulationMissing)
 
             val result = leadsRepository.sendSimulation(agencyId, simulation.id, acceptedContact = true)
+            if (result is SendLeadResult.Success) {
+                usageTracker.track(
+                    UsageEvents.LEAD_SENT,
+                    mapOf("termYears" to simulation.termYears, "graceType" to simulation.graceType.apiValue),
+                )
+            }
             if (result is SendLeadResult.Failure && result.reason == LeadFailure.SessionExpired) {
                 // The token is no longer good: keeping the session would only repeat the failure.
                 authRepository.signOut()

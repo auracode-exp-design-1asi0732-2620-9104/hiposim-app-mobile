@@ -2,7 +2,10 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.auracode.hiposim.core.analytics.UsageEvents
+import com.auracode.hiposim.core.analytics.UsageTracker
 import com.auracode.hiposim.core.util.PeruFormat
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import com.auracode.hiposim.feature.simulation.domain.SimulateLoanUseCase
 import com.auracode.hiposim.feature.simulation.domain.SimulationConfig
 import com.auracode.hiposim.feature.simulation.domain.SimulationFailure
@@ -25,7 +28,17 @@ class SimulationFormViewModel
     constructor(
         private val validateForm: ValidateSimulationFormUseCase,
         private val simulateLoan: SimulateLoanUseCase,
+        private val usageTracker: UsageTracker = UsageTracker.None,
     ) : ViewModel() {
+        /** `simulation_started` goes once per form: on the first edit or on the first submit. */
+        private var startTracked = false
+
+        private fun trackStart() {
+            if (startTracked) return
+            startTracked = true
+            usageTracker.track(UsageEvents.SIMULATION_STARTED)
+        }
+
         private val _uiState =
             MutableStateFlow(
                 SimulationFormUiState(
@@ -47,10 +60,28 @@ class SimulationFormViewModel
 
         fun onBonusChange(apply: Boolean) = updateForm(edited = null) { it.copy(applyGoodPayerBonus = apply) }
 
+        /** Choosing a grace type that needs months, with none typed yet, suggests the usual 3 months (US03). */
+        fun onGraceTypeChange(type: GraceType) =
+            updateForm(SimulationField.GraceMonths) {
+                val months =
+                    if (type != GraceType.None &&
+                        it.graceMonths.isEmpty()
+                    ) {
+                        DEFAULT_GRACE_MONTHS
+                    } else {
+                        it.graceMonths
+                    }
+                it.copy(graceType = type, graceMonths = months)
+            }
+
+        fun onGraceMonthsChange(value: String) =
+            updateForm(SimulationField.GraceMonths) { it.copy(graceMonths = value.digits(MAX_GRACE_DIGITS)) }
+
         /** Validates the form and, if it is valid, asks for the simulation. */
         fun onSubmit() {
             val state = _uiState.value
             if (state.isSubmitting) return
+            trackStart()
 
             val validation = validateForm(state.form)
             _uiState.update { it.copy(errors = validation.errors, serverErrors = emptyMap(), generalError = null) }
@@ -92,6 +123,7 @@ class SimulationFormViewModel
             edited: SimulationField?,
             transform: (SimulationForm) -> SimulationForm,
         ) {
+            trackStart()
             _uiState.update { state ->
                 val form = transform(state.form)
                 state.copy(
@@ -110,6 +142,8 @@ class SimulationFormViewModel
             /** Up to S/ 999,999,999: far above the allowed range, short enough to never overflow the field. */
             const val MAX_AMOUNT_DIGITS = 9
             const val MAX_TERM_DIGITS = 2
+            const val MAX_GRACE_DIGITS = 2
+            const val DEFAULT_GRACE_MONTHS = "3"
 
             /** Starting values of the Landing Page simulator: S/ 280,000, 15% down payment, 20 years. */
             val INITIAL_FORM = SimulationForm(propertyPrice = "280000", downPayment = "42000", termYears = "20")

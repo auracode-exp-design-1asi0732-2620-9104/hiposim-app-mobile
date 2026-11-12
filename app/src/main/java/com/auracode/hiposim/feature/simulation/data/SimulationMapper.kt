@@ -1,5 +1,6 @@
 package com.auracode.hiposim.feature.simulation.data
 
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import com.auracode.hiposim.feature.simulation.domain.Installment
 import com.auracode.hiposim.feature.simulation.domain.LoanSimulation
 import com.auracode.hiposim.feature.simulation.domain.SimulationAssumptions
@@ -18,6 +19,9 @@ fun SimulationParams.toRequestDto(): SimulationRequestDto =
         annualEffectiveRate = annualEffectiveRate.toDouble(),
         termInMonths = termMonths,
         applyGoodPayerBonus = applyGoodPayerBonus,
+        // Only sent when the buyer chose a grace period; without them the API applies no grace (US03).
+        gracePeriodMonths = graceMonths.takeIf { graceType != GraceType.None },
+        graceType = graceType.takeIf { it != GraceType.None }?.apiValue,
     )
 
 /**
@@ -39,6 +43,8 @@ fun SimulationResponseDto.toDomainOrNull(params: SimulationParams): LoanSimulati
         termMonths = params.termMonths,
         annualEffectiveRate = params.annualEffectiveRate,
         bonusRequested = params.applyGoodPayerBonus,
+        graceType = params.graceType,
+        graceMonths = params.graceMonths,
         bonusEligible = benefit.eligible,
         goodPayerBonus = benefit.appliedAmount.toMoney(),
         netLoan = financedAmount.toMoney(),

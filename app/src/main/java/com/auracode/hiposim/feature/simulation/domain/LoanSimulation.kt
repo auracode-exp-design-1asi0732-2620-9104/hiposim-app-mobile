@@ -19,6 +19,9 @@ data class LoanSimulation(
     val annualEffectiveRate: BigDecimal,
     /** The buyer asked for the Bono del Buen Pagador. */
     val bonusRequested: Boolean,
+    /** Grace period the buyer asked for (US03). [graceMonths] is 0 without grace. */
+    val graceType: GraceType = GraceType.None,
+    val graceMonths: Int = 0,
     /** The property price is inside a bonus range, even when the bonus was not requested. */
     val bonusEligible: Boolean,
     /** Bonus subtracted from the loan. Zero when it was not requested or the property does not qualify. */

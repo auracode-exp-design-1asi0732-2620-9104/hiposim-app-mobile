@@ -18,15 +18,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,8 +38,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -46,6 +51,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -53,6 +60,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -63,6 +71,7 @@ import com.auracode.hiposim.core.designsystem.component.BarSegment
 import com.auracode.hiposim.core.designsystem.component.HighlightBanner
 import com.auracode.hiposim.core.designsystem.component.HipoSimCard
 import com.auracode.hiposim.core.designsystem.component.HipoSimNavigationBar
+import com.auracode.hiposim.core.designsystem.component.HipoSimTextField
 import com.auracode.hiposim.core.designsystem.component.LegalFooter
 import com.auracode.hiposim.core.designsystem.component.LoadingIndicator
 import com.auracode.hiposim.core.designsystem.component.MetricTile
@@ -77,7 +86,10 @@ import com.auracode.hiposim.core.navigation.MainDestination
 import com.auracode.hiposim.feature.auth.ui.AccountSheet
 import com.auracode.hiposim.feature.auth.ui.LoginRequiredSheet
 import com.auracode.hiposim.feature.leads.ui.SendToAgencySheet
+import com.auracode.hiposim.feature.scenarios.domain.MAX_SCENARIO_NAME_LENGTH
+import com.auracode.hiposim.feature.scenarios.ui.scenarioFailureMessage
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,6 +97,7 @@ fun ResultsScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToSchedule: () -> Unit,
+    onNavigateToScenarios: () -> Unit,
     viewModel: ResultsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -92,6 +105,27 @@ fun ResultsScreen(
     val scope = rememberCoroutineScope()
     val comingSoon = stringResource(R.string.coming_soon)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    val scenarioSaved = stringResource(R.string.scenario_saved)
+    val viewScenarios = stringResource(R.string.scenario_saved_action)
+
+    LaunchedEffect(state.scenarioSaved) {
+        if (state.scenarioSaved) {
+            viewModel.onScenarioSavedShown()
+            // Own scope, like the "coming soon" message: clearing the flag must not cancel the snackbar.
+            scope.launch {
+                val result = snackbarHostState.showSnackbar(scenarioSaved, actionLabel = viewScenarios)
+                if (result == SnackbarResult.ActionPerformed) viewModel.onViewScenariosClick()
+            }
+        }
+    }
+
+    LaunchedEffect(state.navigateToScenarios) {
+        if (state.navigateToScenarios) {
+            viewModel.onScenariosNavigated()
+            onNavigateToScenarios()
+        }
+    }
 
     LaunchedEffect(state.showComingSoon) {
         if (state.showComingSoon) {
@@ -108,8 +142,18 @@ fun ResultsScreen(
         onSendQuote = viewModel::onSendQuoteClick,
         onDestinationClick = viewModel::onDestinationClick,
         onDownloadPdf = viewModel::onDownloadPdfClick,
+        onSaveScenario = viewModel::onSaveScenarioClick,
         onViewSchedule = onNavigateToSchedule,
     )
+
+    state.saveScenario?.let { dialog ->
+        SaveScenarioDialog(
+            state = dialog,
+            onNameChange = viewModel::onScenarioNameChange,
+            onConfirm = viewModel::onSaveScenarioConfirm,
+            onDismiss = viewModel::onSaveScenarioDismiss,
+        )
+    }
 
     if (state.isUnlockSheetVisible) {
         LoginRequiredSheet(
@@ -155,8 +199,11 @@ private fun ResultsContent(
     onSendQuote: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
     onDownloadPdf: () -> Unit,
+    onSaveScenario: (String) -> Unit,
     onViewSchedule: () -> Unit,
 ) {
+    val suggestedName =
+        state.summary?.let { stringResource(R.string.scenario_default_name, it.propertyPrice, it.termYears) }.orEmpty()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -185,6 +232,7 @@ private fun ResultsContent(
                 showActions = state.summary != null,
                 onSendQuote = onSendQuote,
                 onDownloadPdf = onDownloadPdf,
+                onSaveScenario = { onSaveScenario(suggestedName) },
                 onDestinationClick = onDestinationClick,
             )
         },
@@ -356,6 +404,7 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                     )
                 },
             )
+            GraceNote(summary)
             TileRow(
                 first = {
                     MetricTile(
@@ -425,6 +474,33 @@ private fun TceaBadge(
             )
         }
     }
+}
+
+/** Says which grace the buyer chose (US03); the schedule marks those months. Nothing without grace. */
+@Composable
+private fun GraceNote(summary: ResultsSummaryUi) {
+    val text =
+        when (summary.graceType) {
+            GraceType.None -> return
+            GraceType.Partial ->
+                pluralStringResource(
+                    R.plurals.grace_note_partial,
+                    summary.graceMonths,
+                    summary.graceMonths,
+                )
+            GraceType.Total ->
+                pluralStringResource(
+                    R.plurals.grace_note_total,
+                    summary.graceMonths,
+                    summary.graceMonths,
+                )
+        }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -596,6 +672,7 @@ private fun ResultsBottomBar(
     showActions: Boolean,
     onSendQuote: () -> Unit,
     onDownloadPdf: () -> Unit,
+    onSaveScenario: () -> Unit,
     onDestinationClick: (MainDestination) -> Unit,
 ) {
     val items =
@@ -622,12 +699,20 @@ private fun ResultsBottomBar(
                         onClick = onSendQuote,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    OutlinedActionButton(
-                        text = stringResource(R.string.download_pdf),
-                        icon = Icons.Filled.PictureAsPdf,
-                        onClick = onDownloadPdf,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        OutlinedActionButton(
+                            text = stringResource(R.string.save_scenario),
+                            icon = Icons.Filled.BookmarkAdd,
+                            onClick = onSaveScenario,
+                            modifier = Modifier.weight(1f).testTag(SAVE_SCENARIO_TAG),
+                        )
+                        OutlinedActionButton(
+                            text = stringResource(R.string.download_pdf),
+                            icon = Icons.Filled.PictureAsPdf,
+                            onClick = onDownloadPdf,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
             HipoSimNavigationBar(
@@ -637,4 +722,54 @@ private fun ResultsBottomBar(
             )
         }
     }
+}
+
+/** Test tag of the "Save scenario" button, used by the UI tests. */
+const val SAVE_SCENARIO_TAG = "save_scenario"
+
+/** Names the simulation on screen and saves it as a scenario (US06). */
+@Composable
+private fun SaveScenarioDialog(
+    state: SaveScenarioUi,
+    onNameChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.save_scenario_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                Text(
+                    text = stringResource(R.string.save_scenario_body),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                HipoSimTextField(
+                    value = state.name,
+                    onValueChange = onNameChange,
+                    label = stringResource(R.string.field_scenario_name),
+                    leadingIcon = Icons.Filled.BookmarkAdd,
+                    supportingText = stringResource(R.string.field_scenario_name_hint, MAX_SCENARIO_NAME_LENGTH),
+                    errorText = state.failure?.let { stringResource(scenarioFailureMessage(it)) },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm, enabled = !state.isSaving && state.name.isNotBlank()) {
+                Text(
+                    stringResource(
+                        if (state.isSaving) R.string.save_scenario_saving else R.string.save_scenario_confirm,
+                    ),
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !state.isSaving) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        },
+    )
 }

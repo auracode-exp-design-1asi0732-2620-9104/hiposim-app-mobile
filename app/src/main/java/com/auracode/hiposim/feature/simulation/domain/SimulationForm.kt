@@ -6,6 +6,9 @@ data class SimulationForm(
     val downPayment: String = "",
     val termYears: String = "",
     val applyGoodPayerBonus: Boolean = false,
+    /** Grace period of US03. [graceMonths] is only read when [graceType] is not [GraceType.None]. */
+    val graceType: GraceType = GraceType.None,
+    val graceMonths: String = "",
 )
 
 /** Form fields that can show an error. [requestProperty] is the name the API uses in its validation errors. */
@@ -15,6 +18,7 @@ enum class SimulationField(
     PropertyPrice("propertyPrice"),
     DownPayment("downPayment"),
     TermYears("termInMonths"),
+    GraceMonths("gracePeriodMonths"),
     ;
 
     companion object {
@@ -30,6 +34,8 @@ enum class SimulationFormError {
     DownPaymentTooHigh,
     TermRequired,
     TermOutOfRange,
+    GraceMonthsRequired,
+    GraceMonthsOutOfRange,
 }
 
 /** [params] is set only when the form is valid. */

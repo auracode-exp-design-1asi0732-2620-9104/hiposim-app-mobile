@@ -167,4 +167,65 @@
   <string name="legal_privacy_read">Read the Privacy Policy</string>
   <string name="legal_terms_description">Terms and Conditions, opens in the browser</string>
   <string name="legal_privacy_description">Privacy Policy, opens in the browser</string>
+  <string name="usage_notice">HipoSim records anonymous usage data (never your name, email or phone) to improve the app.</string>
+  <!-- US03: grace period -->
+  <string name="grace_title">Grace period</string>
+  <string name="grace_none">None</string>
+  <string name="grace_partial">Partial</string>
+  <string name="grace_total">Total</string>
+  <string name="grace_none_body">You start paying the full installment in the first month.</string>
+  <string name="grace_partial_body">During the grace months you pay only the interest. The regular installment starts afterwards.</string>
+  <string name="grace_total_body">During the grace months you pay nothing. That interest is added to your balance, so the later installments are higher.</string>
+  <string name="field_grace_months">Grace months</string>
+  <string name="field_grace_months_suffix">months</string>
+  <string name="field_grace_months_hint">From %1$d to %2$d months</string>
+  <string name="error_grace_months_required">Enter the grace months</string>
+  <string name="error_grace_months_range">Enter between %1$d and %2$d grace months</string>
+  <plurals name="grace_note_partial">
+    <item quantity="one">Partial grace of %1$d month: you pay only the interest at the start.</item>
+    <item quantity="other">Partial grace of %1$d months: you pay only the interest at the start.</item>
+  </plurals>
+  <plurals name="grace_note_total">
+    <item quantity="one">Total grace of %1$d month: no payment at the start, the interest is added to the balance.</item>
+    <item quantity="other">Total grace of %1$d months: no payments at the start, the interest is added to the balance.</item>
+  </plurals>
+  <!-- US06: saved scenarios -->
+  <string name="action_cancel">Cancel</string>
+  <string name="save_scenario">Save scenario</string>
+  <string name="scenario_default_name">%1$s over %2$d years</string>
+  <string name="save_scenario_title">Save this scenario</string>
+  <string name="save_scenario_body">Give it a name to find it later in My scenarios. You will not need to type the values again.</string>
+  <string name="field_scenario_name">Scenario name</string>
+  <string name="field_scenario_name_hint">Up to %1$d characters</string>
+  <string name="save_scenario_confirm">Save</string>
+  <string name="save_scenario_saving">Saving…</string>
+  <string name="scenario_saved">Scenario saved</string>
+  <string name="scenario_saved_action">View</string>
+  <string name="scenarios_title">My scenarios</string>
+  <plurals name="scenarios_count">
+    <item quantity="one">%1$d saved scenario, newest first</item>
+    <item quantity="other">%1$d saved scenarios, newest first</item>
+  </plurals>
+  <string name="scenario_saved_on">Saved on %1$s</string>
+  <string name="scenario_down_payment_label">Down payment</string>
+  <string name="scenario_bonus_label">Good Payer Bonus</string>
+  <plurals name="scenario_term_years">
+    <item quantity="one">%1$d year</item>
+    <item quantity="other">%1$d years</item>
+  </plurals>
+  <plurals name="scenario_grace_partial">
+    <item quantity="one">Partial, %1$d month</item>
+    <item quantity="other">Partial, %1$d months</item>
+  </plurals>
+  <plurals name="scenario_grace_total">
+    <item quantity="one">Total, %1$d month</item>
+    <item quantity="other">Total, %1$d months</item>
+  </plurals>
+  <string name="scenarios_empty_title">You have no saved scenarios yet</string>
+  <string name="scenarios_empty_body">Simulate a loan and tap Save scenario in the results. Your scenarios appear here, ready to review.</string>
+  <string name="scenarios_back_to_results">Back to my simulation</string>
+  <string name="scenarios_sign_in">Sign in</string>
+  <string name="error_scenario_name">Enter a name of up to 60 characters</string>
+  <string name="error_scenario_not_found">We could not find your simulation. Simulate again and save it.</string>
+  <string name="error_scenario_session_expired">Your session expired. Sign in again to see and save your scenarios.</string>
 </resources>

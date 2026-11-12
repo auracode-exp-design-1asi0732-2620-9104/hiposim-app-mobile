@@ -2,7 +2,9 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.compose.runtime.Immutable
 import com.auracode.hiposim.feature.auth.ui.AccountUi
+import com.auracode.hiposim.feature.scenarios.domain.ScenarioFailure
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 
 /** Everything the Results screen draws. Money and rates are already formatted (es-PE). */
 @Immutable
@@ -21,6 +23,12 @@ data class ResultsUiState(
     val isSendSheetVisible: Boolean = false,
     /** One-off message request, cleared by [ResultsViewModel.onComingSoonShown]. */
     val showComingSoon: Boolean = false,
+    /** The dialog to save the simulation as a named scenario (US06), or null when it is closed. */
+    val saveScenario: SaveScenarioUi? = null,
+    /** One-off confirmation after saving, cleared by [ResultsViewModel.onScenarioSavedShown]. */
+    val scenarioSaved: Boolean = false,
+    /** One-off request to open "My scenarios", cleared by [ResultsViewModel.onScenariosNavigated]. */
+    val navigateToScenarios: Boolean = false,
 ) {
     val isAuthenticated: Boolean get() = account != null
 }
@@ -35,6 +43,9 @@ data class ResultsSummaryUi(
     val netLoan: String,
     val termYears: Int,
     val termMonths: Int,
+    /** Grace period of the simulation (US03); [graceMonths] is 0 without grace. */
+    val graceType: GraceType = GraceType.None,
+    val graceMonths: Int = 0,
     val monthlyPayment: String,
     val monthlyInsurance: String,
     val totalPaid: String,
@@ -64,4 +75,12 @@ data class InstallmentUi(
     val interest: String,
     val insurance: String,
     val remainingBalance: String,
+)
+
+/** The save scenario dialog (US06). [failure] is shown inside the dialog. */
+@Immutable
+data class SaveScenarioUi(
+    val name: String,
+    val isSaving: Boolean = false,
+    val failure: ScenarioFailure? = null,
 )

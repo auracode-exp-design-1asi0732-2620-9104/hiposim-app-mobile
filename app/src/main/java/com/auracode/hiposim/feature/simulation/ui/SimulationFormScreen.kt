@@ -18,12 +18,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AssuredWorkload
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
@@ -47,6 +52,7 @@ import com.auracode.hiposim.core.designsystem.component.PrimaryButton
 import com.auracode.hiposim.core.designsystem.component.ThousandsSeparatorTransformation
 import com.auracode.hiposim.core.designsystem.theme.Spacing
 import com.auracode.hiposim.core.util.PeruFormat
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import com.auracode.hiposim.feature.simulation.domain.SimulationConfig
 import com.auracode.hiposim.feature.simulation.domain.SimulationField
 import com.auracode.hiposim.feature.simulation.domain.SimulationFormError
@@ -72,6 +78,8 @@ fun SimulationFormScreen(
         onDownPaymentChange = viewModel::onDownPaymentChange,
         onTermYearsChange = viewModel::onTermYearsChange,
         onBonusChange = viewModel::onBonusChange,
+        onGraceTypeChange = viewModel::onGraceTypeChange,
+        onGraceMonthsChange = viewModel::onGraceMonthsChange,
         onSubmit = viewModel::onSubmit,
     )
 }
@@ -84,6 +92,8 @@ private fun SimulationFormContent(
     onDownPaymentChange: (String) -> Unit,
     onTermYearsChange: (String) -> Unit,
     onBonusChange: (Boolean) -> Unit,
+    onGraceTypeChange: (GraceType) -> Unit,
+    onGraceMonthsChange: (String) -> Unit,
     onSubmit: () -> Unit,
 ) {
     Scaffold(
@@ -143,6 +153,12 @@ private fun SimulationFormContent(
             )
 
             BonusRow(checked = state.form.applyGoodPayerBonus, onChange = onBonusChange)
+
+            GraceSection(
+                state = state,
+                onGraceTypeChange = onGraceTypeChange,
+                onGraceMonthsChange = onGraceMonthsChange,
+            )
 
             Text(
                 text = stringResource(R.string.simulation_rate_note, state.annualRate),
@@ -270,6 +286,80 @@ private fun BonusRow(
     }
 }
 
+/**
+ * Grace period of US03: none, partial (only interest) or total (nothing paid, interest capitalized). The months
+ * field appears only when a grace type is chosen.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GraceSection(
+    state: SimulationFormUiState,
+    onGraceTypeChange: (GraceType) -> Unit,
+    onGraceMonthsChange: (String) -> Unit,
+) {
+    val form = state.form
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Text(
+            text = stringResource(R.string.grace_title),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().testTag(GRACE_TYPE_TAG)) {
+            GraceType.entries.forEachIndexed { index, type ->
+                SegmentedButton(
+                    selected = form.graceType == type,
+                    onClick = { onGraceTypeChange(type) },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = GraceType.entries.size),
+                    modifier = Modifier.heightIn(min = Spacing.minTouchTarget),
+                ) {
+                    Text(stringResource(graceTypeLabel(type)))
+                }
+            }
+        }
+        Text(
+            text = stringResource(graceTypeExplanation(form.graceType)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (form.graceType != GraceType.None) {
+            HipoSimTextField(
+                value = form.graceMonths,
+                onValueChange = onGraceMonthsChange,
+                label = stringResource(R.string.field_grace_months),
+                leadingIcon = Icons.Filled.HourglassEmpty,
+                suffix = stringResource(R.string.field_grace_months_suffix),
+                supportingText =
+                    stringResource(
+                        R.string.field_grace_months_hint,
+                        SimulationConfig.MIN_GRACE_MONTHS,
+                        SimulationConfig.MAX_GRACE_MONTHS,
+                    ),
+                errorText = fieldError(state, SimulationField.GraceMonths),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                modifier = Modifier.fillMaxWidth().testTag(GRACE_MONTHS_TAG),
+            )
+        }
+    }
+}
+
+private fun graceTypeLabel(type: GraceType): Int =
+    when (type) {
+        GraceType.None -> R.string.grace_none
+        GraceType.Partial -> R.string.grace_partial
+        GraceType.Total -> R.string.grace_total
+    }
+
+private fun graceTypeExplanation(type: GraceType): Int =
+    when (type) {
+        GraceType.None -> R.string.grace_none_body
+        GraceType.Partial -> R.string.grace_partial_body
+        GraceType.Total -> R.string.grace_total_body
+    }
+
+/** Test tags of the grace controls, used by the UI tests. */
+const val GRACE_TYPE_TAG = "grace_type"
+const val GRACE_MONTHS_TAG = "grace_months"
+
 /** The client message when there is one, otherwise what the API said about the field. */
 @Composable
 private fun fieldError(
@@ -300,6 +390,13 @@ private fun formErrorMessage(error: SimulationFormError): String =
                 R.string.error_term_range,
                 SimulationConfig.MIN_TERM_YEARS,
                 SimulationConfig.MAX_TERM_YEARS,
+            )
+        SimulationFormError.GraceMonthsRequired -> stringResource(R.string.error_grace_months_required)
+        SimulationFormError.GraceMonthsOutOfRange ->
+            stringResource(
+                R.string.error_grace_months_range,
+                SimulationConfig.MIN_GRACE_MONTHS,
+                SimulationConfig.MAX_GRACE_MONTHS,
             )
     }
 

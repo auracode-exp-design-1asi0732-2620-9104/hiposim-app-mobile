@@ -16,7 +16,8 @@ import kotlin.math.pow
  *
  * It answers with the exact shape of contract v0.1.0 and follows the rules of the backend engine
  * (hiposim-backEnd, `HipoSim.FinancialEngine`): French method, 30/360 monthly rate, the reference bonus table,
- * lender-side NPV at a 10% discount rate, no insurance. An invalid request fails like the server does,
+ * lender-side NPV at a 10% discount rate, no insurance, and the grace periods of US03 (partial pays only the
+ * interest; total pays nothing and capitalizes it, with the regular installment calculated on that balance). An invalid request fails like the server does,
  * with a 400 `application/problem+json`, so the error path is the same as with the real API.
  *
  * It is a development aid, not the financial engine: the server is the source of truth.
@@ -42,32 +43,36 @@ class FakeSimulationService(
 
         val monthlyRate = (1 + request.annualEffectiveRate).pow(1.0 / MONTHS_PER_YEAR) - 1
         val startDate = request.startDate?.let(LocalDate::parse) ?: today()
-        val regularInstallment = frenchInstallment(financedAmount, monthlyRate, request.termInMonths)
-        val schedule = buildSchedule(financedAmount, monthlyRate, request.termInMonths, regularInstallment, startDate)
+        val grace = Grace(GraceKind.from(request.graceType), request.gracePeriodMonths ?: 0)
+        val schedule = buildSchedule(financedAmount, monthlyRate, request.termInMonths, grace, startDate)
+        val regularInstallment = schedule.first { !it.isGracePeriod }.installment
         val payments = schedule.map { it.totalPayment }
         val monthlyIrr = irr(financedAmount, payments)
         val annualIrr = rate((1 + monthlyIrr).pow(MONTHS_PER_YEAR) - 1)
 
-        return SimulationResponseDto(
-            simulationId = UUID.randomUUID().toString(),
-            financedAmount = financedAmount,
-            monthlyInstallment = money(regularInstallment),
-            totalPaid = money(payments.sum()),
-            totalInterest = money(schedule.sumOf { it.interest }),
-            additionalCosts = 0.0,
-            tcea = annualIrr,
-            irr = annualIrr,
-            npv = money(npv(financedAmount, payments, (1 + ANNUAL_DISCOUNT_RATE).pow(1.0 / MONTHS_PER_YEAR) - 1)),
-            benefit = BenefitDto(name = BONUS_NAME, eligible = eligibleBonus != null, appliedAmount = appliedBonus),
-            assumptions =
-                AssumptionsDto(
-                    monthlyPropertyInsurance = 0.0,
-                    monthlyCreditLifeInsurance = 0.0,
-                    administrativeExpenses = 0.0,
-                    annualDiscountRate = ANNUAL_DISCOUNT_RATE,
-                ),
-            amortizationSchedule = schedule,
-        )
+        val response =
+            SimulationResponseDto(
+                simulationId = UUID.randomUUID().toString(),
+                financedAmount = financedAmount,
+                monthlyInstallment = money(regularInstallment),
+                totalPaid = money(payments.sum()),
+                totalInterest = money(schedule.sumOf { it.interest }),
+                additionalCosts = 0.0,
+                tcea = annualIrr,
+                irr = annualIrr,
+                npv = money(npv(financedAmount, payments, (1 + ANNUAL_DISCOUNT_RATE).pow(1.0 / MONTHS_PER_YEAR) - 1)),
+                benefit = BenefitDto(name = BONUS_NAME, eligible = eligibleBonus != null, appliedAmount = appliedBonus),
+                assumptions =
+                    AssumptionsDto(
+                        monthlyPropertyInsurance = 0.0,
+                        monthlyCreditLifeInsurance = 0.0,
+                        administrativeExpenses = 0.0,
+                        annualDiscountRate = ANNUAL_DISCOUNT_RATE,
+                    ),
+                amortizationSchedule = schedule,
+            )
+        FakeSimulationStore.put(request, response)
+        return response
     }
 
     private fun validate(request: SimulationRequestDto): Map<String, List<String>> =
@@ -90,7 +95,24 @@ class FakeSimulationService(
             if (request.termInMonths !in MIN_TERM_MONTHS..MAX_TERM_MONTHS) {
                 put("termInMonths", listOf("The termInMonths must be between $MIN_TERM_MONTHS and $MAX_TERM_MONTHS."))
             }
+            validateGrace(request)?.let { (field, message) -> put(field, listOf(message)) }
         }
+
+    /** Same rules as the backend validator: the type is known, it is "none" exactly when there are no months. */
+    private fun validateGrace(request: SimulationRequestDto): Pair<String, String>? {
+        val months = request.gracePeriodMonths ?: 0
+        val type = request.graceType ?: GraceKind.NONE
+        return when {
+            type !in GraceKind.API_VALUES -> "graceType" to "The graceType must be none, total or partial."
+            months < 0 -> "gracePeriodMonths" to "The gracePeriodMonths cannot be negative."
+            months >= request.termInMonths ->
+                "gracePeriodMonths" to
+                    "The gracePeriodMonths must be lower than the termInMonths."
+            (type == GraceKind.NONE) != (months == 0) ->
+                "graceType" to "The graceType must be none if and only if the gracePeriodMonths is 0."
+            else -> null
+        }
+    }
 
     private fun validationError(errors: Map<String, List<String>>): HttpException = validationProblemException(errors)
 
@@ -107,35 +129,85 @@ class FakeSimulationService(
         financedAmount: Double,
         monthlyRate: Double,
         months: Int,
-        regularInstallment: Double,
+        grace: Grace,
         startDate: LocalDate,
     ): List<AmortizationEntryDto> {
         var balance = financedAmount
-        return (1..months).map { period ->
-            val openingBalance = balance
-            val interest = balance * monthlyRate
-            var amortization = regularInstallment - interest
-            var installment = regularInstallment
-            balance -= amortization
-            if (period == months) {
-                // The last installment settles whatever balance the rounding left.
-                amortization += balance
-                installment += money(balance)
-                balance = 0.0
+        val graceRows =
+            (1..grace.months).map { period ->
+                val openingBalance = balance
+                val interest = balance * monthlyRate
+                // Total grace pays nothing and capitalizes the interest; partial grace pays exactly the interest.
+                val installment = if (grace.kind == GraceKind.Total) 0.0 else interest
+                if (grace.kind == GraceKind.Total) balance += interest
+                entry(period, startDate, openingBalance, installment, interest, amortization = 0.0, balance, true)
             }
-            AmortizationEntryDto(
-                period = period,
-                paymentDate = startDate.plusMonths(period.toLong()).toString(),
-                openingBalance = money(openingBalance),
-                installment = money(installment),
-                interest = money(interest),
-                amortization = money(amortization),
-                remainingBalance = money(balance),
-                propertyInsurance = 0.0,
-                creditLifeInsurance = 0.0,
-                totalPayment = money(installment),
-                isGracePeriod = false,
-            )
+
+        val paymentMonths = months - grace.months
+        // After a total grace the installment is calculated on the capitalized balance, like the backend engine.
+        val regularInstallment = frenchInstallment(balance, monthlyRate, paymentMonths)
+        val regularRows =
+            (1..paymentMonths).map { k ->
+                val openingBalance = balance
+                val interest = balance * monthlyRate
+                var amortization = regularInstallment - interest
+                var installment = regularInstallment
+                balance -= amortization
+                if (k == paymentMonths) {
+                    // The last installment settles whatever balance the rounding left.
+                    amortization += balance
+                    installment += money(balance)
+                    balance = 0.0
+                }
+                entry(grace.months + k, startDate, openingBalance, installment, interest, amortization, balance, false)
+            }
+        return graceRows + regularRows
+    }
+
+    private fun entry(
+        period: Int,
+        startDate: LocalDate,
+        openingBalance: Double,
+        installment: Double,
+        interest: Double,
+        amortization: Double,
+        remainingBalance: Double,
+        isGracePeriod: Boolean,
+    ) = AmortizationEntryDto(
+        period = period,
+        paymentDate = startDate.plusMonths(period.toLong()).toString(),
+        openingBalance = money(openingBalance),
+        installment = money(installment),
+        interest = money(interest),
+        amortization = money(amortization),
+        remainingBalance = money(remainingBalance),
+        propertyInsurance = 0.0,
+        creditLifeInsurance = 0.0,
+        totalPayment = money(installment),
+        isGracePeriod = isGracePeriod,
+    )
+
+    private data class Grace(
+        val kind: GraceKind,
+        val months: Int,
+    )
+
+    private enum class GraceKind {
+        None,
+        Partial,
+        Total,
+        ;
+
+        companion object {
+            const val NONE = "none"
+            val API_VALUES = setOf(NONE, "partial", "total")
+
+            fun from(value: String?): GraceKind =
+                when (value) {
+                    "partial" -> Partial
+                    "total" -> Total
+                    else -> None
+                }
         }
     }
 

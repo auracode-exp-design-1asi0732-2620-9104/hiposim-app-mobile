@@ -167,4 +167,65 @@
   <string name="legal_privacy_read">Leer la Política de Privacidad</string>
   <string name="legal_terms_description">Términos y Condiciones, se abre en el navegador</string>
   <string name="legal_privacy_description">Política de Privacidad, se abre en el navegador</string>
+  <string name="usage_notice">HipoSim registra datos de uso anónimos (nunca tu nombre, correo ni teléfono) para mejorar la app.</string>
+  <!-- US03: periodo de gracia -->
+  <string name="grace_title">Periodo de gracia</string>
+  <string name="grace_none">Ninguno</string>
+  <string name="grace_partial">Parcial</string>
+  <string name="grace_total">Total</string>
+  <string name="grace_none_body">Empiezas a pagar la cuota completa desde el primer mes.</string>
+  <string name="grace_partial_body">Durante los meses de gracia pagas solo los intereses. La cuota regular empieza después.</string>
+  <string name="grace_total_body">Durante los meses de gracia no pagas nada. Esos intereses se suman a tu saldo, así que las cuotas siguientes son más altas.</string>
+  <string name="field_grace_months">Meses de gracia</string>
+  <string name="field_grace_months_suffix">meses</string>
+  <string name="field_grace_months_hint">De %1$d a %2$d meses</string>
+  <string name="error_grace_months_required">Ingresa los meses de gracia</string>
+  <string name="error_grace_months_range">Ingresa entre %1$d y %2$d meses de gracia</string>
+  <plurals name="grace_note_partial">
+    <item quantity="one">Gracia parcial de %1$d mes: al inicio pagas solo los intereses.</item>
+    <item quantity="other">Gracia parcial de %1$d meses: al inicio pagas solo los intereses.</item>
+  </plurals>
+  <plurals name="grace_note_total">
+    <item quantity="one">Gracia total de %1$d mes: al inicio no pagas, los intereses se suman al saldo.</item>
+    <item quantity="other">Gracia total de %1$d meses: al inicio no pagas, los intereses se suman al saldo.</item>
+  </plurals>
+  <!-- US06: escenarios guardados -->
+  <string name="action_cancel">Cancelar</string>
+  <string name="save_scenario">Guardar escenario</string>
+  <string name="scenario_default_name">%1$s a %2$d años</string>
+  <string name="save_scenario_title">Guardar este escenario</string>
+  <string name="save_scenario_body">Ponle un nombre para encontrarlo luego en Mis escenarios. No tendrás que volver a ingresar los datos.</string>
+  <string name="field_scenario_name">Nombre del escenario</string>
+  <string name="field_scenario_name_hint">Hasta %1$d caracteres</string>
+  <string name="save_scenario_confirm">Guardar</string>
+  <string name="save_scenario_saving">Guardando…</string>
+  <string name="scenario_saved">Escenario guardado</string>
+  <string name="scenario_saved_action">Ver</string>
+  <string name="scenarios_title">Mis escenarios</string>
+  <plurals name="scenarios_count">
+    <item quantity="one">%1$d escenario guardado, del más reciente al más antiguo</item>
+    <item quantity="other">%1$d escenarios guardados, del más reciente al más antiguo</item>
+  </plurals>
+  <string name="scenario_saved_on">Guardado el %1$s</string>
+  <string name="scenario_down_payment_label">Cuota inicial</string>
+  <string name="scenario_bonus_label">Bono del Buen Pagador</string>
+  <plurals name="scenario_term_years">
+    <item quantity="one">%1$d año</item>
+    <item quantity="other">%1$d años</item>
+  </plurals>
+  <plurals name="scenario_grace_partial">
+    <item quantity="one">Parcial, %1$d mes</item>
+    <item quantity="other">Parcial, %1$d meses</item>
+  </plurals>
+  <plurals name="scenario_grace_total">
+    <item quantity="one">Total, %1$d mes</item>
+    <item quantity="other">Total, %1$d meses</item>
+  </plurals>
+  <string name="scenarios_empty_title">Aún no tienes escenarios guardados</string>
+  <string name="scenarios_empty_body">Simula un crédito y toca Guardar escenario en los resultados. Tus escenarios aparecen aquí, listos para revisarlos.</string>
+  <string name="scenarios_back_to_results">Volver a mi simulación</string>
+  <string name="scenarios_sign_in">Iniciar sesión</string>
+  <string name="error_scenario_name">Ingresa un nombre de hasta 60 caracteres</string>
+  <string name="error_scenario_not_found">No encontramos tu simulación. Vuelve a simular y guárdala.</string>
+  <string name="error_scenario_session_expired">Tu sesión expiró. Vuelve a iniciar sesión para ver y guardar tus escenarios.</string>
 </resources>

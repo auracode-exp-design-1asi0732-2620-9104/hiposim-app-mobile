@@ -159,4 +159,68 @@ class FakeSimulationServiceTest {
         /** Sums of 240 rounded rows may differ from the engine in the last cent. */
         const val CENT = 0.011
     }
+
+    // US03: grace periods. Expected values are the partialGrace and totalGrace examples of the contract
+    // (hiposim-backEnd, openapi.v0.yaml), real results of the backend engine at TEA 8.85%.
+
+    private fun graceRequest(
+        type: String,
+        months: Int = 3,
+    ) = request(rate = 0.0885).copy(gracePeriodMonths = months, graceType = type)
+
+    @Test
+    fun partialGrace_paysOnlyTheInterestAndThenTheEngineInstallment() =
+        runTest {
+            val response = service.createSimulation(graceRequest("partial"))
+
+            val grace = response.amortizationSchedule.take(3)
+            assertTrue(grace.all { it.isGracePeriod })
+            assertTrue(grace.all { it.installment == 1558.77 && it.interest == 1558.77 && it.amortization == 0.0 })
+            assertTrue(grace.all { it.remainingBalance == 219_800.0 })
+            val firstRegular = response.amortizationSchedule[3]
+            assertFalse(firstRegular.isGracePeriod)
+            assertEquals(4, firstRegular.period)
+            assertEquals(1918.11, firstRegular.installment, 0.0)
+            assertEquals(359.35, firstRegular.amortization, 0.01)
+            assertEquals(1918.11, response.monthlyInstallment, 0.0)
+            assertEquals(240, response.amortizationSchedule.size)
+            assertEquals(0.0, response.amortizationSchedule.last().remainingBalance, 0.0)
+        }
+
+    @Test
+    fun totalGrace_capitalizesTheInterestAndCalculatesTheInstallmentOnThatBalance() =
+        runTest {
+            val response = service.createSimulation(graceRequest("total"))
+
+            val grace = response.amortizationSchedule.take(3)
+            assertTrue(grace.all { it.isGracePeriod && it.installment == 0.0 && it.totalPayment == 0.0 })
+            assertEquals(listOf(221_358.77, 222_928.59, 224_509.54), grace.map { it.remainingBalance })
+            assertEquals(1959.21, response.monthlyInstallment, 0.0)
+            assertEquals(224_509.54, response.amortizationSchedule[3].openingBalance, 0.0)
+            assertEquals(0.0, response.amortizationSchedule.last().remainingBalance, 0.0)
+        }
+
+    @Test
+    fun graceTypeWithoutMonths_isRejectedLikeTheServer() =
+        runTest {
+            val errors = fieldErrorsOf(graceRequest("partial", months = 0))
+
+            assertTrue(errors.containsKey("graceType"))
+        }
+
+    @Test
+    fun graceMonthsNotLowerThanTheTerm_areRejected() =
+        runTest {
+            val errors = fieldErrorsOf(graceRequest("total", months = 240))
+
+            assertTrue(errors.containsKey("gracePeriodMonths"))
+        }
+
+    @Test
+    fun unknownGraceType_isRejected() =
+        runTest {
+            val errors = fieldErrorsOf(graceRequest("monthly"))
+
+            assertTrue(errors.containsKey("graceType"))
+        }
 }

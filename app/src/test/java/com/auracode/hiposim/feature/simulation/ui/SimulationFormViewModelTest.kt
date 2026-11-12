@@ -2,6 +2,7 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import com.auracode.hiposim.feature.simulation.data.DefaultSimulationRepository
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import com.auracode.hiposim.feature.simulation.domain.SimulateLoanUseCase
 import com.auracode.hiposim.feature.simulation.domain.SimulationField
 import com.auracode.hiposim.feature.simulation.domain.SimulationFormError
@@ -218,5 +219,46 @@ class SimulationFormViewModelTest {
 
         assertNull(state.generalError)
         assertTrue(state.navigateToResults)
+    }
+
+    // US03: grace period.
+
+    @Test
+    fun choosingAGraceType_suggestsThreeMonths_andNoneHidesThem() {
+        viewModel.onGraceTypeChange(GraceType.Partial)
+
+        assertEquals(GraceType.Partial, state.form.graceType)
+        assertEquals("3", state.form.graceMonths)
+
+        viewModel.onGraceMonthsChange("1x2")
+        assertEquals("12", state.form.graceMonths)
+
+        viewModel.onGraceTypeChange(GraceType.Total)
+        assertEquals("12", state.form.graceMonths)
+    }
+
+    @Test
+    fun submitWithGrace_sendsTheGraceToTheApi() {
+        viewModel.onGraceTypeChange(GraceType.Total)
+        viewModel.onGraceMonthsChange("6")
+
+        viewModel.onSubmit()
+
+        val request = service.requests.single()
+        assertEquals(6, request.gracePeriodMonths)
+        assertEquals("total", request.graceType)
+        assertTrue(state.navigateToResults)
+        assertEquals(GraceType.Total, repository.currentSimulation.value?.graceType)
+    }
+
+    @Test
+    fun graceOutOfRange_blocksTheSubmitWithAFieldError() {
+        viewModel.onGraceTypeChange(GraceType.Partial)
+        viewModel.onGraceMonthsChange("24")
+
+        viewModel.onSubmit()
+
+        assertEquals(SimulationFormError.GraceMonthsOutOfRange, state.errors[SimulationField.GraceMonths])
+        assertTrue(service.requests.isEmpty())
     }
 }

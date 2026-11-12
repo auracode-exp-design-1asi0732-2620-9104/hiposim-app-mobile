@@ -7,6 +7,9 @@ import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
 import com.auracode.hiposim.feature.auth.ui.AccountUi
+import com.auracode.hiposim.feature.scenarios.domain.MAX_SCENARIO_NAME_LENGTH
+import com.auracode.hiposim.feature.scenarios.domain.SaveScenarioResult
+import com.auracode.hiposim.feature.scenarios.domain.SaveScenarioUseCase
 import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +26,7 @@ class ResultsViewModel
         private val observeCurrentSimulation: ObserveCurrentSimulationUseCase,
         private val observeSession: ObserveSessionUseCase,
         private val signOut: SignOutUseCase,
+        private val saveScenario: SaveScenarioUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(ResultsUiState())
         val uiState: StateFlow<ResultsUiState> = _uiState.asStateFlow()
@@ -64,7 +68,7 @@ class ResultsViewModel
                 MainDestination.Simulate -> Unit
                 MainDestination.Profile -> requireAccount { showAccountSheet() }
                 MainDestination.Realtors -> requireAccount { showSendSheet() }
-                MainDestination.History -> requireAccount { showComingSoon() }
+                MainDestination.History -> requireAccount { openScenarios() }
             }
         }
 
@@ -85,6 +89,61 @@ class ResultsViewModel
             viewModelScope.launch { signOut() }
         }
 
+        /** Opens the save dialog with [suggestedName] (US06). Guests must sign up or sign in first. */
+        fun onSaveScenarioClick(suggestedName: String) =
+            requireAccount {
+                if (_uiState.value.summary != null) {
+                    _uiState.update {
+                        it.copy(
+                            saveScenario = SaveScenarioUi(name = suggestedName.take(MAX_SCENARIO_NAME_LENGTH)),
+                        )
+                    }
+                }
+            }
+
+        fun onScenarioNameChange(name: String) {
+            _uiState.update { state ->
+                state.copy(
+                    saveScenario = state.saveScenario?.copy(name = name.take(MAX_SCENARIO_NAME_LENGTH), failure = null),
+                )
+            }
+        }
+
+        fun onSaveScenarioDismiss() {
+            if (_uiState.value.saveScenario?.isSaving == true) return
+            _uiState.update { it.copy(saveScenario = null) }
+        }
+
+        fun onSaveScenarioConfirm() {
+            val dialog = _uiState.value.saveScenario ?: return
+            if (dialog.isSaving) return
+            _uiState.update { it.copy(saveScenario = dialog.copy(isSaving = true, failure = null)) }
+            viewModelScope.launch {
+                when (val result = saveScenario(dialog.name)) {
+                    is SaveScenarioResult.Success ->
+                        _uiState.update { it.copy(saveScenario = null, scenarioSaved = true) }
+
+                    is SaveScenarioResult.Failure ->
+                        _uiState.update { state ->
+                            state.copy(
+                                saveScenario = state.saveScenario?.copy(isSaving = false, failure = result.reason),
+                            )
+                        }
+                }
+            }
+        }
+
+        fun onScenarioSavedShown() {
+            _uiState.update { it.copy(scenarioSaved = false) }
+        }
+
+        /** From the confirmation after saving. */
+        fun onViewScenariosClick() = requireAccount { openScenarios() }
+
+        fun onScenariosNavigated() {
+            _uiState.update { it.copy(navigateToScenarios = false) }
+        }
+
         fun onComingSoonShown() {
             _uiState.update { it.copy(showComingSoon = false) }
         }
@@ -99,6 +158,10 @@ class ResultsViewModel
                     )
                 }
             }
+        }
+
+        private fun openScenarios() {
+            _uiState.update { it.copy(navigateToScenarios = true) }
         }
 
         private fun showComingSoon() {
