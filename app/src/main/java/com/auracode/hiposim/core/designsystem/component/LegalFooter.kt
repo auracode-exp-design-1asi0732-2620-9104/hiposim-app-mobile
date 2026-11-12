@@ -1,6 +1,7 @@
 package com.auracode.hiposim.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,26 +16,45 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import com.auracode.hiposim.R
 import com.auracode.hiposim.core.designsystem.theme.Spacing
 import com.auracode.hiposim.core.legal.LegalLinks
 
 const val LEGAL_FOOTER_TAG = "legal_footer"
+const val USAGE_NOTICE_TAG = "usage_notice"
 
 /**
  * Footer with the Terms and Conditions and the Privacy Policy (US17). Each link opens its section of the
- * Landing Page in the browser.
+ * Landing Page in the browser. Below them, a short notice that the app records anonymous usage data (TS10b).
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LegalFooter(
     modifier: Modifier = Modifier,
     termsUrl: String = LegalLinks.termsUrl(),
     privacyUrl: String = LegalLinks.privacyUrl(),
 ) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        LegalLinksRow(termsUrl = termsUrl, privacyUrl = privacyUrl)
+        Text(
+            text = stringResource(R.string.usage_notice),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().testTag(USAGE_NOTICE_TAG),
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LegalLinksRow(
+    termsUrl: String,
+    privacyUrl: String,
+) {
     FlowRow(
-        modifier = modifier.fillMaxWidth().testTag(LEGAL_FOOTER_TAG),
+        modifier = Modifier.fillMaxWidth().testTag(LEGAL_FOOTER_TAG),
         horizontalArrangement =
             Arrangement.spacedBy(
                 Spacing.sm,

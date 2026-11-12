@@ -167,6 +167,7 @@
   <string name="legal_privacy_read">Leer la Política de Privacidad</string>
   <string name="legal_terms_description">Términos y Condiciones, se abre en el navegador</string>
   <string name="legal_privacy_description">Política de Privacidad, se abre en el navegador</string>
+  <string name="usage_notice">HipoSim registra datos de uso anónimos (nunca tu nombre, correo ni teléfono) para mejorar la app.</string>
   <!-- US03: periodo de gracia -->
   <string name="grace_title">Periodo de gracia</string>
   <string name="grace_none">Ninguno</string>
