@@ -86,6 +86,79 @@ class ScenariosViewModelTest {
         assertFalse(state.isEmpty)
     }
 
+    private fun idsOf(viewModel: ScenariosViewModel) =
+        viewModel.uiState.value.scenarios
+            .map { it.id }
+
+    @Test
+    fun withTwoOrMoreScenarios_pickingIsAvailable_butComparingNeedsTwoPicked() {
+        signInAndSave("Uno", "Dos", "Tres")
+        val viewModel = viewModel()
+        val ids = idsOf(viewModel)
+
+        assertTrue(viewModel.uiState.value.canPick)
+        assertFalse(viewModel.uiState.value.canCompare)
+
+        viewModel.onToggleSelection(ids[0])
+        assertFalse(viewModel.uiState.value.canCompare)
+
+        viewModel.onToggleSelection(ids[1])
+        assertTrue(viewModel.uiState.value.canCompare)
+        assertEquals(listOf(ids[0], ids[1]), viewModel.uiState.value.selectedIds)
+    }
+
+    @Test
+    fun aSingleScenario_cannotBePickedToCompare() {
+        signInAndSave("Uno")
+
+        assertFalse(viewModel().uiState.value.canPick)
+    }
+
+    @Test
+    fun atMostThreeCanBePicked_andAPickedOneCanBeDropped() {
+        signInAndSave("Uno", "Dos", "Tres", "Cuatro")
+        val viewModel = viewModel()
+        val ids = idsOf(viewModel)
+
+        ids.forEach(viewModel::onToggleSelection)
+
+        assertEquals(ids.take(3), viewModel.uiState.value.selectedIds)
+        assertTrue(viewModel.uiState.value.isSelectionFull)
+
+        viewModel.onToggleSelection(ids[0])
+        assertEquals(ids.subList(1, 3), viewModel.uiState.value.selectedIds)
+        assertFalse(viewModel.uiState.value.isSelectionFull)
+    }
+
+    @Test
+    fun anUnknownIdIsIgnored() {
+        signInAndSave("Uno", "Dos")
+        val viewModel = viewModel()
+
+        viewModel.onToggleSelection("no-such-id")
+
+        assertTrue(
+            viewModel.uiState.value.selectedIds
+                .isEmpty(),
+        )
+    }
+
+    @Test
+    fun theSelection_survivesReadingTheListAgain_exceptForScenariosThatAreGone() {
+        signInAndSave("Uno", "Dos")
+        val viewModel = viewModel()
+        val ids = idsOf(viewModel)
+        ids.forEach(viewModel::onToggleSelection)
+        val remaining = scenariosService.onGet
+
+        viewModel.onRetry()
+        assertEquals(ids, viewModel.uiState.value.selectedIds)
+
+        scenariosService.onGet = { remaining().filter { it.id == ids[0] } }
+        viewModel.onRetry()
+        assertEquals(listOf(ids[0]), viewModel.uiState.value.selectedIds)
+    }
+
     @Test
     fun failure_canBeRetried() {
         signInAndSave("Primero")

@@ -10,6 +10,8 @@ object UsageEvents {
     const val SIMULATION_COMPLETED = "simulation_completed"
     const val SCHEDULE_OPENED = "schedule_opened"
     const val SCENARIO_SAVED = "scenario_saved"
+    const val SCENARIOS_COMPARED = "scenarios_compared"
+    const val PDF_EXPORTED = "pdf_exported"
     const val LEAD_SENT = "lead_sent"
 }
 

@@ -3,7 +3,6 @@
   <string name="app_name">HipoSim</string>
   <string name="action_close">Cerrar</string>
   <string name="action_back">Volver</string>
-  <string name="coming_soon">Disponible próximamente</string>
   <string name="action_retry">Reintentar</string>
   <string name="loading">Cargando</string>
 
@@ -83,6 +82,15 @@
   <string name="send_quote">Enviar cotización a inmobiliarias</string>
   <string name="send_quote_hint">(Desbloquea proyectos en tu rango)</string>
   <string name="download_pdf">Descargar resumen PDF</string>
+  <string name="pdf_generating">Preparando PDF…</string>
+  <string name="pdf_share_title">Compartir el reporte en PDF</string>
+  <string name="pdf_open_failed">Ninguna aplicación pudo abrir el PDF. Inténtalo de nuevo o instala un lector de PDF.</string>
+  <string name="pdf_error_simulation_missing">No hay una simulación para exportar. Haz una primero.</string>
+  <string name="pdf_error_session_expired">Tu sesión venció. Inicia sesión de nuevo para descargar el PDF.</string>
+  <string name="pdf_error_not_found">No encontramos esta simulación. Vuelve a simular e inténtalo de nuevo.</string>
+  <string name="pdf_error_no_connection">Sin conexión. Revisa tu internet e inténtalo de nuevo.</string>
+  <string name="pdf_error_service_unavailable">El servicio no está disponible en este momento. Inténtalo de nuevo en unos minutos.</string>
+  <string name="pdf_error_unexpected">No pudimos preparar el PDF. Inténtalo de nuevo.</string>
 
   <!-- Navigation -->
   <string name="nav_simulate">Simular</string>
@@ -226,6 +234,17 @@
   <string name="scenarios_back_to_results">Volver a mi simulación</string>
   <string name="scenarios_sign_in">Iniciar sesión</string>
   <string name="error_scenario_name">Ingresa un nombre de hasta 60 caracteres</string>
+  <string name="compare_title">Comparar escenarios</string>
+  <string name="compare_intro">Se resalta la cifra más baja de cada fila. Una cuota o un costo menor es mejor.</string>
+  <string name="compare_lowest">Más baja</string>
+  <string name="compare_higher">%1$s más</string>
+  <string name="compare_no_value">–</string>
+  <string name="compare_button">Comparar escenarios (%1$d de 3)</string>
+  <string name="compare_hint">Elige 2 o 3 escenarios para compararlos</string>
+  <string name="compare_need_two">Guarda al menos dos escenarios para compararlos.</string>
+  <string name="compare_select_description">Seleccionar %1$s para comparar</string>
+  <string name="compare_back_to_list">Volver a mis escenarios</string>
+  <string name="error_compare_selection">Elige dos o tres escenarios para comparar</string>
   <string name="error_scenario_not_found">No encontramos tu simulación. Vuelve a simular y guárdala.</string>
   <string name="error_scenario_session_expired">Tu sesión expiró. Vuelve a iniciar sesión para ver y guardar tus escenarios.</string>
 </resources>

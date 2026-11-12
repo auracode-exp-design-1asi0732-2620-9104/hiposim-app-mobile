@@ -7,6 +7,8 @@ import com.auracode.hiposim.feature.leads.data.AgenciesService
 import com.auracode.hiposim.feature.leads.data.FakeAgenciesService
 import com.auracode.hiposim.feature.leads.data.FakeLeadsService
 import com.auracode.hiposim.feature.leads.data.LeadsService
+import com.auracode.hiposim.feature.report.data.FakeReportService
+import com.auracode.hiposim.feature.report.data.ReportService
 import com.auracode.hiposim.feature.scenarios.data.FakeScenariosService
 import com.auracode.hiposim.feature.scenarios.data.ScenariosService
 import com.auracode.hiposim.feature.simulation.data.FakeSimulationService
@@ -65,6 +67,15 @@ object ServiceModule {
             FakeAgenciesService()
         } else {
             retrofit.get().create(AgenciesService::class.java)
+        }
+
+    @Provides
+    @Singleton
+    fun provideReportService(retrofit: Lazy<Retrofit>): ReportService =
+        if (BuildConfig.USE_FAKE_API) {
+            FakeReportService(latencyMillis = FakeReportService.DEFAULT_LATENCY_MILLIS)
+        } else {
+            retrofit.get().create(ReportService::class.java)
         }
 
     @Provides
