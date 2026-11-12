@@ -2,6 +2,8 @@ package com.auracode.hiposim.feature.simulation.ui
 
 import androidx.compose.runtime.Immutable
 import com.auracode.hiposim.feature.auth.ui.AccountUi
+import com.auracode.hiposim.feature.report.domain.ReportFailure
+import com.auracode.hiposim.feature.report.domain.ReportFile
 import com.auracode.hiposim.feature.scenarios.domain.ScenarioFailure
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
 import com.auracode.hiposim.feature.simulation.domain.GraceType
@@ -21,8 +23,12 @@ data class ResultsUiState(
     val isAccountSheetVisible: Boolean = false,
     /** The sheet to choose an agency and authorize sending the simulation (signed in buyers only). */
     val isSendSheetVisible: Boolean = false,
-    /** One-off message request, cleared by [ResultsViewModel.onComingSoonShown]. */
-    val showComingSoon: Boolean = false,
+    /** The PDF report is being downloaded (US08): the button is disabled and says so. */
+    val isExportingPdf: Boolean = false,
+    /** One-off: the PDF arrived and must be opened, cleared by [ResultsViewModel.onPdfReportHandled]. */
+    val pdfReport: ReportFile? = null,
+    /** One-off: why the PDF could not be downloaded, cleared by [ResultsViewModel.onPdfFailureShown]. */
+    val pdfFailure: ReportFailure? = null,
     /** The dialog to save the simulation as a named scenario (US06), or null when it is closed. */
     val saveScenario: SaveScenarioUi? = null,
     /** One-off confirmation after saving, cleared by [ResultsViewModel.onScenarioSavedShown]. */

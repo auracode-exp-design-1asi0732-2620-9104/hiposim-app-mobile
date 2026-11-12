@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -86,6 +87,8 @@ import com.auracode.hiposim.core.navigation.MainDestination
 import com.auracode.hiposim.feature.auth.ui.AccountSheet
 import com.auracode.hiposim.feature.auth.ui.LoginRequiredSheet
 import com.auracode.hiposim.feature.leads.ui.SendToAgencySheet
+import com.auracode.hiposim.feature.report.ui.ReportSharer
+import com.auracode.hiposim.feature.report.ui.messageRes
 import com.auracode.hiposim.feature.scenarios.domain.MAX_SCENARIO_NAME_LENGTH
 import com.auracode.hiposim.feature.scenarios.ui.scenarioFailureMessage
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
@@ -103,7 +106,7 @@ fun ResultsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val comingSoon = stringResource(R.string.coming_soon)
+    val context = LocalContext.current
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     val scenarioSaved = stringResource(R.string.scenario_saved)
@@ -127,11 +130,23 @@ fun ResultsScreen(
         }
     }
 
-    LaunchedEffect(state.showComingSoon) {
-        if (state.showComingSoon) {
-            viewModel.onComingSoonShown()
-            // Own scope: clearing the flag restarts this effect, which would cancel the snackbar.
-            scope.launch { snackbarHostState.showSnackbar(comingSoon) }
+    // US08: the PDF arrived. Own scope, like the messages above: clearing the flag restarts this effect.
+    val pdfOpenFailed = stringResource(R.string.pdf_open_failed)
+    LaunchedEffect(state.pdfReport) {
+        val report = state.pdfReport
+        if (report != null) {
+            viewModel.onPdfReportHandled()
+            scope.launch {
+                if (!ReportSharer.open(context, report)) snackbarHostState.showSnackbar(pdfOpenFailed)
+            }
+        }
+    }
+
+    val pdfFailureMessage = state.pdfFailure?.let { stringResource(it.messageRes()) }
+    LaunchedEffect(state.pdfFailure) {
+        if (pdfFailureMessage != null) {
+            viewModel.onPdfFailureShown()
+            scope.launch { snackbarHostState.showSnackbar(pdfFailureMessage) }
         }
     }
 
@@ -230,6 +245,7 @@ private fun ResultsContent(
             ResultsBottomBar(
                 isAuthenticated = state.isAuthenticated,
                 showActions = state.summary != null,
+                isExportingPdf = state.isExportingPdf,
                 onSendQuote = onSendQuote,
                 onDownloadPdf = onDownloadPdf,
                 onSaveScenario = { onSaveScenario(suggestedName) },
@@ -670,6 +686,7 @@ private fun InstallmentLine(
 private fun ResultsBottomBar(
     isAuthenticated: Boolean,
     showActions: Boolean,
+    isExportingPdf: Boolean,
     onSendQuote: () -> Unit,
     onDownloadPdf: () -> Unit,
     onSaveScenario: () -> Unit,
@@ -707,10 +724,14 @@ private fun ResultsBottomBar(
                             modifier = Modifier.weight(1f).testTag(SAVE_SCENARIO_TAG),
                         )
                         OutlinedActionButton(
-                            text = stringResource(R.string.download_pdf),
+                            text =
+                                stringResource(
+                                    if (isExportingPdf) R.string.pdf_generating else R.string.download_pdf,
+                                ),
                             icon = Icons.Filled.PictureAsPdf,
                             onClick = onDownloadPdf,
-                            modifier = Modifier.weight(1f),
+                            enabled = !isExportingPdf,
+                            modifier = Modifier.weight(1f).testTag(DOWNLOAD_PDF_TAG),
                         )
                     }
                 }
@@ -726,6 +747,9 @@ private fun ResultsBottomBar(
 
 /** Test tag of the "Save scenario" button, used by the UI tests. */
 const val SAVE_SCENARIO_TAG = "save_scenario"
+
+/** Test tag of the "Download PDF" button, used by the UI tests. */
+const val DOWNLOAD_PDF_TAG = "download_pdf"
 
 /** Names the simulation on screen and saves it as a scenario (US06). */
 @Composable

@@ -5,6 +5,9 @@ import com.auracode.hiposim.feature.auth.data.DefaultAuthRepository
 import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.RegistrationForm
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
+import com.auracode.hiposim.feature.report.data.DefaultReportRepository
+import com.auracode.hiposim.feature.report.domain.ExportSimulationReportUseCase
+import com.auracode.hiposim.feature.report.domain.ReportFailure
 import com.auracode.hiposim.feature.scenarios.data.DefaultScenariosRepository
 import com.auracode.hiposim.feature.scenarios.domain.MAX_SCENARIO_NAME_LENGTH
 import com.auracode.hiposim.feature.scenarios.domain.SaveScenarioUseCase
@@ -14,10 +17,12 @@ import com.auracode.hiposim.feature.simulation.domain.ObserveCurrentSimulationUs
 import com.auracode.hiposim.feature.simulation.domain.SimulationParams
 import com.auracode.hiposim.feature.simulation.domain.SimulationRepository
 import com.auracode.hiposim.testing.MainDispatcherRule
+import com.auracode.hiposim.testing.StubReportService
 import com.auracode.hiposim.testing.StubScenariosService
 import com.auracode.hiposim.testing.contractExampleParams
 import com.auracode.hiposim.testing.fakeBackedAuthRepository
 import com.auracode.hiposim.testing.fakeBackedSimulationRepository
+import com.auracode.hiposim.testing.httpException
 import com.auracode.hiposim.testing.simulationRepositoryWithContractExample
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -45,6 +50,7 @@ class ResultsViewModelTest {
     }
 
     private val scenariosService = StubScenariosService()
+    private val reportService = StubReportService()
 
     private fun viewModelWith(simulationRepository: SimulationRepository) =
         ResultsViewModel(
@@ -53,6 +59,12 @@ class ResultsViewModelTest {
             signOut = SignOutUseCase(authRepository),
             saveScenario =
                 SaveScenarioUseCase(DefaultScenariosRepository(scenariosService), simulationRepository, authRepository),
+            exportReport =
+                ExportSimulationReportUseCase(
+                    reportRepository = DefaultReportRepository(reportService),
+                    simulationRepository = simulationRepository,
+                    authRepository = authRepository,
+                ),
         )
 
     private suspend fun signIn() {
@@ -192,7 +204,6 @@ class ResultsViewModelTest {
         viewModel.onSendQuoteClick()
 
         assertTrue(viewModel.uiState.value.isUnlockSheetVisible)
-        assertFalse(viewModel.uiState.value.showComingSoon)
     }
 
     @Test
@@ -211,7 +222,6 @@ class ResultsViewModelTest {
         viewModel.onDestinationClick(MainDestination.Simulate)
 
         assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
-        assertFalse(viewModel.uiState.value.showComingSoon)
     }
 
     @Test
@@ -223,13 +233,62 @@ class ResultsViewModelTest {
     }
 
     @Test
-    fun downloadPdf_showsComingSoonUntilConsumed() {
+    fun guest_downloadPdf_opensUnlockSheet_andDownloadsNothing() {
         viewModel.onDownloadPdfClick()
-        assertTrue(viewModel.uiState.value.showComingSoon)
 
-        viewModel.onComingSoonShown()
-        assertFalse(viewModel.uiState.value.showComingSoon)
+        assertTrue(viewModel.uiState.value.isUnlockSheetVisible)
+        assertNull(viewModel.uiState.value.pdfReport)
+        assertTrue(reportService.requests.isEmpty())
     }
+
+    @Test
+    fun signedIn_downloadPdf_exposesTheReportUntilItIsHandled() =
+        runTest {
+            signIn()
+
+            viewModel.onDownloadPdfClick()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isExportingPdf)
+            val report = requireNotNull(state.pdfReport)
+            assertTrue(report.fileName.startsWith("hiposim-simulacion-"))
+            assertTrue(report.fileName.endsWith(".pdf"))
+            assertEquals("%PDF-", String(report.bytes.copyOf(5), Charsets.US_ASCII))
+            assertNull(state.pdfFailure)
+
+            viewModel.onPdfReportHandled()
+            assertNull(viewModel.uiState.value.pdfReport)
+        }
+
+    @Test
+    fun signedIn_downloadPdf_whenTheServiceFails_exposesTheReasonUntilItIsShown() =
+        runTest {
+            signIn()
+            reportService.onGet = { throw httpException(500) }
+
+            viewModel.onDownloadPdfClick()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isExportingPdf)
+            assertNull(state.pdfReport)
+            assertEquals(ReportFailure.ServiceUnavailable, state.pdfFailure)
+
+            viewModel.onPdfFailureShown()
+            assertNull(viewModel.uiState.value.pdfFailure)
+        }
+
+    @Test
+    fun downloadPdf_withoutASimulation_doesNothing() =
+        runTest {
+            signIn()
+            val empty = viewModelWith(fakeBackedSimulationRepository())
+
+            empty.onDownloadPdfClick()
+
+            assertNull(empty.uiState.value.pdfReport)
+            assertNull(empty.uiState.value.pdfFailure)
+            assertTrue(reportService.requests.isEmpty())
+        }
 
     @Test
     fun signingIn_exposesTheAccountAndClosesTheUnlockSheet() =
@@ -253,7 +312,6 @@ class ResultsViewModelTest {
             viewModel.onSendQuoteClick()
             assertTrue(viewModel.uiState.value.isSendSheetVisible)
             assertFalse(viewModel.uiState.value.isUnlockSheetVisible)
-            assertFalse(viewModel.uiState.value.showComingSoon)
 
             viewModel.onSendSheetDismiss()
             assertFalse(viewModel.uiState.value.isSendSheetVisible)
@@ -264,7 +322,6 @@ class ResultsViewModelTest {
             viewModel.onSendSheetDismiss()
             viewModel.onDestinationClick(MainDestination.History)
             assertTrue(viewModel.uiState.value.navigateToScenarios)
-            assertFalse(viewModel.uiState.value.showComingSoon)
             assertFalse(viewModel.uiState.value.isSendSheetVisible)
 
             viewModel.onScenariosNavigated()

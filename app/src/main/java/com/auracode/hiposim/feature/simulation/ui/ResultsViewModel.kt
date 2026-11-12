@@ -7,6 +7,8 @@ import com.auracode.hiposim.feature.auth.domain.ObserveSessionUseCase
 import com.auracode.hiposim.feature.auth.domain.SessionState
 import com.auracode.hiposim.feature.auth.domain.SignOutUseCase
 import com.auracode.hiposim.feature.auth.ui.AccountUi
+import com.auracode.hiposim.feature.report.domain.ExportReportResult
+import com.auracode.hiposim.feature.report.domain.ExportSimulationReportUseCase
 import com.auracode.hiposim.feature.scenarios.domain.MAX_SCENARIO_NAME_LENGTH
 import com.auracode.hiposim.feature.scenarios.domain.SaveScenarioResult
 import com.auracode.hiposim.feature.scenarios.domain.SaveScenarioUseCase
@@ -27,6 +29,7 @@ class ResultsViewModel
         private val observeSession: ObserveSessionUseCase,
         private val signOut: SignOutUseCase,
         private val saveScenario: SaveScenarioUseCase,
+        private val exportReport: ExportSimulationReportUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(ResultsUiState())
         val uiState: StateFlow<ResultsUiState> = _uiState.asStateFlow()
@@ -60,8 +63,8 @@ class ResultsViewModel
         /** Guests must sign up or sign in first. Signed in buyers choose an agency and authorize the sending. */
         fun onSendQuoteClick() = requireAccount { showSendSheet() }
 
-        /** The PDF summary is not generated yet. */
-        fun onDownloadPdfClick() = showComingSoon()
+        /** Downloads the PDF report of the simulation (US08). Guests must sign up or sign in first. */
+        fun onDownloadPdfClick() = requireAccount { exportPdf() }
 
         fun onDestinationClick(destination: MainDestination) {
             when (destination) {
@@ -144,8 +147,12 @@ class ResultsViewModel
             _uiState.update { it.copy(navigateToScenarios = false) }
         }
 
-        fun onComingSoonShown() {
-            _uiState.update { it.copy(showComingSoon = false) }
+        fun onPdfReportHandled() {
+            _uiState.update { it.copy(pdfReport = null) }
+        }
+
+        fun onPdfFailureShown() {
+            _uiState.update { it.copy(pdfFailure = null) }
         }
 
         private fun requireAccount(whenSignedIn: () -> Unit) {
@@ -164,8 +171,20 @@ class ResultsViewModel
             _uiState.update { it.copy(navigateToScenarios = true) }
         }
 
-        private fun showComingSoon() {
-            _uiState.update { it.copy(showComingSoon = true) }
+        /** Nothing is downloaded without a simulation on screen, and a second tap while one is under way is ignored. */
+        private fun exportPdf() {
+            val state = _uiState.value
+            if (state.summary == null || state.isExportingPdf) return
+            _uiState.update { it.copy(isExportingPdf = true, pdfFailure = null) }
+            viewModelScope.launch {
+                when (val result = exportReport()) {
+                    is ExportReportResult.Success ->
+                        _uiState.update { it.copy(isExportingPdf = false, pdfReport = result.file) }
+
+                    is ExportReportResult.Failure ->
+                        _uiState.update { it.copy(isExportingPdf = false, pdfFailure = result.reason) }
+                }
+            }
         }
 
         /** Nothing can be sent without a simulation on screen. */
