@@ -167,4 +167,25 @@
   <string name="legal_privacy_read">Leer la Política de Privacidad</string>
   <string name="legal_terms_description">Términos y Condiciones, se abre en el navegador</string>
   <string name="legal_privacy_description">Política de Privacidad, se abre en el navegador</string>
+  <!-- US03: periodo de gracia -->
+  <string name="grace_title">Periodo de gracia</string>
+  <string name="grace_none">Ninguno</string>
+  <string name="grace_partial">Parcial</string>
+  <string name="grace_total">Total</string>
+  <string name="grace_none_body">Empiezas a pagar la cuota completa desde el primer mes.</string>
+  <string name="grace_partial_body">Durante los meses de gracia pagas solo los intereses. La cuota regular empieza después.</string>
+  <string name="grace_total_body">Durante los meses de gracia no pagas nada. Esos intereses se suman a tu saldo, así que las cuotas siguientes son más altas.</string>
+  <string name="field_grace_months">Meses de gracia</string>
+  <string name="field_grace_months_suffix">meses</string>
+  <string name="field_grace_months_hint">De %1$d a %2$d meses</string>
+  <string name="error_grace_months_required">Ingresa los meses de gracia</string>
+  <string name="error_grace_months_range">Ingresa entre %1$d y %2$d meses de gracia</string>
+  <plurals name="grace_note_partial">
+    <item quantity="one">Gracia parcial de %1$d mes: al inicio pagas solo los intereses.</item>
+    <item quantity="other">Gracia parcial de %1$d meses: al inicio pagas solo los intereses.</item>
+  </plurals>
+  <plurals name="grace_note_total">
+    <item quantity="one">Gracia total de %1$d mes: al inicio no pagas, los intereses se suman al saldo.</item>
+    <item quantity="other">Gracia total de %1$d meses: al inicio no pagas, los intereses se suman al saldo.</item>
+  </plurals>
 </resources>

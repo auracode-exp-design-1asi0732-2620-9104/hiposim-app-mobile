@@ -23,4 +23,9 @@ object SimulationConfig {
     const val MIN_TERM_YEARS = 5
     const val MAX_TERM_YEARS = 30
     const val MONTHS_PER_YEAR = 12
+
+    // Grace period (US03). The contract does not set a maximum; 12 months is a first filter for the buyer
+    // (mortgage grace periods in Peru are usually up to 6 months). The API checks that it is lower than the term.
+    const val MIN_GRACE_MONTHS = 1
+    const val MAX_GRACE_MONTHS = 12
 }

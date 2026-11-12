@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -78,6 +79,7 @@ import com.auracode.hiposim.feature.auth.ui.AccountSheet
 import com.auracode.hiposim.feature.auth.ui.LoginRequiredSheet
 import com.auracode.hiposim.feature.leads.ui.SendToAgencySheet
 import com.auracode.hiposim.feature.simulation.domain.BonusStatus
+import com.auracode.hiposim.feature.simulation.domain.GraceType
 import kotlinx.coroutines.launch
 
 @Composable
@@ -356,6 +358,7 @@ private fun SummaryCard(summary: ResultsSummaryUi) {
                     )
                 },
             )
+            GraceNote(summary)
             TileRow(
                 first = {
                     MetricTile(
@@ -425,6 +428,33 @@ private fun TceaBadge(
             )
         }
     }
+}
+
+/** Says which grace the buyer chose (US03); the schedule marks those months. Nothing without grace. */
+@Composable
+private fun GraceNote(summary: ResultsSummaryUi) {
+    val text =
+        when (summary.graceType) {
+            GraceType.None -> return
+            GraceType.Partial ->
+                pluralStringResource(
+                    R.plurals.grace_note_partial,
+                    summary.graceMonths,
+                    summary.graceMonths,
+                )
+            GraceType.Total ->
+                pluralStringResource(
+                    R.plurals.grace_note_total,
+                    summary.graceMonths,
+                    summary.graceMonths,
+                )
+        }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

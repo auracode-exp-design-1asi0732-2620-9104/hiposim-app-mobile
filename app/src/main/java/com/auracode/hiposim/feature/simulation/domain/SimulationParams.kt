@@ -10,6 +10,9 @@ data class SimulationParams(
     val applyGoodPayerBonus: Boolean,
     /** Effective annual rate as a fraction. It is not typed by the buyer, see [SimulationConfig]. */
     val annualEffectiveRate: BigDecimal = SimulationConfig.ANNUAL_EFFECTIVE_RATE,
+    /** Grace period (US03). [graceMonths] is 0 exactly when [graceType] is [GraceType.None], as the contract requires. */
+    val graceType: GraceType = GraceType.None,
+    val graceMonths: Int = 0,
 ) {
     val termMonths: Int get() = termYears * SimulationConfig.MONTHS_PER_YEAR
 }
