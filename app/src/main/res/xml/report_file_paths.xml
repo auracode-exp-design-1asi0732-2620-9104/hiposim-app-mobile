@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the folder where the PDF report of a simulation is written before it is opened (US08). -->
+<paths>
+  <cache-path
+    name="reports"
+    path="reports/" />
+</paths>

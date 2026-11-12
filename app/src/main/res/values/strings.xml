@@ -3,7 +3,6 @@
   <string name="app_name">HipoSim</string>
   <string name="action_close">Close</string>
   <string name="action_back">Back</string>
-  <string name="coming_soon">Coming soon</string>
   <string name="action_retry">Try again</string>
   <string name="loading">Loading</string>
 
@@ -83,6 +82,15 @@
   <string name="send_quote">Send quote to real estate agencies</string>
   <string name="send_quote_hint">(Unlocks projects in your range)</string>
   <string name="download_pdf">Download PDF summary</string>
+  <string name="pdf_generating">Preparing PDF…</string>
+  <string name="pdf_share_title">Share the PDF report</string>
+  <string name="pdf_open_failed">No app could open the PDF. Try again or install a PDF viewer.</string>
+  <string name="pdf_error_simulation_missing">There is no simulation to export. Run one first.</string>
+  <string name="pdf_error_session_expired">Your session expired. Sign in again to download the PDF.</string>
+  <string name="pdf_error_not_found">We could not find this simulation. Run it again and retry.</string>
+  <string name="pdf_error_no_connection">No connection. Check your internet and try again.</string>
+  <string name="pdf_error_service_unavailable">The service is not available right now. Try again in a few minutes.</string>
+  <string name="pdf_error_unexpected">We could not prepare the PDF. Try again.</string>
 
   <!-- Navigation -->
   <string name="nav_simulate">Simulate</string>
