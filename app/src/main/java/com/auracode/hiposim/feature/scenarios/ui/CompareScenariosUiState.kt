@@ -69,7 +69,7 @@ private fun format(
 ): String =
     when (metric) {
         ComparedMetric.Tcea -> PeruFormat.percent(value)
-        ComparedMetric.MonthlyPayment, ComparedMetric.TotalPaid -> PeruFormat.soles(value)
+        ComparedMetric.MonthlyPayment, ComparedMetric.TotalPaid -> PeruFormat.soles(value, fractionDigits = 2)
     }
 
 /** A rate difference is in percentage points, not in percent: 8.85% against 9.20% is `+0.35 pp`. */
@@ -79,5 +79,6 @@ private fun extra(
 ): String =
     when (metric) {
         ComparedMetric.Tcea -> "+${PeruFormat.percent(difference).removeSuffix("%")} pp"
-        ComparedMetric.MonthlyPayment, ComparedMetric.TotalPaid -> "+${PeruFormat.soles(difference)}"
+        ComparedMetric.MonthlyPayment, ComparedMetric.TotalPaid ->
+            "+${PeruFormat.soles(difference, fractionDigits = 2)}"
     }
